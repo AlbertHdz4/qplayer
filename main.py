@@ -6,6 +6,7 @@ from PyQt5.QtCore import *
 import sys
 
 from variables import VariablesModel, VariablesProxyModel
+from widgets import TextEditDelegate
 
 
 class ControlSystemGUI(QMainWindow):
@@ -32,6 +33,8 @@ class ControlSystemGUI(QMainWindow):
         # VIEWS SETUP
         self.ui.static_variables_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.ui.iterator_variables_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.ui.static_variables_view.header().setSectionResizeMode(1,QHeaderView.Stretch)
+        self.ui.static_variables_view.setItemDelegateForColumn(1, TextEditDelegate())
 
         # SIGNALS
         self.ui.addVariableGroupButton.clicked.connect(self.add_variable_group)
@@ -60,7 +63,7 @@ class ControlSystemGUI(QMainWindow):
 
         prnt = self.variables_model.index(2, 0)
         self.variables_model.add_variable(prnt, name="evaporation_time", value="0", start="0",stop="3000",increment="100",iterator=True)
-        self.variables_model.add_variable(prnt, name="bottom_power", value="y = exp(-5*evaporation_time)\namp = 4\n= amp*y", comment="W")
+        self.variables_model.add_variable(prnt, name="bottom_power", value="y = exp(-5*evaporation_time)\namp = 4\nreturn amp*y", comment="W")
 
         prnt = self.variables_model.index(3, 0)
         self.variables_model.add_variable(prnt, name="probe_detuning", value="-40", start="-40",stop="40",increment="5",iterator=True)
@@ -88,7 +91,8 @@ class ControlSystemGUI(QMainWindow):
 
     @pyqtSlot()
     def data_changed(self):
-        print("Data changed!")
+        pass
+        #print("Data changed!")
 
     @pyqtSlot(QPoint)
     def iterator_variables_context_menu_requested(self, pos):
@@ -132,8 +136,6 @@ class ControlSystemGUI(QMainWindow):
             elif action == delete_action:
                 self.variables_model.removeRow(src_idx.row(),src_idx.parent())
             elif action in move_actions:
-                print("Move to %s %d"%(group_list[move_actions[action]], move_actions[action]))
-
                 taken_row = self.variables_model.itemFromIndex(src_idx.parent()).takeRow(src_idx.row())
                 dest_item = self.variables_model.item(move_actions[action], 0)
                 dest_item.insertRow(0,taken_row)

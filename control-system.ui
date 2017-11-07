@@ -19,22 +19,61 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QToolButton" name="toolButton">
+        <property name="toolTip">
+         <string>Run</string>
+        </property>
         <property name="text">
          <string>run</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/actions/icons/media-playback-start.svg</normaloff>:/actions/icons/media-playback-start.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QToolButton" name="toolButton_8">
+        <property name="toolTip">
+         <string>Iterate</string>
+        </property>
         <property name="text">
          <string>iterate</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/actions/icons/media-seek-forward.svg</normaloff>:/actions/icons/media-seek-forward.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QToolButton" name="toolButton_7">
+        <property name="toolTip">
+         <string>Stop</string>
+        </property>
         <property name="text">
          <string>stop</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/actions/icons/media-playback-stop.svg</normaloff>:/actions/icons/media-playback-stop.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -53,22 +92,61 @@
       </item>
       <item>
        <widget class="QToolButton" name="toolButton_4">
+        <property name="toolTip">
+         <string>Save sequence</string>
+        </property>
         <property name="text">
          <string>save</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/actions/icons/document-save.svg</normaloff>:/actions/icons/document-save.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QToolButton" name="toolButton_6">
+        <property name="toolTip">
+         <string>Save sequence as</string>
+        </property>
         <property name="text">
          <string>save as</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/actions/icons/document-save-as.svg</normaloff>:/actions/icons/document-save-as.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QToolButton" name="toolButton_5">
+        <property name="toolTip">
+         <string>Load sequence from file</string>
+        </property>
         <property name="text">
          <string>load</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/actions/icons/document-open.svg</normaloff>:/actions/icons/document-open.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -76,6 +154,9 @@
     </item>
     <item>
      <widget class="QTabWidget" name="tabWidget">
+      <property name="tabPosition">
+       <enum>QTabWidget::North</enum>
+      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -88,15 +169,41 @@
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <widget class="QToolButton" name="collapseVariables">
+            <property name="toolTip">
+             <string>Collapse groups</string>
+            </property>
             <property name="text">
              <string>collapse</string>
+            </property>
+            <property name="icon">
+             <iconset resource="resources.qrc">
+              <normaloff>:/actions/icons/object-group.svg</normaloff>:/actions/icons/object-group.svg</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QToolButton" name="expandVariables">
+            <property name="toolTip">
+             <string>Expand groups</string>
+            </property>
             <property name="text">
              <string>expand</string>
+            </property>
+            <property name="icon">
+             <iconset resource="resources.qrc">
+              <normaloff>:/actions/icons/object-ungroup.svg</normaloff>:/actions/icons/object-ungroup.svg</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -147,7 +254,7 @@
              <bool>true</bool>
             </property>
             <attribute name="headerStretchLastSection">
-             <bool>true</bool>
+             <bool>false</bool>
             </attribute>
            </widget>
           </item>
@@ -176,15 +283,41 @@
           </property>
           <item>
            <widget class="QToolButton" name="addVariableButton">
+            <property name="toolTip">
+             <string>Add variable to selected group</string>
+            </property>
             <property name="text">
-             <string>add var</string>
+             <string>add variable</string>
+            </property>
+            <property name="icon">
+             <iconset resource="resources.qrc">
+              <normaloff>:/actions/icons/document-new.svg</normaloff>:/actions/icons/document-new.svg</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QToolButton" name="addVariableGroupButton">
+            <property name="toolTip">
+             <string>Add new group</string>
+            </property>
             <property name="text">
              <string>add group</string>
+            </property>
+            <property name="icon">
+             <iconset resource="resources.qrc">
+              <normaloff>:/actions/icons/folder-new.svg</normaloff>:/actions/icons/folder-new.svg</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -207,8 +340,9 @@
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
-        <string>Tab 2</string>
+        <string>Digital Sequence</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4"/>
       </widget>
      </widget>
     </item>
@@ -237,7 +371,9 @@
    </attribute>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>expandVariables</sender>

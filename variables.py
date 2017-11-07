@@ -34,6 +34,7 @@ class VariablesModel(QStandardItemModel):
             field = self.variable_fields[i]
             ftype = self.variable_types[i]
             it = QStandardItem()
+            it.setTextAlignment(Qt.AlignTop)
             if ftype == bool:
                 it.setCheckable(True)
 
@@ -79,7 +80,6 @@ class VariablesProxyModel(QSortFilterProxyModel):
             rows = group_item.rowCount()
             col = VariablesModel.variable_fields.index("iterator")
             for j in range(rows):
-                print(group_item.child(j, 0).data(Qt.DisplayRole))
                 if group_item.child(j,col).data(Qt.CheckStateRole) == Qt.Checked and self.show_iterator:
                     visible_contents += 1
                 elif group_item.child(j,col).data(Qt.CheckStateRole) == Qt.Unchecked and self.show_static:
