@@ -113,29 +113,12 @@
             </property>
            </spacer>
           </item>
-          <item>
-           <widget class="QComboBox" name="comboBox"/>
-          </item>
-          <item>
-           <widget class="QToolButton" name="toolButton_2">
-            <property name="text">
-             <string>add var set</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="toolButton_3">
-            <property name="text">
-             <string>remove var set</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QTreeView" name="variablesView">
+           <widget class="QTreeView" name="static_variables_view">
             <property name="contextMenuPolicy">
              <enum>Qt::CustomContextMenu</enum>
             </property>
@@ -143,10 +126,10 @@
              <bool>true</bool>
             </property>
             <property name="dragEnabled">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="dragDropMode">
-             <enum>QAbstractItemView::InternalMove</enum>
+             <enum>QAbstractItemView::NoDragDrop</enum>
             </property>
             <property name="rootIsDecorated">
              <bool>true</bool>
@@ -157,13 +140,17 @@
             <property name="wordWrap">
              <bool>true</bool>
             </property>
+            <attribute name="headerStretchLastSection">
+             <bool>true</bool>
+            </attribute>
            </widget>
           </item>
           <item>
-           <widget class="QTreeView" name="iteratorsView"/>
-          </item>
-          <item>
-           <widget class="QTreeView" name="fullView"/>
+           <widget class="QTreeView" name="iterator_variables_view">
+            <attribute name="headerStretchLastSection">
+             <bool>true</bool>
+            </attribute>
+           </widget>
           </item>
          </layout>
         </item>
@@ -221,7 +208,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -243,7 +230,7 @@
   <connection>
    <sender>expandVariables</sender>
    <signal>clicked()</signal>
-   <receiver>variablesView</receiver>
+   <receiver>static_variables_view</receiver>
    <slot>expandAll()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -259,7 +246,7 @@
   <connection>
    <sender>collapseVariables</sender>
    <signal>clicked()</signal>
-   <receiver>variablesView</receiver>
+   <receiver>static_variables_view</receiver>
    <slot>collapseAll()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -269,6 +256,38 @@
     <hint type="destinationlabel">
      <x>92</x>
      <y>197</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>expandVariables</sender>
+   <signal>clicked()</signal>
+   <receiver>iterator_variables_view</receiver>
+   <slot>expandAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>129</x>
+     <y>130</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>590</x>
+     <y>339</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>collapseVariables</sender>
+   <signal>clicked()</signal>
+   <receiver>iterator_variables_view</receiver>
+   <slot>collapseAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>130</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>590</x>
+     <y>339</y>
     </hint>
    </hints>
   </connection>

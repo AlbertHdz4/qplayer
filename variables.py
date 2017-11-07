@@ -5,274 +5,70 @@
 #  
 #
 
-from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel, QAbstractItemModel, QMimeData
-from collections import OrderedDict
+from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel
+from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
 
-class VariablesStore:
+class VariablesModel(QStandardItemModel):
+    variable_fields = ["name","value","iterator","start","stop","increment","comment"]
+    variable_types = [str, str, bool, float, float, float, str]
+
     def __init__(self):
-        self.groups = []
+        super().__init__()
+        self.setHorizontalHeaderLabels(self.variable_fields)
 
-    def appendGroup(self,group):
-        self.groups.append(group)
-        group.parent = self
+    def add_group(self, name):
+        new_item = QStandardItem(name)
+        new_row = [new_item]
+        for i in range(len(self.variable_fields)-1):
+            it = QStandardItem()
+            it.setFlags(Qt.NoItemFlags)
+            new_row.append(it)
+        self.appendRow(new_row)
 
-    def index(self, group):
-        return self.groups.index(group)
+    def add_variable(self, parent_idx, **kwargs):
+        parent = self.itemFromIndex(parent_idx)
+        new_row = []
+        for i in range(len(self.variable_fields)):
+            field = self.variable_fields[i]
+            ftype = self.variable_types[i]
+            it = QStandardItem()
+            if ftype == bool:
+                it.setCheckable(True)
 
-    def group(self,row):
-        return self.groups[row]
+            if kwargs is not None and field in kwargs:
+                if ftype == bool and kwargs[field]:
+                    it.setCheckState(Qt.Checked)
+                else:
+                    it.setData(kwargs[field],Qt.DisplayRole)
+            new_row.append(it)
+        parent.appendRow(new_row)
 
-    @property
-    def length(self):
-        return len(self.groups)
-
-
-
-class VariablesGroup:
-    def __init__(self, name="",parent=None):
-        self.name = name
-        self.parent = parent
-        self.variables = []
-
-    def addVariable(self, variable):
-        self.variables.append(variable)
-        variable.parent = self
-
-    def variable(self,row):
-        return self.variables[row]
-
-    @property
-    def length(self):
-        return len(self.variables)
-
-    @property
-    def row(self):
-        if self.parent:
-            return self.parent.index(self)
+    def get_group_list(self):
+        group_list = []
+        for j in range(self.rowCount()):
+            group_list.append(self.item(j,0).data(Qt.DisplayRole))
+        return group_list
 
 
-class Variable:
-
-    columns = 7
-
-    def __init__(self, name, parent=None):
-        self.name = name
-        self.value = 8
-        self.iterating = False
-        self.start = 0
-        self.stop = 10
-        self.step = 1
-        self.comment = "[%s]"%name
-        self.parent = parent
-
-    @property
-    def row(self):
-        if self.parent:
-            return self.parent.index(self)
-
-    def column(self,col):
-        if col == 0:
-            return self.name
-        elif col == 1:
-            return self.value
-        elif col == 2:
-            return self.comment
-        elif col == 3:
-            return self.start
-        elif col == 4:
-            return self.stop
-        elif col == 5:
-            return self.step
-        elif col == 6:
-            return self.iterating
-
-
-    def set_column(self,col,val):
-        if col == 0:
-            self.name = val
-        elif col == 1:
-            self.value = val
-        elif col == 2:
-            self.comment = val
-        elif col == 3:
-            self.start = val
-        elif col == 4:
-            self.stop = val
-        elif col == 5:
-            self.step = val
-        elif col == 6:
-            self.iterating = val == "true"
-
-
-class VariablesModel(QAbstractItemModel):
-    def __init__(self, data=None, parent=None):
-        super(VariablesModel, self).__init__(parent)
-
-        self.rootItem = VariablesStore()
-
-    # Given a row, column, and parent model index this function generates the corresponding model index for the child of
-    # the parent in the position row,column. The generated model index contains a pointer to the underlying data.
-    def index(self, row, column, parent):
-        if not self.hasIndex(row, column, parent):
-            return QModelIndex()
-
-        if not parent.isValid():
-            parentItem = self.rootItem
-        else:
-            parentItem = parent.internalPointer()
-
-        if isinstance(parentItem, VariablesStore):
-            childItem = parentItem.group(row)
-        elif isinstance(parentItem, VariablesGroup):
-            childItem = parentItem.variable(row)
-        else:
-            print("Parent is WFT")
-
-
-        if childItem:
-            return self.createIndex(row, column, childItem)
-        else:
-            return QModelIndex()
-
-    def parent(self, index):
-        if not index.isValid():
-            return QModelIndex()
-
-        childItem = index.internalPointer()
-
-
-
-        if isinstance(childItem, VariablesGroup):
-            return QModelIndex()
-        elif isinstance(childItem, Variable):
-            pass
-        elif isinstance(childItem, VariablesStore):
-            pass
-
-        parentItem = childItem.parent
-
-        return self.createIndex(parentItem.row, 0, parentItem)
-
-    def rowCount(self, parent):
-        if not parent.isValid():
-            parentItem = self.rootItem
-        else:
-            parentItem = parent.internalPointer()
-
-        if isinstance(parentItem, Variable):
-            return 0
-        else:
-            return parentItem.length
-
-    def columnCount(self, parent):
-        return Variable.columns
-
-    def data(self, index: QModelIndex, role):
-        pointer = index.internalPointer()
-        if role == Qt.DisplayRole:
-
-            if isinstance(pointer,VariablesGroup) and index.column() == 0:
-                return pointer.name
-            elif isinstance(pointer, Variable):
-                col = index.column()
-                return pointer.column(col)
-        else:
-            return None
-
-    def flags(self, index):
-        internalPointer = index.internalPointer()
-
-        standard_flags = Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsDragEnabled
-
-        if isinstance(internalPointer, VariablesGroup):
-            if index.column() > 0:
-                return Qt.NoItemFlags
-            elif index.column() == 0:
-                return standard_flags| Qt.ItemIsDropEnabled
-
-        return standard_flags
-
-    def supportedDropActions(self):
-        return Qt.MoveAction
-
-    """
-    def dropMimeData(self, data: QMimeData, action: Qt.DropAction, row: int, column: int, parent: QModelIndex):
-        #print(data.text())
-        print(data.hasText())
-        print(action)
-        print(row,column,parent.internalPointer().row)
-        print("Drop that!")
-        return True
-    """
-
-    def moveRows(self, sourceParent: QModelIndex, sourceRow: int, count: int, destinationParent: QModelIndex, destinationChild: int):
-        print("Shake it!")
-        return True
-
-    def canDropMimeData(self, data: QMimeData, action: Qt.DropAction, row: int, column: int, parent: QModelIndex):
-        return True
-
-
-    def setData(self, index, value, role):
-        if role == Qt.EditRole and len(value) > 0:
-            editedItem = index.internalPointer()
-            if isinstance(editedItem,VariablesGroup):
-                editedItem.name = value
-            elif isinstance(editedItem,Variable):
-                editedItem.set_column(index.column(),value)
-            self.dataChanged.emit(index,index,[Qt.DisplayRole])
-        return True
-
-    def addGroup(self, name):
-        row = self.rootItem.length
-        self.beginInsertRows(QModelIndex(),row,row)
-        self.rootItem.appendGroup(VariablesGroup(name))
-        self.endInsertRows()
-
-    # add a new variable: name, the new variable name, parent, the row that the variable group occupies
-    def addVariable(self, name, parent):
-        row = self.rootItem.group(parent).length
-        index = self.index(parent,0,QModelIndex())
-        self.beginInsertRows(index,row,row)
-        self.rootItem.group(parent).addVariable(Variable(name))
-        self.endInsertRows()
-
-
-class StaticVariablesProxyModel(QSortFilterProxyModel):
+class VariablesProxyModel(QSortFilterProxyModel):
+    def __init__(self, accepted_fields, show_static, show_iterator):
+        super().__init__()
+        self.accepted_fields = accepted_fields
+        self.show_iterator = show_iterator
+        self.show_static = show_static
 
     def filterAcceptsColumn(self, source_column: int, source_parent: QModelIndex):
-        if source_column<2:
-            return True
-        else:
-            return False
+        return VariablesModel.variable_fields[source_column] in self.accepted_fields
 
     def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex):
-        parentPointer = source_parent.internalPointer()
+        if source_parent.isValid():  # This is a variable
+            row_idx = source_parent.child(source_row,
+                                          VariablesModel.variable_fields.index("iterator"))  # Index of interator cell
+            if self.sourceModel().data(row_idx, Qt.CheckStateRole) == Qt.Checked:
+                return self.show_iterator
+            else:
+                return self.show_static
 
-        if isinstance(parentPointer, VariablesStore):
+        else:  # This is a group
             return True
-        elif isinstance(parentPointer, VariablesGroup):
-            return not parentPointer.variable(source_row).iterating
-        else:
-            return True
-
-
-class IteratorVariablesProxyModel(QSortFilterProxyModel):
-
-    def filterAcceptsColumn(self, source_column: int, source_parent: QModelIndex):
-        if source_column>=2 or source_column==0:
-            return True
-        else:
-            return False
-
-    def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex):
-        parentPointer = source_parent.internalPointer()
-        print(type(parentPointer))
-        if isinstance(parentPointer, VariablesStore):
-            return True
-        elif isinstance(parentPointer, VariablesGroup):
-            return parentPointer.variable(source_row).iterating
-        else:
-            return True
-
