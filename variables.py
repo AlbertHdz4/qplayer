@@ -25,6 +25,7 @@ class VariablesModel(QStandardItemModel):
             it.setFlags(Qt.NoItemFlags)
             new_row.append(it)
         self.appendRow(new_row)
+        self.dataChanged.emit(QModelIndex(),QModelIndex())
 
     def add_variable(self, parent_idx, **kwargs):
         parent = self.itemFromIndex(parent_idx)
@@ -43,6 +44,7 @@ class VariablesModel(QStandardItemModel):
                     it.setData(kwargs[field],Qt.DisplayRole)
             new_row.append(it)
         parent.appendRow(new_row)
+        self.dataChanged.emit(QModelIndex(), QModelIndex())
 
     def get_group_list(self):
         group_list = []
@@ -52,11 +54,12 @@ class VariablesModel(QStandardItemModel):
 
 
 class VariablesProxyModel(QSortFilterProxyModel):
-    def __init__(self, accepted_fields, show_static, show_iterator):
+    def __init__(self, accepted_fields, show_static, show_iterator, show_empty_groups):
         super().__init__()
         self.accepted_fields = accepted_fields
         self.show_iterator = show_iterator
         self.show_static = show_static
+        self.show_empty_groups = show_empty_groups
 
     def filterAcceptsColumn(self, source_column: int, source_parent: QModelIndex):
         return VariablesModel.variable_fields[source_column] in self.accepted_fields
@@ -71,4 +74,18 @@ class VariablesProxyModel(QSortFilterProxyModel):
                 return self.show_static
 
         else:  # This is a group
-            return True
+            group_item = self.sourceModel().item(source_row,0) # type: QStandardItem
+            visible_contents = 0
+            rows = group_item.rowCount()
+            col = VariablesModel.variable_fields.index("iterator")
+            for j in range(rows):
+                print(group_item.child(j, 0).data(Qt.DisplayRole))
+                if group_item.child(j,col).data(Qt.CheckStateRole) == Qt.Checked and self.show_iterator:
+                    visible_contents += 1
+                elif group_item.child(j,col).data(Qt.CheckStateRole) == Qt.Unchecked and self.show_static:
+                    visible_contents += 1
+
+            if visible_contents == 0:
+                return self.show_empty_groups
+            else:
+                return True
