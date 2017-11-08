@@ -78,6 +78,37 @@
        </widget>
       </item>
       <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="toolTip">
+         <string>Shuffle iterations</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/actions/icons/media-playlist-repeat.svg</normaloff>
+          <activeon>:/actions/icons/media-playlist-shuffle.svg</activeon>:/actions/icons/media-playlist-repeat.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -168,7 +199,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QToolButton" name="collapseVariables">
+           <widget class="QToolButton" name="collapse_variables">
             <property name="toolTip">
              <string>Collapse groups</string>
             </property>
@@ -188,7 +219,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="expandVariables">
+           <widget class="QToolButton" name="expand_variables">
             <property name="toolTip">
              <string>Expand groups</string>
             </property>
@@ -282,7 +313,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QToolButton" name="addVariableButton">
+           <widget class="QToolButton" name="add_variable_button">
             <property name="toolTip">
              <string>Add variable to selected group</string>
             </property>
@@ -302,7 +333,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="addVariableGroupButton">
+           <widget class="QToolButton" name="add_variable_group_button">
             <property name="toolTip">
              <string>Add new group</string>
             </property>
@@ -342,7 +373,30 @@
        <attribute name="title">
         <string>Digital Sequence</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_4"/>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>758</width>
+             <height>417</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <layout class="QVBoxLayout" name="digital_tracks_container"/>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -354,7 +408,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
@@ -376,7 +430,7 @@
  </resources>
  <connections>
   <connection>
-   <sender>expandVariables</sender>
+   <sender>expand_variables</sender>
    <signal>clicked()</signal>
    <receiver>static_variables_view</receiver>
    <slot>expandAll()</slot>
@@ -392,7 +446,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>collapseVariables</sender>
+   <sender>collapse_variables</sender>
    <signal>clicked()</signal>
    <receiver>static_variables_view</receiver>
    <slot>collapseAll()</slot>
@@ -408,7 +462,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>expandVariables</sender>
+   <sender>expand_variables</sender>
    <signal>clicked()</signal>
    <receiver>iterator_variables_view</receiver>
    <slot>expandAll()</slot>
@@ -424,7 +478,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>collapseVariables</sender>
+   <sender>collapse_variables</sender>
    <signal>clicked()</signal>
    <receiver>iterator_variables_view</receiver>
    <slot>collapseAll()</slot>

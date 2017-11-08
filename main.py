@@ -37,8 +37,8 @@ class ControlSystemGUI(QMainWindow):
         self.ui.static_variables_view.setItemDelegateForColumn(1, TextEditDelegate())
 
         # SIGNALS
-        self.ui.addVariableGroupButton.clicked.connect(self.add_variable_group)
-        self.ui.addVariableButton.clicked.connect(self.add_variable)
+        self.ui.add_variable_group_button.clicked.connect(self.add_variable_group)
+        self.ui.add_variable_button.clicked.connect(self.add_variable)
         self.ui.static_variables_view.customContextMenuRequested.connect(self.static_variables_context_menu_requested)
         self.ui.iterator_variables_view.customContextMenuRequested.connect(self.iterator_variables_context_menu_requested)
         self.variables_model.dataChanged.connect(self.data_changed)
@@ -67,6 +67,25 @@ class ControlSystemGUI(QMainWindow):
 
         prnt = self.variables_model.index(3, 0)
         self.variables_model.add_variable(prnt, name="probe_detuning", value="-40", start="-40",stop="40",increment="5",iterator=True)
+
+        ui_track, track = loadUiType('track-widget.ui')
+
+        for i in range(16):
+
+            track_widget = QWidget()
+            onetrack = ui_track()
+            onetrack.setupUi(track_widget)
+
+
+            print(ui_track)
+            print(track)
+
+            container = self.ui.digital_tracks_container # type: QVBoxLayout
+            container.addWidget(track_widget)
+            line = QFrame()
+            line.setFrameShape(QFrame.HLine)
+            line.setFrameShadow(QFrame.Sunken)
+            container.addWidget(line)
 
     @pyqtSlot()
     def add_variable_group(self):

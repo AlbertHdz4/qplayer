@@ -4,6 +4,7 @@ from PyQt5.Qt import QStyledItemDelegate, QWidget
 from PyQt5.QtWidgets import QStyleOptionViewItem, QTextEdit
 from PyQt5.QtCore import QModelIndex, Qt, QAbstractItemModel, QRegExp
 from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont
+from PyQt5.uic import loadUiType
 
 
 class TextEditDelegate(QStyledItemDelegate):
@@ -98,7 +99,8 @@ class Highlighter(QSyntaxHighlighter):
             else:
                 commentLength = endIndex - startIndex + self.commentEndExpression.matchedLength()
 
-            self.setFormat(startIndex, commentLength,
-                    self.multiLineCommentFormat)
-            startIndex = self.commentStartExpression.indexIn(text,
-                    startIndex + commentLength);
+            self.setFormat(startIndex, commentLength, self.multiLineCommentFormat)
+            startIndex = self.commentStartExpression.indexIn(text, startIndex + commentLength)
+
+class SequenceEditor(QWidget):
+    pass
