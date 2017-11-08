@@ -128,7 +128,6 @@ class ControlSystemGUI(QMainWindow):
         src_idx = self.static_variables_model.mapToSource(idx)
 
         if src_idx.parent().isValid(): # if a variable is selected
-
             action = menu.exec(self.ui.static_variables_view.mapToGlobal(pos)) # type: QMenu
             if action == iterate_action:
                 iterator_idx = src_idx.parent().child(src_idx.row(),VariablesModel.variable_fields.index("iterator"))

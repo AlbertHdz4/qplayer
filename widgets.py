@@ -74,10 +74,7 @@ class Highlighter(QSyntaxHighlighter):
         self.commentStartExpression = QRegExp("/\\*")
         self.commentEndExpression = QRegExp("\\*/")
 
-        print("highlighter loaded")
-
     def highlightBlock(self, text):
-        print("higlightBlock")
         for pattern, format in self.highlightingRules:
             expression = QRegExp(pattern)
             index = expression.indexIn(text)

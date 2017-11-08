@@ -6,7 +6,7 @@
 #
 
 from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont
 
 
 class VariablesModel(QStandardItemModel):
@@ -19,7 +19,15 @@ class VariablesModel(QStandardItemModel):
 
     def add_group(self, name):
         new_item = QStandardItem(name)
+
+        font = QFont()
+        font.setBold(True)
+        font.setFamily('Helvetica')
+        new_item.setData(font,Qt.FontRole)
+
         new_row = [new_item]
+
+        #Add the rest of the columns as inert cells
         for i in range(len(self.variable_fields)-1):
             it = QStandardItem()
             it.setFlags(Qt.NoItemFlags)
