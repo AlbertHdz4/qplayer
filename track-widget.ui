@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>636</width>
-    <height>80</height>
+    <height>60</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -48,7 +48,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QFrame" name="frame">
+    <widget class="QFrame" name="track_frame">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -58,6 +58,12 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
        <height>60</height>
       </size>
      </property>
@@ -78,16 +84,16 @@
        <number>1</number>
       </property>
       <property name="leftMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="topMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <item>
        <widget class="QFrame" name="frame_2">
@@ -100,6 +106,9 @@
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <property name="spacing">
           <number>6</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
          </property>
          <item>
           <widget class="QLabel" name="track_label">
@@ -192,8 +201,8 @@
         <property name="spacing">
          <number>1</number>
         </property>
-        <property name="rightMargin">
-         <number>0</number>
+        <property name="leftMargin">
+         <number>5</number>
         </property>
        </layout>
       </item>

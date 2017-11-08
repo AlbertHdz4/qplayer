@@ -1,9 +1,9 @@
 
 
 from PyQt5.Qt import QStyledItemDelegate, QWidget
-from PyQt5.QtWidgets import QStyleOptionViewItem, QTextEdit
+from PyQt5.QtWidgets import QStyleOptionViewItem, QTextEdit, QVBoxLayout, QFrame, QPushButton, QLabel
 from PyQt5.QtCore import QModelIndex, Qt, QAbstractItemModel, QRegExp
-from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont
+from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont, QMouseEvent
 from PyQt5.uic import loadUiType
 
 
@@ -16,6 +16,7 @@ class TextEditDelegate(QStyledItemDelegate):
 
         editor = QTextEdit(parent)
         editor.setFont(font)
+        editor.setTabChangesFocus(True)
 
         self.highlighter = Highlighter(editor.document())
 
@@ -69,8 +70,7 @@ class Highlighter(QSyntaxHighlighter):
         functionFormat = QTextCharFormat()
         functionFormat.setFontItalic(True)
         functionFormat.setForeground(Qt.blue)
-        self.highlightingRules.append((QRegExp("\\b[A-Za-z0-9_]+(?=\\()"),
-                functionFormat))
+        self.highlightingRules.append((QRegExp("\\b[A-Za-z0-9_]+(?=\\()"), functionFormat))
 
         self.commentStartExpression = QRegExp("/\\*")
         self.commentEndExpression = QRegExp("\\*/")
@@ -102,5 +102,65 @@ class Highlighter(QSyntaxHighlighter):
             self.setFormat(startIndex, commentLength, self.multiLineCommentFormat)
             startIndex = self.commentStartExpression.indexIn(text, startIndex + commentLength)
 
+
 class SequenceEditor(QWidget):
-    pass
+
+    def __init__(self):
+        super().__init__()
+        self.setLayout(QVBoxLayout())
+        self.layout().setSpacing(2)
+
+        for i in range(8):
+            track = SequenceTrack("DChannel %d"%i, SequenceTrack.digital_track)
+            self.layout().addWidget(track)
+            line = QFrame()
+            line.setFrameShape(QFrame.HLine)
+            line.setFrameShadow(QFrame.Sunken)
+            self.layout().addWidget(line)
+
+        for i in range(2):
+            track = SequenceTrack("AChannel %d"%i, SequenceTrack.analog_track)
+            self.layout().addWidget(track)
+            line = QFrame()
+            line.setFrameShape(QFrame.HLine)
+            line.setFrameShadow(QFrame.Sunken)
+            self.layout().addWidget(line)
+
+
+class SequenceTrack(QWidget):
+
+    digital_track = 0
+    analog_track = 1
+
+    ui_form, ui_base = loadUiType('track-widget.ui')
+
+    def __init__(self, name, track_type):
+        super().__init__()
+        self.ui = self.ui_form()
+        self.ui.setupUi(self)
+        self.ui.track_label.setText(name)
+        self.track_type = track_type
+
+    def mouseDoubleClickEvent(self, a0: QMouseEvent):
+        if self.track_type == self.digital_track:
+            self.ui.track_container.addWidget(DigitalSequenceEvent())
+        elif self.track_type == self.analog_track:
+            self.ui.track_container.addWidget(AnalogSequenceEvent())
+
+class DigitalSequenceEvent(QWidget):
+
+    ui_form, ui_base = loadUiType('digital-event.ui')
+
+    def __init__(self):
+        super().__init__()
+        self.ui = self.ui_form()
+        self.ui.setupUi(self)
+
+class AnalogSequenceEvent(QWidget):
+
+    ui_form, ui_base = loadUiType('analog-event.ui')
+
+    def __init__(self):
+        super().__init__()
+        self.ui = self.ui_form()
+        self.ui.setupUi(self)

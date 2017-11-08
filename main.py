@@ -6,7 +6,8 @@ from PyQt5.QtCore import *
 import sys
 
 from variables import VariablesModel, VariablesProxyModel
-from widgets import TextEditDelegate
+from routines import RoutinesModel
+from widgets import TextEditDelegate, SequenceEditor
 
 
 class ControlSystemGUI(QMainWindow):
@@ -18,6 +19,7 @@ class ControlSystemGUI(QMainWindow):
 
         # MODELS
         self.variables_model = VariablesModel()
+        self.routines_model = RoutinesModel()
 
         # PROXY MODELS
         self.static_variables_model = VariablesProxyModel(["name","value","comment"], True, False, True)
@@ -29,6 +31,8 @@ class ControlSystemGUI(QMainWindow):
         # ADD MODELS TO VIEWS
         self.ui.static_variables_view.setModel(self.static_variables_model)
         self.ui.iterator_variables_view.setModel(self.iterator_variables_model)
+        self.ui.sequence_dbg_treeview.setModel(self.routines_model)
+        self.ui.routine_combo_box.setModel(self.routines_model)
 
         # VIEWS SETUP
         self.ui.static_variables_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
@@ -43,10 +47,14 @@ class ControlSystemGUI(QMainWindow):
         self.ui.iterator_variables_view.customContextMenuRequested.connect(self.iterator_variables_context_menu_requested)
         self.variables_model.dataChanged.connect(self.data_changed)
         self.variables_model.dataChanged.connect(self.iterator_variables_model.invalidate)
+        self.ui.add_routine_button.clicked.connect(self.add_routine)
+        self.ui.rename_routine_button.clicked.connect(self.rename_routine)
+        self.ui.remove_routine_button.clicked.connect(self.remove_routine)
 
         # UTILITY VARIABLES
         self.var_idx = 0
         self.group_idx = 0
+        self.routine_idx = 0
 
         # DUMMY DATA FOR TESTING
         self.variables_model.add_group("MOT")
@@ -68,24 +76,9 @@ class ControlSystemGUI(QMainWindow):
         prnt = self.variables_model.index(3, 0)
         self.variables_model.add_variable(prnt, name="probe_detuning", value="-40", start="-40",stop="40",increment="5",iterator=True)
 
-        ui_track, track = loadUiType('track-widget.ui')
+        self.ui.sequence_editor_scroll_area.setWidget(SequenceEditor())
 
-        for i in range(16):
-
-            track_widget = QWidget()
-            onetrack = ui_track()
-            onetrack.setupUi(track_widget)
-
-
-            print(ui_track)
-            print(track)
-
-            container = self.ui.digital_tracks_container # type: QVBoxLayout
-            container.addWidget(track_widget)
-            line = QFrame()
-            line.setFrameShape(QFrame.HLine)
-            line.setFrameShadow(QFrame.Sunken)
-            container.addWidget(line)
+        sa = QScrollArea()
 
     @pyqtSlot()
     def add_variable_group(self):
@@ -106,6 +99,34 @@ class ControlSystemGUI(QMainWindow):
             parent = self.static_variables_model.mapToSource(parent_idx) # type: QStandardItem
             self.variables_model.add_variable(parent, name="var%02d" % self.var_idx, iterator=False,value="0")
             self.var_idx += 1
+
+    @pyqtSlot()
+    def add_routine(self):
+        txt,ok = QInputDialog.getText(self,"New routine","New routine name:")
+        if ok:
+            self.routines_model.add_routine(txt)
+
+    @pyqtSlot()
+    def rename_routine(self):
+        cb = self.ui.routine_combo_box # type: QComboBox
+        curr_name = cb.currentText()
+        root_index = cb.rootModelIndex()
+        row = cb.currentIndex()
+        element_index = self.routines_model.index(row,0,root_index)
+        txt,ok = QInputDialog.getText(self,"Rename routine","New routine name:",text=curr_name)
+        if ok:
+            self.routines_model.setData(element_index,txt,Qt.EditRole)
+
+    @pyqtSlot()
+    def remove_routine(self):
+        cb = self.ui.routine_combo_box # type: QComboBox
+        curr_name = cb.currentText()
+        root_index = cb.rootModelIndex()
+        row = cb.currentIndex()
+        txt, ok = QInputDialog.getText(self, "Delete routine", "Are you sure you want to delete the routine named '%s'?\n"
+                                                               "If yes, type the name of the routine to confirm."%curr_name)
+        if ok and txt == curr_name:
+            self.routines_model.removeRow(row,root_index)
 
 
     @pyqtSlot()

@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="actions">
+    <file>icons/edit.svg</file>
+    <file>icons/list-remove.svg</file>
+    <file>icons/list-add.svg</file>
+    <file>icons/lines-connector.svg</file>
     <file>icons/media-playlist-repeat.svg</file>
     <file>icons/media-playlist-shuffle.svg</file>
     <file>icons/document-save-as.svg</file>
