@@ -1,10 +1,11 @@
 
 
-from PyQt5.Qt import QStyledItemDelegate, QWidget
+from PyQt5.Qt import QStyledItemDelegate, QWidget, QStandardItemModel
 from PyQt5.QtWidgets import QStyleOptionViewItem, QTextEdit, QVBoxLayout, QFrame, QPushButton, QLabel
-from PyQt5.QtCore import QModelIndex, Qt, QAbstractItemModel, QRegExp
+from PyQt5.QtCore import QModelIndex, Qt, QAbstractItemModel, QRegExp, pyqtSlot
 from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont, QMouseEvent
 from PyQt5.uic import loadUiType
+import util
 
 
 class TextEditDelegate(QStyledItemDelegate):
@@ -109,9 +110,13 @@ class SequenceEditor(QWidget):
         super().__init__()
         self.setLayout(QVBoxLayout())
         self.layout().setSpacing(2)
+        self.model = None # type: QStandardItemModel
+        self.root_index = None # type: QModelIndex
+        self.tracks = []
 
         for i in range(8):
-            track = SequenceTrack("DChannel %d"%i, SequenceTrack.digital_track)
+            track = SequenceTrack("DChannel %d"%i, util.DigitalTrack)
+            self.tracks.append(track)
             self.layout().addWidget(track)
             line = QFrame()
             line.setFrameShape(QFrame.HLine)
@@ -119,19 +124,51 @@ class SequenceEditor(QWidget):
             self.layout().addWidget(line)
 
         for i in range(2):
-            track = SequenceTrack("AChannel %d"%i, SequenceTrack.analog_track)
+            track = SequenceTrack("AChannel %d"%i, util.AnalogTrack)
+            self.tracks.append(track)
             self.layout().addWidget(track)
             line = QFrame()
             line.setFrameShape(QFrame.HLine)
             line.setFrameShadow(QFrame.Sunken)
             self.layout().addWidget(line)
 
+    def add_track(self,track_name, track_type):
+        track = SequenceTrack(track_name, track_type)
+        self.layout().addWidget(track)
+        # line = QFrame()
+        # line.setFrameShape(QFrame.HLine)
+        # line.setFrameShadow(QFrame.Sunken)
+        # self.layout().addWidget(line)
+
+    def clear(self):
+        for i in range(self.layout().count()):
+            t = self.layout().takeAt(i)
+
+    def set_model(self,model: QStandardItemModel):
+        self.model = model
+        self.model.dataChanged.connect(self.data_changed)
+
+    def set_routine(self, index: int):
+        self.root_index = self.model.index(index,0) # type: QModelIndex
+        routine_item = self.model.itemFromIndex(self.root_index)
+
+
+        self.clear()
+
+        for i in range(routine_item.rowCount()):
+            track_item = routine_item.child(i)
+            for j in range(track_item.rowCount()):
+                event_item = track_item.child(j)
+                self.tracks[i].add_event(event_item.data(Qt.DisplayRole))
+
+
+
+    @pyqtSlot()
+    def data_changed(self):
+        print("routine model data changed")
+
 
 class SequenceTrack(QWidget):
-
-    digital_track = 0
-    analog_track = 1
-
     ui_form, ui_base = loadUiType('track-widget.ui')
 
     def __init__(self, name, track_type):
@@ -142,19 +179,23 @@ class SequenceTrack(QWidget):
         self.track_type = track_type
 
     def mouseDoubleClickEvent(self, a0: QMouseEvent):
-        if self.track_type == self.digital_track:
+        if self.track_type == util.DigitalTrack:
             self.ui.track_container.addWidget(DigitalSequenceEvent())
-        elif self.track_type == self.analog_track:
+        elif self.track_type == util.AnalogTrack:
             self.ui.track_container.addWidget(AnalogSequenceEvent())
+
+    def add_event(self,duration):
+        self.ui.track_container.addWidget(DigitalSequenceEvent(duration))
 
 class DigitalSequenceEvent(QWidget):
 
     ui_form, ui_base = loadUiType('digital-event.ui')
 
-    def __init__(self):
+    def __init__(self, duration):
         super().__init__()
         self.ui = self.ui_form()
         self.ui.setupUi(self)
+        self.ui.event_duration.setText(duration)
 
 class AnalogSequenceEvent(QWidget):
 

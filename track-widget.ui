@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>636</width>
-    <height>60</height>
+    <width>1148</width>
+    <height>519</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -64,11 +64,11 @@
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>60</height>
+       <height>76</height>
       </size>
      </property>
      <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
+      <enum>QFrame::Box</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Plain</enum>

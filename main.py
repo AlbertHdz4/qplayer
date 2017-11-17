@@ -17,6 +17,10 @@ class ControlSystemGUI(QMainWindow):
         self.ui = ui_main_window()
         self.ui.setupUi(self)
 
+        # UI SETUP
+        self.sequence_editor = SequenceEditor()
+        self.ui.sequence_editor_scroll_area.setWidget(self.sequence_editor)
+
         # MODELS
         self.variables_model = VariablesModel()
         self.routines_model = RoutinesModel()
@@ -33,6 +37,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.iterator_variables_view.setModel(self.iterator_variables_model)
         self.ui.sequence_dbg_treeview.setModel(self.routines_model)
         self.ui.routine_combo_box.setModel(self.routines_model)
+        self.sequence_editor.set_model(self.routines_model)
 
         # VIEWS SETUP
         self.ui.static_variables_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
@@ -76,7 +81,6 @@ class ControlSystemGUI(QMainWindow):
         prnt = self.variables_model.index(3, 0)
         self.variables_model.add_variable(prnt, name="probe_detuning", value="-40", start="-40",stop="40",increment="5",iterator=True)
 
-        self.ui.sequence_editor_scroll_area.setWidget(SequenceEditor())
 
         sa = QScrollArea()
 
@@ -104,7 +108,10 @@ class ControlSystemGUI(QMainWindow):
     def add_routine(self):
         txt,ok = QInputDialog.getText(self,"New routine","New routine name:")
         if ok:
-            self.routines_model.add_routine(txt)
+            routine_index = self.routines_model.add_routine(txt)
+            new_row = routine_index.row()
+            self.ui.routine_combo_box.setCurrentIndex(new_row)
+            self.sequence_editor.set_routine(new_row)
 
     @pyqtSlot()
     def rename_routine(self):
@@ -152,22 +159,23 @@ class ControlSystemGUI(QMainWindow):
     @pyqtSlot(QPoint)
     def static_variables_context_menu_requested(self, pos):
         menu = QMenu()
-        iterate_action = menu.addAction("Iterate")
-        move_to_menu = menu.addMenu("Move to group")
-
-        group_list = self.variables_model.get_group_list()
-        move_actions = {}
-        for gr_idx in range(len(group_list)):
-            group_name = group_list[gr_idx]
-            new_action = move_to_menu.addAction(group_name)
-            move_actions[new_action] = gr_idx
-
-        delete_action = menu.addAction("Delete variable")
 
         idx = self.ui.static_variables_view.indexAt(pos) # type: QModelIndex
         src_idx = self.static_variables_model.mapToSource(idx)
 
         if src_idx.parent().isValid(): # if a variable is selected
+            iterate_action = menu.addAction("Iterate")
+            move_to_menu = menu.addMenu("Move to group")
+
+            group_list = self.variables_model.get_group_list()
+            move_actions = {}
+            for gr_idx in range(len(group_list)):
+                group_name = group_list[gr_idx]
+                new_action = move_to_menu.addAction(group_name)
+                move_actions[new_action] = gr_idx
+
+            delete_action = menu.addAction("Delete variable")
+
             action = menu.exec(self.ui.static_variables_view.mapToGlobal(pos)) # type: QMenu
             if action == iterate_action:
                 iterator_idx = src_idx.parent().child(src_idx.row(),VariablesModel.variable_fields.index("iterator"))
@@ -178,6 +186,21 @@ class ControlSystemGUI(QMainWindow):
                 taken_row = self.variables_model.itemFromIndex(src_idx.parent()).takeRow(src_idx.row())
                 dest_item = self.variables_model.item(move_actions[action], 0)
                 dest_item.insertRow(0,taken_row)
+        elif src_idx.isValid(): # if a variable group is selected
+            add_var_action = menu.addAction("Add variable")
+            delete_action  = menu.addAction("Delete group")
+            action = menu.exec(self.ui.static_variables_view.mapToGlobal(pos))  # type: QMenu
+            if action == add_var_action:
+                self.add_variable()
+            elif action == delete_action:
+                curr_name = self.variables_model.data(src_idx,Qt.DisplayRole)
+                txt, ok = QInputDialog.getText(self, "Delete group",
+                                               "Are you sure you want to delete the routine named '%s'?\n"
+                                               "If yes, type the name of the group to confirm." % curr_name)
+                if ok and txt == curr_name:
+                    self.variables_model.removeRow(src_idx.row(),src_idx.parent())
+
+
 
 
 
