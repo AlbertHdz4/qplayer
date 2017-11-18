@@ -5,9 +5,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import sys
 
-from variables import VariablesModel, VariablesProxyModel
-from routines import RoutinesModel
-from widgets import TextEditDelegate, SequenceEditor
+from variables import *
+from routines import *
+from widgets import *
 
 
 class ControlSystemGUI(QMainWindow):
@@ -106,6 +106,10 @@ class ControlSystemGUI(QMainWindow):
 
     @pyqtSlot()
     def add_routine(self):
+
+        dialog = RoutinePropertiesDialog()
+        dialog.exec()
+
         txt,ok = QInputDialog.getText(self,"New routine","New routine name:")
         if ok:
             routine_index = self.routines_model.add_routine(txt)
