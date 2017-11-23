@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont
-import util
+import utils
 
 from random import randint
 
@@ -14,7 +14,7 @@ class RoutinesModel(QStandardItemModel):
 
         for i in range(8):
             track_item = QStandardItem("D%d"%i)
-            track_item.setData(util.DigitalTrack,util.TrackTypeRole)
+            track_item.setData(utils.DigitalTrack, utils.TrackTypeRole)
             new_item.appendRow(track_item)
 
             for j in range(randint(0,10)):
@@ -24,7 +24,7 @@ class RoutinesModel(QStandardItemModel):
 
         for i in range(2):
             track_item = QStandardItem("A%d"%i)
-            track_item.setData(util.AnalogTrack, util.TrackTypeRole)
+            track_item.setData(utils.AnalogTrack, utils.TrackTypeRole)
             new_item.appendRow(track_item)
 
         self.appendRow(new_item)

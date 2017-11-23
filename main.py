@@ -4,6 +4,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import sys
+import config
 
 from variables import *
 from routines import *
@@ -12,6 +13,9 @@ from widgets import *
 
 class ControlSystemGUI(QMainWindow):
     def __init__(self, parent=None):
+        self.config = config.Config()
+        self.cards = self.config.get_cards()
+
         QMainWindow.__init__(self, parent)
         ui_main_window, main_window = loadUiType('control-system.ui')
         self.ui = ui_main_window()
@@ -107,7 +111,7 @@ class ControlSystemGUI(QMainWindow):
     @pyqtSlot()
     def add_routine(self):
 
-        dialog = RoutinePropertiesDialog()
+        dialog = RoutinePropertiesDialog(self.cards)
         dialog.exec()
 
         txt,ok = QInputDialog.getText(self,"New routine","New routine name:")

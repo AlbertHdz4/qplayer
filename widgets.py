@@ -1,11 +1,11 @@
 
 
-from PyQt5.Qt import QStyledItemDelegate, QWidget, QStandardItemModel
-from PyQt5.QtWidgets import QStyleOptionViewItem, QTextEdit, QVBoxLayout, QFrame, QPushButton, QLabel, QDialog
-from PyQt5.QtCore import QModelIndex, Qt, QAbstractItemModel, QRegExp, pyqtSlot
-from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont, QMouseEvent
-from PyQt5.uic import loadUiType
-import util
+from PyQt5.Qt import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.uic import *
+import utils
 
 
 class TextEditDelegate(QStyledItemDelegate):
@@ -161,9 +161,9 @@ class SequenceTrack(QWidget):
         self.track_type = track_type
 
     def mouseDoubleClickEvent(self, a0: QMouseEvent):
-        if self.track_type == util.DigitalTrack:
+        if self.track_type == utils.DigitalTrack:
             self.ui.track_container.addWidget(DigitalSequenceEvent())
-        elif self.track_type == util.AnalogTrack:
+        elif self.track_type == utils.AnalogTrack:
             self.ui.track_container.addWidget(AnalogSequenceEvent())
 
     def add_event(self,duration):
@@ -192,10 +192,19 @@ class AnalogSequenceEvent(QWidget):
 class RoutinePropertiesDialog(QDialog):
     ui_form, ui_base = loadUiType('routine-properties.ui')
 
-    def __init__(self, index=None):
+    def __init__(self, cards, index=None):
         super().__init__()
         self.ui = self.ui_form()
         self.ui.setupUi(self)
+
+        enabled_channels = self.ui.enabled_channels  # type: QListWidget
+
+        for card in cards:
+            for chan in card.channels:
+                new_item = QListWidgetItem(chan.name)
+                new_item.setFlags(new_item.flags() | Qt.ItemIsUserCheckable )
+                new_item.setCheckState(False)
+                enabled_channels.addItem(new_item)
 
         if index == None: # new routine
             pass

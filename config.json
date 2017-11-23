@@ -1,0 +1,26 @@
+{
+  "cards": [
+    {
+      "class":"DigitalBusCard",
+      "address":"0x0000",
+      "name": "Digital 0"
+    },
+    {
+      "class":"DigitalBusCard",
+      "address":"0x0001",
+      "name": "Digital 1"
+    },
+    {
+      "class":"AnalogBusCard",
+      "address":"0x0002",
+      "name": "Analog 0"
+    },
+    {
+      "class":"AnalogBusCard",
+      "address":"0x0003",
+      "name": "Analog 1"
+    }
+  ]
+}
+
+
