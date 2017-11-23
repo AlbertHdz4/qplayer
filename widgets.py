@@ -110,6 +110,7 @@ class SequenceEditor(QWidget):
         super().__init__()
         self.setLayout(QVBoxLayout())
         self.layout().setSpacing(2)
+        self.layout().setAlignment(Qt.AlignTop)
         self.model = None # type: QStandardItemModel
         self.root_index = None # type: QModelIndex
         self.tracks = []
@@ -123,8 +124,8 @@ class SequenceEditor(QWidget):
         # self.layout().addWidget(line)
 
     def clear(self):
-        for i in range(self.layout().count()):
-            t = self.layout().takeAt(i)
+        for i in reversed(range(self.layout().count())):
+            self.layout().itemAt(i).widget().setParent(None)
 
     def set_model(self,model: QStandardItemModel):
         self.model = model
@@ -139,9 +140,11 @@ class SequenceEditor(QWidget):
 
         for i in range(routine_item.rowCount()):
             track_item = routine_item.child(i)
-            for j in range(track_item.rowCount()):
-                event_item = track_item.child(j)
-                self.tracks[i].add_event(event_item.data(Qt.DisplayRole))
+            self.add_track(track_item.data(Qt.DisplayRole),track_item.data(utils.TrackTypeRole))
+
+            #for j in range(track_item.rowCount()):
+            #    event_item = track_item.child(j)
+            #    self.tracks[i].add_event(event_item.data(Qt.DisplayRole))
 
 
 
@@ -173,11 +176,12 @@ class DigitalSequenceEvent(QWidget):
 
     ui_form, ui_base = loadUiType('digital-event.ui')
 
-    def __init__(self, duration):
+    def __init__(self, duration=""):
         super().__init__()
         self.ui = self.ui_form()
         self.ui.setupUi(self)
         self.ui.event_duration.setText(duration)
+
 
 class AnalogSequenceEvent(QWidget):
 
@@ -192,19 +196,66 @@ class AnalogSequenceEvent(QWidget):
 class RoutinePropertiesDialog(QDialog):
     ui_form, ui_base = loadUiType('routine-properties.ui')
 
-    def __init__(self, cards, index=None):
+    def __init__(self, cards, index: QModelIndex=None):
         super().__init__()
         self.ui = self.ui_form()
         self.ui.setupUi(self)
 
-        enabled_channels = self.ui.enabled_channels  # type: QListWidget
+        self.ui.all_button.clicked.connect(self.selectAll)
+        self.ui.none_button.clicked.connect(self.selectNone)
+
+        channel_list = self.ui.channel_list  # type: QListWidget
+
+        active_channels  = []
+        if index is not None:
+            model = index.model()
+            num_channles = model.rowCount(index)
+            for r in range(num_channles):
+                chan_index = model.index(r,0,index)
+                chan = chan_index.data(utils.ChannelRole)
+                print(chan.name)
+                active_channels.append(chan)
 
         for card in cards:
             for chan in card.channels:
                 new_item = QListWidgetItem(chan.name)
+                new_item.setData(utils.ChannelRole,chan)
                 new_item.setFlags(new_item.flags() | Qt.ItemIsUserCheckable )
-                new_item.setCheckState(False)
-                enabled_channels.addItem(new_item)
+                if chan in active_channels:
+                    new_item.setCheckState(Qt.Checked)
+                else:
+                    new_item.setCheckState(Qt.Unchecked)
+                channel_list.addItem(new_item)
 
-        if index == None: # new routine
-            pass
+
+
+    @pyqtSlot()
+    def selectAll(self):
+        channel_list = self.ui.channel_list  # type: QListWidget
+        for i in range(channel_list.count()):
+            channel_list.item(i).setCheckState(Qt.Checked)
+
+    @pyqtSlot()
+    def selectNone(self):
+        channel_list = self.ui.channel_list  # type: QListWidget
+        for i in range(channel_list.count()):
+            channel_list.item(i).setCheckState(Qt.Unchecked)
+
+    @property
+    def name(self):
+        return self.ui.routine_name.text()
+
+    @property
+    def active_channels(self):
+
+        channel_list = self.ui.channel_list  # type: QListWidget
+
+        active_channels_ = []
+
+        for i in range(channel_list.count()):
+            item = channel_list.item(i) # type: QListWidgetItem
+            if item.checkState() == Qt.Checked:
+                active_channels_.append(item.data(utils.ChannelRole))
+
+        return active_channels_
+

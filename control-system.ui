@@ -407,9 +407,9 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="rename_routine_button">
+           <widget class="QPushButton" name="config_routine_button">
             <property name="toolTip">
-             <string>Rename routine</string>
+             <string>Configure routine</string>
             </property>
             <property name="text">
              <string/>
@@ -472,7 +472,7 @@
              <x>0</x>
              <y>0</y>
              <width>771</width>
-             <height>389</height>
+             <height>377</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5"/>
@@ -511,7 +511,7 @@
      <x>0</x>
      <y>0</y>
      <width>813</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

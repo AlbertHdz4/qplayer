@@ -11,8 +11,9 @@ class Card:
 
 
 class Channel:
-    def __init__(self, name):
+    def __init__(self, name, card):
         self.name = name
+        self.card = card
 
 
 class BussCard(Card):
@@ -21,7 +22,7 @@ class BussCard(Card):
         self.address = address
         self._channels = []
         for i in range(self.num_channels):
-            self._channels.append(Channel(self.name+"-%02d"%i))
+            self._channels.append(Channel(self.name+"-%02d"%i, self))
 
     @property
     def channels(self):

@@ -57,8 +57,9 @@ class ControlSystemGUI(QMainWindow):
         self.variables_model.dataChanged.connect(self.data_changed)
         self.variables_model.dataChanged.connect(self.iterator_variables_model.invalidate)
         self.ui.add_routine_button.clicked.connect(self.add_routine)
-        self.ui.rename_routine_button.clicked.connect(self.rename_routine)
+        self.ui.config_routine_button.clicked.connect(self.config_routine)
         self.ui.remove_routine_button.clicked.connect(self.remove_routine)
+        self.ui.routine_combo_box.currentIndexChanged.connect(self.changed_routine)
 
         # UTILITY VARIABLES
         self.var_idx = 0
@@ -112,25 +113,36 @@ class ControlSystemGUI(QMainWindow):
     def add_routine(self):
 
         dialog = RoutinePropertiesDialog(self.cards)
-        dialog.exec()
+        rslt = dialog.exec()
 
-        txt,ok = QInputDialog.getText(self,"New routine","New routine name:")
-        if ok:
-            routine_index = self.routines_model.add_routine(txt)
+        if rslt == QDialog.Accepted:
+            name = dialog.name
+            active_channels = dialog.active_channels
+            for chan in active_channels:
+                print(chan.name)
+            routine_index = self.routines_model.add_routine(name, active_channels)
             new_row = routine_index.row()
             self.ui.routine_combo_box.setCurrentIndex(new_row)
             self.sequence_editor.set_routine(new_row)
 
+    @pyqtSlot(int)
+    def changed_routine(self, row):
+        self.sequence_editor.set_routine(row)
+
     @pyqtSlot()
-    def rename_routine(self):
+    def config_routine(self):
         cb = self.ui.routine_combo_box # type: QComboBox
-        curr_name = cb.currentText()
         root_index = cb.rootModelIndex()
         row = cb.currentIndex()
         element_index = self.routines_model.index(row,0,root_index)
-        txt,ok = QInputDialog.getText(self,"Rename routine","New routine name:",text=curr_name)
-        if ok:
-            self.routines_model.setData(element_index,txt,Qt.EditRole)
+
+        dialog = RoutinePropertiesDialog(self.cards, element_index)
+        rslt = dialog.exec()
+
+        if rslt == QDialog.Accepted:
+            pass
+
+
 
     @pyqtSlot()
     def remove_routine(self):
