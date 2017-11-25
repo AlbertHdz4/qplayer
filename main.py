@@ -47,7 +47,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.static_variables_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.ui.iterator_variables_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.ui.static_variables_view.header().setSectionResizeMode(1,QHeaderView.Stretch)
-        self.ui.static_variables_view.setItemDelegateForColumn(1, TextEditDelegate())
+        self.ui.static_variables_view.setItemDelegateForColumn(1, CodeEditDelegate())
 
         # SIGNALS
         self.ui.add_variable_group_button.clicked.connect(self.add_variable_group)
@@ -118,8 +118,6 @@ class ControlSystemGUI(QMainWindow):
         if rslt == QDialog.Accepted:
             name = dialog.name
             active_channels = dialog.active_channels
-            for chan in active_channels:
-                print(chan.name)
             routine_index = self.routines_model.add_routine(name, active_channels)
             new_row = routine_index.row()
             self.ui.routine_combo_box.setCurrentIndex(new_row)
@@ -127,20 +125,26 @@ class ControlSystemGUI(QMainWindow):
 
     @pyqtSlot(int)
     def changed_routine(self, row):
-        self.sequence_editor.set_routine(row)
+        if row >= 0:
+            self.sequence_editor.set_routine(row)
+        else:
+            self.sequence_editor.clear()
 
     @pyqtSlot()
     def config_routine(self):
         cb = self.ui.routine_combo_box # type: QComboBox
         root_index = cb.rootModelIndex()
         row = cb.currentIndex()
-        element_index = self.routines_model.index(row,0,root_index)
+        element_index = self.routines_model.index(row,0,root_index) # type: QModelIndex
 
         dialog = RoutinePropertiesDialog(self.cards, element_index)
         rslt = dialog.exec()
 
         if rslt == QDialog.Accepted:
-            pass
+            self.routines_model.setData(element_index,dialog.name)
+            active_channels = dialog.active_channels
+            self.routines_model.set_active_channels(element_index, active_channels)
+            self.sequence_editor.set_routine(row)
 
 
 

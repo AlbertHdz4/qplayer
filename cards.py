@@ -3,7 +3,7 @@ import utils
 
 class Card:
     num_channels = None
-    track_type = None
+    type = None
 
     @property
     def channels(self):
@@ -31,9 +31,9 @@ class BussCard(Card):
 
 class DigitalBusCard(BussCard):
     num_channels = 16
-    track_type = utils.DigitalTrack
+    type = utils.DigitalTrack
 
 
 class AnalogBusCard(BussCard):
     num_channels = 1
-    track_type = utils.AnalogTrack
+    type = utils.AnalogTrack

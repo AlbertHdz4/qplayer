@@ -8,7 +8,7 @@ from PyQt5.uic import *
 import utils
 
 
-class TextEditDelegate(QStyledItemDelegate):
+class CodeEditDelegate(QStyledItemDelegate):
     def createEditor(self, parent: QWidget, option: QStyleOptionViewItem, index: QModelIndex):
         font = QFont()
         font.setFamily('Courier')
@@ -18,6 +18,8 @@ class TextEditDelegate(QStyledItemDelegate):
         editor = QTextEdit(parent)
         editor.setFont(font)
         editor.setTabChangesFocus(True)
+        editor.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        #editor.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
 
         self.highlighter = Highlighter(editor.document())
 
@@ -33,7 +35,6 @@ class TextEditDelegate(QStyledItemDelegate):
 
     def updateEditorGeometry(self, editor: QTextEdit, option: QStyleOptionViewItem, index: QModelIndex):
         editor.setGeometry(option.rect)
-
 
 # source https://github.com/baoboa/pyqt5/blob/master/examples/richtext/syntaxhighlighter.py
 class Highlighter(QSyntaxHighlighter):
@@ -112,11 +113,10 @@ class SequenceEditor(QWidget):
         self.layout().setSpacing(2)
         self.layout().setAlignment(Qt.AlignTop)
         self.model = None # type: QStandardItemModel
-        self.root_index = None # type: QModelIndex
         self.tracks = []
 
-    def add_track(self,track_name, track_type):
-        track = SequenceTrack(track_name, track_type)
+    def add_track(self,track_name, channel):
+        track = SequenceTrack(track_name, channel)
         self.layout().addWidget(track)
         # line = QFrame()
         # line.setFrameShape(QFrame.HLine)
@@ -132,15 +132,16 @@ class SequenceEditor(QWidget):
         self.model.dataChanged.connect(self.data_changed)
 
     def set_routine(self, index: int):
-        self.root_index = self.model.index(index,0) # type: QModelIndex
-        routine_item = self.model.itemFromIndex(self.root_index)
+        root_index = self.model.index(index,0) # type: QModelIndex
+        routine_item = self.model.itemFromIndex(root_index)
 
 
         self.clear()
 
         for i in range(routine_item.rowCount()):
             track_item = routine_item.child(i)
-            self.add_track(track_item.data(Qt.DisplayRole),track_item.data(utils.TrackTypeRole))
+            channel = track_item.data(utils.ChannelRole)
+            self.add_track(track_item.data(Qt.DisplayRole), channel)
 
             #for j in range(track_item.rowCount()):
             #    event_item = track_item.child(j)
@@ -156,17 +157,17 @@ class SequenceEditor(QWidget):
 class SequenceTrack(QWidget):
     ui_form, ui_base = loadUiType('track-widget.ui')
 
-    def __init__(self, name, track_type):
+    def __init__(self, name, channel):
         super().__init__()
         self.ui = self.ui_form()
         self.ui.setupUi(self)
         self.ui.track_label.setText(name)
-        self.track_type = track_type
+        self.channel = channel
 
     def mouseDoubleClickEvent(self, a0: QMouseEvent):
-        if self.track_type == utils.DigitalTrack:
+        if self.channel.card.type == utils.DigitalTrack:
             self.ui.track_container.addWidget(DigitalSequenceEvent())
-        elif self.track_type == utils.AnalogTrack:
+        elif self.channel.card.type == utils.AnalogTrack:
             self.ui.track_container.addWidget(AnalogSequenceEvent())
 
     def add_event(self,duration):
@@ -210,6 +211,9 @@ class RoutinePropertiesDialog(QDialog):
         if index is not None:
             model = index.model()
             num_channles = model.rowCount(index)
+
+            self.ui.routine_name.setText(index.data(Qt.DisplayRole))
+
             for r in range(num_channles):
                 chan_index = model.index(r,0,index)
                 chan = chan_index.data(utils.ChannelRole)
