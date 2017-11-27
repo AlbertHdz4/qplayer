@@ -6,6 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.uic import *
 import utils
+from routines import RoutinesModel
 
 
 class VariableEditDelegate(QStyledItemDelegate):
@@ -52,6 +53,7 @@ class VariableEditDelegate(QStyledItemDelegate):
 
     def updateEditorGeometry(self, editor: QTextEdit, option: QStyleOptionViewItem, index: QModelIndex):
         editor.setGeometry(option.rect)
+
 
 # source https://github.com/baoboa/pyqt5/blob/master/examples/richtext/syntaxhighlighter.py
 class Highlighter(QSyntaxHighlighter):
@@ -214,20 +216,22 @@ class AnalogSequenceEvent(QWidget):
 class RoutinePropertiesDialog(QDialog):
     ui_form, ui_base = loadUiType('routine-properties.ui')
 
-    def __init__(self, cards, index: QModelIndex=None):
+    def __init__(self, cards, model: RoutinesModel, index: QModelIndex=None):
+        self.model = model
+
         super().__init__()
         self.ui = self.ui_form()
         self.ui.setupUi(self)
 
         self.ui.all_button.clicked.connect(self.selectAll)
         self.ui.none_button.clicked.connect(self.selectNone)
+        self.ui.button_box.accepted.connect(self.submitted)
 
         channel_list = self.ui.channel_list  # type: QListWidget
 
         active_channels  = []
         if index is not None:
-            model = index.model()
-            num_channles = model.rowCount(index)
+            num_channles = self.model.rowCount(index)
 
             self.ui.routine_name.setText(index.data(Qt.DisplayRole))
 
@@ -249,7 +253,6 @@ class RoutinePropertiesDialog(QDialog):
                 channel_list.addItem(new_item)
 
 
-
     @pyqtSlot()
     def selectAll(self):
         channel_list = self.ui.channel_list  # type: QListWidget
@@ -261,6 +264,21 @@ class RoutinePropertiesDialog(QDialog):
         channel_list = self.ui.channel_list  # type: QListWidget
         for i in range(channel_list.count()):
             channel_list.item(i).setCheckState(Qt.Unchecked)
+
+    @pyqtSlot()
+    def submitted(self):
+        existing_routine_names = self.model.get_routine_names()
+
+        if len(self.name) == 0:
+            message_box = QMessageBox(self)
+            message_box.setText("Routine name must not be empty.");
+            message_box.exec()
+        elif self.name in existing_routine_names:
+            message_box = QMessageBox(self)
+            message_box.setText("Routine name must be unique.");
+            message_box.exec()
+        else:
+            self.accept()
 
     @property
     def name(self):

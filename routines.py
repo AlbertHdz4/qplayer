@@ -23,6 +23,15 @@ class RoutinesModel(QStandardItemModel):
         self.dataChanged.emit(index,index)
         return index
 
+    def get_routine_names(self):
+        names = []
+        num_routines = self.rowCount()
+        for i in range(num_routines):
+            name = self.index(i,0).data(Qt.DisplayRole)
+            names.append(name)
+        return names
+
+    # Adds missing channels to a routine and removes the inactive ones
     def set_active_channels(self, routine_index:QModelIndex, active_channels):
 
         currently_active_chans = []

@@ -112,7 +112,7 @@ class ControlSystemGUI(QMainWindow):
     @pyqtSlot()
     def add_routine(self):
 
-        dialog = RoutinePropertiesDialog(self.cards)
+        dialog = RoutinePropertiesDialog(self.cards, self.routines_model)
         rslt = dialog.exec()
 
         if rslt == QDialog.Accepted:
@@ -137,7 +137,7 @@ class ControlSystemGUI(QMainWindow):
         row = cb.currentIndex()
         element_index = self.routines_model.index(row,0,root_index) # type: QModelIndex
 
-        dialog = RoutinePropertiesDialog(self.cards, element_index)
+        dialog = RoutinePropertiesDialog(self.cards, self.routines_model, element_index)
         rslt = dialog.exec()
 
         if rslt == QDialog.Accepted:
