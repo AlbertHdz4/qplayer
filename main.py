@@ -47,7 +47,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.static_variables_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.ui.iterator_variables_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.ui.static_variables_view.header().setSectionResizeMode(1,QHeaderView.Stretch)
-        self.ui.static_variables_view.setItemDelegateForColumn(1, CodeEditDelegate())
+        self.ui.static_variables_view.setItemDelegateForColumn(1, VariableEditDelegate())
 
         # SIGNALS
         self.ui.add_variable_group_button.clicked.connect(self.add_variable_group)
@@ -185,9 +185,20 @@ class ControlSystemGUI(QMainWindow):
         menu = QMenu()
 
         idx = self.ui.static_variables_view.indexAt(pos) # type: QModelIndex
-        src_idx = self.static_variables_model.mapToSource(idx)
+        src_idx = self.static_variables_model.mapToSource(idx) # type: QModelIndex
 
         if src_idx.parent().isValid(): # if a variable is selected
+
+            variable_type_action = None
+            new_variable_type = None
+            if src_idx.data(utils.VariableTypeRole) == utils.CodeVariable:
+                variable_type_action = menu.addAction("Set as numeric variable")
+                new_variable_type = utils.NumericVariable
+            else:
+                variable_type_action = menu.addAction("Set as code variable")
+                new_variable_type = utils.CodeVariable
+
+
             iterate_action = menu.addAction("Iterate")
             move_to_menu = menu.addMenu("Move to group")
 
@@ -201,7 +212,9 @@ class ControlSystemGUI(QMainWindow):
             delete_action = menu.addAction("Delete variable")
 
             action = menu.exec(self.ui.static_variables_view.mapToGlobal(pos)) # type: QMenu
-            if action == iterate_action:
+            if action == variable_type_action:
+                src_idx.model().setData(src_idx,new_variable_type,utils.VariableTypeRole)
+            elif action == iterate_action:
                 iterator_idx = src_idx.parent().child(src_idx.row(),VariablesModel.variable_fields.index("iterator"))
                 self.variables_model.setData(iterator_idx,Qt.Checked,Qt.CheckStateRole)
             elif action == delete_action:

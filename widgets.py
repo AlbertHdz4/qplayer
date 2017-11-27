@@ -8,29 +8,46 @@ from PyQt5.uic import *
 import utils
 
 
-class CodeEditDelegate(QStyledItemDelegate):
+class VariableEditDelegate(QStyledItemDelegate):
     def createEditor(self, parent: QWidget, option: QStyleOptionViewItem, index: QModelIndex):
-        font = QFont()
-        font.setFamily('Courier')
-        font.setFixedPitch(True)
-        font.setPointSize(9)
+        variable_type = index.data(utils.VariableTypeRole)
+        if variable_type == utils.CodeVariable:
 
-        editor = QTextEdit(parent)
-        editor.setFont(font)
-        editor.setTabChangesFocus(True)
-        editor.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        #editor.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
+            font = QFont()
+            font.setFamily('Courier')
+            font.setFixedPitch(True)
+            font.setPointSize(9)
 
-        self.highlighter = Highlighter(editor.document())
+            editor = QTextEdit(parent)
+            editor.setFont(font)
+            editor.setTabChangesFocus(True)
+            editor.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+            #editor.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
 
-        return editor
+            self.highlighter = Highlighter(editor.document())
 
-    def setEditorData(self, editor: QTextEdit, index: QModelIndex):
-        data = index.model().data(index,Qt.EditRole)
-        editor.setPlainText(data)
+            return editor
 
-    def setModelData(self, editor: QTextEdit, model: QAbstractItemModel, index: QModelIndex):
-        text = editor.toPlainText()
+        else:
+            editor = QLineEdit(parent)
+            editor.setValidator(QDoubleValidator())
+            return editor
+
+    def setEditorData(self, editor, index: QModelIndex):
+        variable_type = index.data(utils.VariableTypeRole)
+        data = index.model().data(index, Qt.EditRole)
+        if variable_type == utils.CodeVariable:
+            editor.setPlainText(data)
+        else:
+            editor.setText(data)
+
+
+    def setModelData(self, editor, model: QAbstractItemModel, index: QModelIndex):
+        variable_type = index.data(utils.VariableTypeRole)
+        if variable_type == utils.CodeVariable:
+            text = editor.toPlainText()
+        else:
+            text = editor.text()
         model.setData(index, text, Qt.EditRole)
 
     def updateEditorGeometry(self, editor: QTextEdit, option: QStyleOptionViewItem, index: QModelIndex):

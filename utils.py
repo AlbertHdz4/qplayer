@@ -4,9 +4,14 @@ from PyQt5.QtGui import QValidator
 # User-defined role to use with QStandardItemModel
 TrackTypeRole = Qt.UserRole+1
 ChannelRole = Qt.UserRole+2
+VariableTypeRole = Qt.UserRole+3
 
-
+#TrackTypes
 DigitalTrack = 0
 AnalogTrack = 1
+
+#VariableTypes
+NumericVariable = 0
+CodeVariable = 1
 
 
