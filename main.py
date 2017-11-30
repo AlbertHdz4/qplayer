@@ -21,13 +21,13 @@ class ControlSystemGUI(QMainWindow):
         self.ui = ui_main_window()
         self.ui.setupUi(self)
 
-        # UI SETUP
-        self.sequence_editor = SequenceEditor()
-        self.ui.sequence_editor_scroll_area.setWidget(self.sequence_editor)
-
         # MODELS
         self.variables_model = VariablesModel()
         self.routines_model = RoutinesModel()
+
+        # UI SETUP
+        self.sequence_editor = SequenceEditor(self.routines_model)
+        self.ui.sequence_editor_scroll_area.setWidget(self.sequence_editor)
 
         # PROXY MODELS
         self.static_variables_model = VariablesProxyModel(["name","value","comment"], True, False, True)
@@ -41,7 +41,6 @@ class ControlSystemGUI(QMainWindow):
         self.ui.iterator_variables_view.setModel(self.iterator_variables_model)
         self.ui.sequence_dbg_treeview.setModel(self.routines_model)
         self.ui.routine_combo_box.setModel(self.routines_model)
-        self.sequence_editor.set_model(self.routines_model)
 
         # VIEWS SETUP
         self.ui.static_variables_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)

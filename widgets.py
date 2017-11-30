@@ -6,6 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.uic import *
 import utils
+import cards
 from routines import RoutinesModel
 
 
@@ -126,16 +127,19 @@ class Highlighter(QSyntaxHighlighter):
 
 class SequenceEditor(QWidget):
 
-    def __init__(self):
+    def __init__(self, model):
         super().__init__()
         self.setLayout(QVBoxLayout())
         self.layout().setSpacing(2)
         self.layout().setAlignment(Qt.AlignTop)
-        self.model = None # type: QStandardItemModel
-        self.tracks = []
+        self.model = model # type: QStandardItemModel
 
-    def add_track(self,track_name, channel):
-        track = SequenceTrack(track_name, channel)
+        self.model.dataChanged.connect(self.data_changed)
+
+        self.routine_row = None
+
+    def add_track_widget(self,track_name, channel: cards.Channel):
+        track = SequenceTrack(track_name, channel, self)
         self.layout().addWidget(track)
         # line = QFrame()
         # line.setFrameShape(QFrame.HLine)
@@ -146,25 +150,26 @@ class SequenceEditor(QWidget):
         for i in reversed(range(self.layout().count())):
             self.layout().itemAt(i).widget().setParent(None)
 
-    def set_model(self,model: QStandardItemModel):
-        self.model = model
-        self.model.dataChanged.connect(self.data_changed)
+    def get_current_routine_item(self):
+        if self.routine_row is not None:
+            return self.model.item(self.routine_row, 0)
+        return None
 
-    def set_routine(self, index: int):
-        root_index = self.model.index(index,0) # type: QModelIndex
+    def set_routine(self, routine_row: int):
+        self.routine_row = routine_row
+        root_index = self.model.index(self.routine_row,0) # type: QModelIndex
         routine_item = self.model.itemFromIndex(root_index)
-
 
         self.clear()
 
         for i in range(routine_item.rowCount()):
             track_item = routine_item.child(i)
-            channel = track_item.data(utils.ChannelRole)
-            self.add_track(track_item.data(Qt.DisplayRole), channel)
+            channel = track_item.data(utils.ChannelRole) # type: cards.Channel
+            self.add_track_widget(track_item.data(Qt.DisplayRole), channel)
 
-            #for j in range(track_item.rowCount()):
-            #    event_item = track_item.child(j)
-            #    self.tracks[i].add_event(event_item.data(Qt.DisplayRole))
+            for j in range(track_item.rowCount()):
+                event_item = track_item.child(j)
+                self.layout().itemAt(i).widget().add_event(event_item)
 
 
 
@@ -176,41 +181,97 @@ class SequenceEditor(QWidget):
 class SequenceTrack(QWidget):
     ui_form, ui_base = loadUiType('track-widget.ui')
 
-    def __init__(self, name, channel):
+    def __init__(self, name, channel, sequence_editor):
         super().__init__()
         self.ui = self.ui_form()
         self.ui.setupUi(self)
         self.ui.track_label.setText(name)
         self.channel = channel
+        self.sequence_editor = sequence_editor # type: SequenceEditor
 
-    def mouseDoubleClickEvent(self, a0: QMouseEvent):
+    def mouseDoubleClickEvent(self, event: QMouseEvent):
+        self.add_event()
+
+    def get_model_item(self):
+        current_routine_index = self.sequence_editor.get_current_routine_item() # type: QStandardItem
+        return current_routine_index.child(self.row())
+
+    # if event_item is None, a new item will be added to the model
+    def add_event(self, event_item=None):
         if self.channel.card.type == utils.DigitalTrack:
-            self.ui.track_container.addWidget(DigitalSequenceEvent())
+            self.ui.track_container.addWidget(DigitalSequenceEvent(self,event_item))
         elif self.channel.card.type == utils.AnalogTrack:
-            self.ui.track_container.addWidget(AnalogSequenceEvent())
+            self.ui.track_container.addWidget(AnalogSequenceEvent(self,event_item))
 
-    def add_event(self,duration):
-        self.ui.track_container.addWidget(DigitalSequenceEvent(duration))
+    def position_of_event(self, sequence_event):
+        return self.ui.track_container.indexOf(sequence_event)
 
-class DigitalSequenceEvent(QWidget):
+    def row(self):
+        return self.sequence_editor.layout().indexOf(self)
 
-    ui_form, ui_base = loadUiType('digital-event.ui')
+    def model_item(self):
+        return self.sequence_editor.model.inde
 
-    def __init__(self, duration=""):
+
+class SequenceEvent(QWidget):
+
+    ui_file = None
+
+    def __init__(self, sequence_track, event_item):
         super().__init__()
+
+        self.sequence_track = sequence_track # type: SequenceTrack
+        self.event_item = event_item
+        
+        if self.event_item is None:
+            self.event_item = QStandardItem()
+            self.initialize_event_item(self.event_item)
+            self.sequence_track.get_model_item().appendRow(self.event_item)
+
+        self.ui_form, self.ui_base = loadUiType(self.ui_file)
         self.ui = self.ui_form()
         self.ui.setupUi(self)
-        self.ui.event_duration.setText(duration)
+
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+
+        self.customContextMenuRequested.connect(self.context_menu_requested)
+
+    def initialize_event_item(self, event_item):
+        pass
+
+    @pyqtSlot(QPoint)
+    def context_menu_requested(self,pos):
+        menu = QMenu()
+        delete_event_action = menu.addAction("Delete event")
+        move_right_action = menu.addAction("Move right")
+        move_left_action = menu.addAction("Move left")
+        action = menu.exec(self.mapToGlobal(pos))  # type: QMenu
+
+        if action == delete_event_action:
+            self.setParent(None)
+        elif action == move_right_action:
+            # TODO: move events
+            print("Not implemented!")
+        elif action == move_left_action:
+            # TODO: move events
+            print("Not implemented!")
+
+    def mouseDoubleClickEvent(self, event: QEvent):
+        print(self.sequence_track.position_of_event(self))
 
 
-class AnalogSequenceEvent(QWidget):
+class DigitalSequenceEvent(SequenceEvent):
+    ui_file = "digital-event.ui"
 
-    ui_form, ui_base = loadUiType('analog-event.ui')
+    def initialize_event_item(self,event_item):
+        event_item.setData("on", Qt.DisplayRole)
 
-    def __init__(self):
-        super().__init__()
-        self.ui = self.ui_form()
-        self.ui.setupUi(self)
+
+class AnalogSequenceEvent(SequenceEvent):
+    ui_file = "analog-event.ui"
+
+    def initialize_event_item(self,event_item):
+        event_item.setData("analog",Qt.DisplayRole)
 
 
 class RoutinePropertiesDialog(QDialog):
@@ -230,10 +291,13 @@ class RoutinePropertiesDialog(QDialog):
         channel_list = self.ui.channel_list  # type: QListWidget
 
         active_channels  = []
+        self.old_name = None
+
         if index is not None:
             num_channles = self.model.rowCount(index)
 
-            self.ui.routine_name.setText(index.data(Qt.DisplayRole))
+            self.old_name = index.data(Qt.DisplayRole)
+            self.ui.routine_name.setText(self.old_name)
 
             for r in range(num_channles):
                 chan_index = model.index(r,0,index)
@@ -268,6 +332,10 @@ class RoutinePropertiesDialog(QDialog):
     @pyqtSlot()
     def submitted(self):
         existing_routine_names = self.model.get_routine_names()
+        try:
+            existing_routine_names.remove(self.old_name)
+        except ValueError:
+            pass
 
         if len(self.name) == 0:
             message_box = QMessageBox(self)

@@ -7,6 +7,7 @@
 
 from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont
+import utils
 
 
 class VariablesModel(QStandardItemModel):
@@ -45,6 +46,12 @@ class VariablesModel(QStandardItemModel):
             it.setTextAlignment(Qt.AlignTop)
             if ftype == bool:
                 it.setCheckable(True)
+            if field == "value":
+                try:
+                    float(kwargs[field]) # If it's numeric value, it can ve converted
+                    it.setData(utils.NumericVariable, utils.VariableTypeRole)
+                except ValueError: # It's not a numeric value, treat as code
+                    it.setData(utils.CodeVariable,utils.VariableTypeRole)
 
             if kwargs is not None and field in kwargs:
                 if ftype == bool and kwargs[field]:
