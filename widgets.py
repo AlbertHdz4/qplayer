@@ -172,6 +172,9 @@ class SequenceEditor(QWidget):
                 self.layout().itemAt(i).widget().add_event(event_item)
 
 
+        self.model.dataChanged.emit(QModelIndex(), QModelIndex()) # send data changed notification to everything to set new gui elements
+
+
 
     @pyqtSlot()
     def data_changed(self):
@@ -222,11 +225,13 @@ class SequenceEvent(QWidget):
 
         self.sequence_track = sequence_track # type: SequenceTrack
         self.event_item = event_item
-        
+
         if self.event_item is None:
             self.event_item = QStandardItem()
             self.initialize_event_item(self.event_item)
             self.sequence_track.get_model_item().appendRow(self.event_item)
+
+        self.event_item.model().dataChanged.connect(self.data_changed)
 
         self.ui_form, self.ui_base = loadUiType(self.ui_file)
         self.ui = self.ui_form()
@@ -239,6 +244,10 @@ class SequenceEvent(QWidget):
     def initialize_event_item(self, event_item):
         pass
 
+    @pyqtSlot()
+    def data_changed(self):
+        pass
+
     @pyqtSlot(QPoint)
     def context_menu_requested(self,pos):
         menu = QMenu()
@@ -248,7 +257,7 @@ class SequenceEvent(QWidget):
         action = menu.exec(self.mapToGlobal(pos))  # type: QMenu
 
         if action == delete_event_action:
-            self.setParent(None)
+            self.delete()
         elif action == move_right_action:
             # TODO: move events
             print("Not implemented!")
@@ -259,12 +268,41 @@ class SequenceEvent(QWidget):
     def mouseDoubleClickEvent(self, event: QEvent):
         print(self.sequence_track.position_of_event(self))
 
+    def delete(self):
+        self.event_item.model().removeRow(self.event_item.row(),self.event_item.parent().index())
+        self.setParent(None)
+
 
 class DigitalSequenceEvent(SequenceEvent):
     ui_file = "digital-event.ui"
 
-    def initialize_event_item(self,event_item):
-        event_item.setData("on", Qt.DisplayRole)
+    def __init__(self, sequence_track, event_item):
+        super().__init__(sequence_track, event_item)
+        self.ui.state_button.toggled.connect(self.toggled)
+        self.ui.event_duration.editingFinished.connect(self.duration_edited)
+
+    def initialize_event_item(self,event_item:QStandardItem):
+        event_item.setCheckable(True)
+        event_item.setCheckState(Qt.Unchecked)
+
+    @pyqtSlot()
+    def data_changed(self):
+        # Update button state
+        self.ui.state_button.setChecked(self.event_item.checkState())
+
+        # Update duration
+        self.ui.event_duration.setText(self.event_item.data(utils.DigitalEventDurationRole))
+
+    @pyqtSlot(bool)
+    def toggled(self, checked):
+        if checked:
+            self.event_item.setCheckState(Qt.Checked)
+        else:
+            self.event_item.setCheckState(Qt.Unchecked)
+
+    @pyqtSlot()
+    def duration_edited(self):
+        self.event_item.setData(self.ui.event_duration.text(),utils.DigitalEventDurationRole)
 
 
 class AnalogSequenceEvent(SequenceEvent):

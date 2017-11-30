@@ -85,6 +85,9 @@ class ControlSystemGUI(QMainWindow):
         prnt = self.variables_model.index(3, 0)
         self.variables_model.add_variable(prnt, name="probe_detuning", value="-40", start="-40",stop="40",increment="5",iterator=True)
 
+        self.routines_model.add_routine("MOT",[self.cards[0].channels[0], self.cards[0].channels[1], self.cards[2].channels[0]])
+        self.routines_model.add_routine("Compression", [self.cards[3].channels[0]])
+
 
         sa = QScrollArea()
 
