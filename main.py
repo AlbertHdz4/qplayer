@@ -30,7 +30,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.sequence_editor_scroll_area.setWidget(self.sequence_editor)
 
         # PROXY MODELS
-        self.static_variables_model = VariablesProxyModel(["name","value","comment"], True, False, True)
+        self.static_variables_model = VariablesProxyModel(["name","set","value","comment"], True, False, True)
         self.static_variables_model.setSourceModel(self.variables_model)
         self.iterator_variables_model = VariablesProxyModel(["name","value","start","stop","increment"], False, True, False)
         #self.iterator_variables_model = VariablesProxyModel(VariablesModel.variable_fields, True, True, True) # Uncomment for debug
@@ -53,7 +53,6 @@ class ControlSystemGUI(QMainWindow):
         self.ui.add_variable_button.clicked.connect(self.add_variable)
         self.ui.static_variables_view.customContextMenuRequested.connect(self.static_variables_context_menu_requested)
         self.ui.iterator_variables_view.customContextMenuRequested.connect(self.iterator_variables_context_menu_requested)
-        self.variables_model.dataChanged.connect(self.data_changed)
         self.variables_model.dataChanged.connect(self.iterator_variables_model.invalidate)
         self.ui.add_routine_button.clicked.connect(self.add_routine)
         self.ui.config_routine_button.clicked.connect(self.config_routine)
@@ -72,24 +71,21 @@ class ControlSystemGUI(QMainWindow):
         self.variables_model.add_group("Absorption Imaging")
 
         prnt = self.variables_model.index(0,0)
-        self.variables_model.add_variable(prnt, name="loading_time", value="1000", comment="ms")
-        self.variables_model.add_variable(prnt, name="slower_beam_pwr", value="1000", comment="W")
-        self.variables_model.add_variable(prnt, name="oven_shutter_time", value="100", comment="ms")
-        self.variables_model.add_variable(prnt, name="cooler_detuning", value="-20", comment="MHz")
-        self.variables_model.add_variable(prnt, name="repumper_detuning", value="-20", comment="MHz")
+        self.variables_model.add_variable(prnt, name="loading_time", set="0.2", comment="ms")
+        self.variables_model.add_variable(prnt, name="slower_beam_pwr", set="1000", comment="W")
+        self.variables_model.add_variable(prnt, name="oven_shutter_time", set="100", comment="ms")
+        self.variables_model.add_variable(prnt, name="cooler_detuning", set="-20", comment="MHz")
+        self.variables_model.add_variable(prnt, name="repumper_detuning", set="return bottom_power+4", comment="MHz")
 
         prnt = self.variables_model.index(2, 0)
         self.variables_model.add_variable(prnt, name="evaporation_time", value="0", start="0",stop="3000",increment="100",iterator=True)
-        self.variables_model.add_variable(prnt, name="bottom_power", value="y = exp(-5*evaporation_time)\namp = 4\nreturn amp*y", comment="W")
+        self.variables_model.add_variable(prnt, name="bottom_power", set="y = np.exp(-5*loading_time)\namp = 4\nreturn amp*y", comment="W")
 
         prnt = self.variables_model.index(3, 0)
         self.variables_model.add_variable(prnt, name="probe_detuning", value="-40", start="-40",stop="40",increment="5",iterator=True)
 
         self.routines_model.add_routine("MOT",[self.cards[0].channels[0], self.cards[0].channels[1], self.cards[2].channels[0]])
         self.routines_model.add_routine("Compression", [self.cards[3].channels[0]])
-
-
-        sa = QScrollArea()
 
     @pyqtSlot()
     def add_variable_group(self):

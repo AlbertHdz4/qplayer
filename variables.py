@@ -5,18 +5,21 @@
 #  
 #
 
-from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel
+from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel, pyqtSlot
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont
 import utils
 
+import numpy as np
+
 
 class VariablesModel(QStandardItemModel):
-    variable_fields = ["name","value","iterator","start","stop","increment","comment"]
-    variable_types = [str, str, bool, float, float, float, str]
+    variable_fields = ["name","set", "value","iterator","start","stop","increment","comment"]
+    variable_types = [str, str, float, bool, float, float, float, str]
 
     def __init__(self):
         super().__init__()
         self.setHorizontalHeaderLabels(self.variable_fields)
+        self.dataChanged.connect(self.update_values)
 
     def add_group(self, name):
         new_item = QStandardItem(name)
@@ -46,12 +49,18 @@ class VariablesModel(QStandardItemModel):
             it.setTextAlignment(Qt.AlignTop)
             if ftype == bool:
                 it.setCheckable(True)
-            if field == "value":
+            if field == "set":
                 try:
                     float(kwargs[field]) # If it's numeric value, it can ve converted
                     it.setData(utils.NumericVariable, utils.VariableTypeRole)
                 except ValueError: # It's not a numeric value, treat as code
                     it.setData(utils.CodeVariable,utils.VariableTypeRole)
+                except KeyError: #Field is not defined
+                    pass
+
+            if field == "value":
+                it.setFlags(it.flags() & ~Qt.ItemIsEditable)
+
 
             if kwargs is not None and field in kwargs:
                 if ftype == bool and kwargs[field]:
@@ -67,6 +76,70 @@ class VariablesModel(QStandardItemModel):
         for j in range(self.rowCount()):
             group_list.append(self.item(j,0).data(Qt.DisplayRole))
         return group_list
+
+    @pyqtSlot()
+    def update_values(self):
+
+        to_do = [] # reference to non-numerical variables
+        variables_dict = {'np':np}
+
+        # __builtins__ is added so eval treats 'variables' as we want
+        # (it doesn't add the builtin python variables)
+        variables_dict["__builtins__"] = {}
+
+        self.blockSignals(True)
+
+
+        # Loop through all variables to find the numerical ones
+        num_groups = self.rowCount()
+        for g in range(num_groups):
+            # print("g=%d"%g)
+            group_index = self.index(g,0)
+            num_variables = self.rowCount(group_index)
+            # print("num_vars=%d"%num_variables)
+            for v in range(num_variables):
+                var_set = self.index(v,self.variable_fields.index("set"),group_index).data()
+                if type(var_set) == str:
+                    var_name = self.index(v,self.variable_fields.index("name"),group_index).data()
+                    # print("%d %d %s=%s" % (g, v, var_name, var_set))
+                    try:
+                        var_val = float(var_set)  # Cast variables which are numerical
+                        val_idx = self.index(v, self.variable_fields.index("value"), group_index)
+                        self.setData(val_idx, var_val)
+                        variables_dict[var_name] = var_val
+                    except ValueError:
+                        to_do.append((g,v))
+
+        retry_attempts = 0
+        while len(to_do) > 0:
+            g, v = to_do.pop()
+            group_index = self.index(g, 0)
+            var_set = self.index(v, self.variable_fields.index("set"), group_index).data()
+            if type(var_set) == str:
+                var_set = var_set.replace("return","_return_ =")
+                loc_dict = {}
+                try:
+                    exec(var_set,variables_dict,loc_dict)
+                    var_val = loc_dict["_return_"]
+                    val_idx = self.index(v, self.variable_fields.index("value"), group_index)
+                    var_name = self.index(v, self.variable_fields.index("name"), group_index).data()
+                    self.setData(val_idx, "%f"%var_val)
+                    variables_dict[var_name] = var_val
+                    retry_attempts = 0
+                except NameError:
+                    # Return to to do list if this doesn't work (if there is no error, it should eventually work once
+                    # all the required variables are evaluated)
+                    to_do.insert(0,(g,v))
+                    retry_attempts += 1
+                    if len(to_do) <= retry_attempts:  # Avoid infinite retrys, give up all hope after trying everything
+                        print("Variable set cannot be numerically evaluated: %s" % str(to_do))
+                        break
+
+
+        self.blockSignals(False)
+        # self.dataChanged.emit(QModelIndex(), QModelIndex())
+
+
 
 
 class VariablesProxyModel(QSortFilterProxyModel):
@@ -104,3 +177,7 @@ class VariablesProxyModel(QSortFilterProxyModel):
                 return self.show_empty_groups
             else:
                 return True
+
+
+    class VariablesException(Exception):
+        pass

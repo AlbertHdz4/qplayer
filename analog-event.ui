@@ -68,12 +68,12 @@
          <widget class="QComboBox" name="comboBox">
           <item>
            <property name="text">
-            <string>constant</string>
+            <string>linear</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>linear</string>
+            <string>constant</string>
            </property>
           </item>
           <item>

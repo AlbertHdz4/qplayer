@@ -178,7 +178,8 @@ class SequenceEditor(QWidget):
 
     @pyqtSlot()
     def data_changed(self):
-        print("routine model data changed")
+        pass
+        #print("routine model data changed")
 
 
 class SequenceTrack(QWidget):

@@ -16,11 +16,3 @@ NumericVariable = 0
 CodeVariable = 1
 
 
-class WidgetDataMapper:
-
-    def __init__(self, model):
-        self.model = model
-
-    #def addMapping(self,widget, role):
-
-
