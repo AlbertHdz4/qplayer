@@ -54,6 +54,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.static_variables_view.customContextMenuRequested.connect(self.static_variables_context_menu_requested)
         self.ui.iterator_variables_view.customContextMenuRequested.connect(self.iterator_variables_context_menu_requested)
         self.variables_model.dataChanged.connect(self.iterator_variables_model.invalidate)
+        self.variables_model.dataChanged.connect(self.static_variables_model.invalidate)
         self.ui.add_routine_button.clicked.connect(self.add_routine)
         self.ui.config_routine_button.clicked.connect(self.config_routine)
         self.ui.remove_routine_button.clicked.connect(self.remove_routine)

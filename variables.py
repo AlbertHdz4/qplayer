@@ -98,18 +98,26 @@ class VariablesModel(QStandardItemModel):
             num_variables = self.rowCount(group_index)
             # print("num_vars=%d"%num_variables)
             for v in range(num_variables):
-                var_set = self.index(v,self.variable_fields.index("set"),group_index).data()
-                if type(var_set) == str:
-                    var_name = self.index(v,self.variable_fields.index("name"),group_index).data()
-                    # print("%d %d %s=%s" % (g, v, var_name, var_set))
-                    try:
-                        var_val = float(var_set)  # Cast variables which are numerical
-                        val_idx = self.index(v, self.variable_fields.index("value"), group_index)
-                        self.setData(val_idx, var_val)
-                        variables_dict[var_name] = var_val
-                    except ValueError:
-                        to_do.append((g,v))
+                iterator = self.index(v,self.variable_fields.index("iterator"),group_index).data(Qt.CheckStateRole)
+                var_name = self.index(v, self.variable_fields.index("name"), group_index).data()
+                if iterator == Qt.Checked:
+                    var_start = self.index(v, self.variable_fields.index("start"), group_index).data()
+                    val_idx = self.index(v, self.variable_fields.index("value"), group_index)
+                    self.setData(val_idx, var_start)
+                    variables_dict[var_name] = float(var_start)
+                else:
+                    var_set = self.index(v,self.variable_fields.index("set"),group_index).data()
+                    if type(var_set) == str:
+                        # print("%d %d %s=%s" % (g, v, var_name, var_set))
+                        try:
+                            var_val = float(var_set)  # Cast variables which are numerical
+                            val_idx = self.index(v, self.variable_fields.index("value"), group_index)
+                            self.setData(val_idx, var_val)
+                            variables_dict[var_name] = var_val
+                        except ValueError:
+                            to_do.append((g,v))
 
+        # Now we do our best to parse code variables
         retry_attempts = 0
         while len(to_do) > 0:
             g, v = to_do.pop()
@@ -135,9 +143,7 @@ class VariablesModel(QStandardItemModel):
                         print("Variable set cannot be numerically evaluated: %s" % str(to_do))
                         break
 
-
         self.blockSignals(False)
-        # self.dataChanged.emit(QModelIndex(), QModelIndex())
 
 
 
