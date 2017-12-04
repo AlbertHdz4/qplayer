@@ -148,7 +148,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit">
+            <widget class="QLineEdit" name="track_offset">
              <property name="enabled">
               <bool>true</bool>
              </property>

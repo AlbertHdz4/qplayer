@@ -6,7 +6,7 @@
 #
 
 from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel, pyqtSlot
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont, QColor
 import utils
 
 import numpy as np
@@ -89,7 +89,6 @@ class VariablesModel(QStandardItemModel):
 
         self.blockSignals(True)
 
-
         # Loop through all variables to find the numerical ones
         num_groups = self.rowCount()
         for g in range(num_groups):
@@ -100,11 +99,15 @@ class VariablesModel(QStandardItemModel):
             for v in range(num_variables):
                 iterator = self.index(v,self.variable_fields.index("iterator"),group_index).data(Qt.CheckStateRole)
                 var_name = self.index(v, self.variable_fields.index("name"), group_index).data()
+
+                # Set iterating variables
                 if iterator == Qt.Checked:
                     var_start = self.index(v, self.variable_fields.index("start"), group_index).data()
                     val_idx = self.index(v, self.variable_fields.index("value"), group_index)
                     self.setData(val_idx, var_start)
                     variables_dict[var_name] = float(var_start)
+
+                # Set numerical variables
                 else:
                     var_set = self.index(v,self.variable_fields.index("set"),group_index).data()
                     if type(var_set) == str:
@@ -130,7 +133,10 @@ class VariablesModel(QStandardItemModel):
                     exec(var_set,variables_dict,loc_dict)
                     var_val = loc_dict["_return_"]
                     val_idx = self.index(v, self.variable_fields.index("value"), group_index)
-                    var_name = self.index(v, self.variable_fields.index("name"), group_index).data()
+                    var_name_idx = self.index(v, self.variable_fields.index("name"), group_index)
+                    self.itemFromIndex(var_name_idx).setBackground(Qt.white)
+                    self.itemFromIndex(var_name_idx).setFont(QFont())
+                    var_name = var_name_idx.data()
                     self.setData(val_idx, "%f"%var_val)
                     variables_dict[var_name] = var_val
                     retry_attempts = 0
@@ -141,6 +147,16 @@ class VariablesModel(QStandardItemModel):
                     retry_attempts += 1
                     if len(to_do) <= retry_attempts:  # Avoid infinite retrys, give up all hope after trying everything
                         print("Variable set cannot be numerically evaluated: %s" % str(to_do))
+
+                        for g,v in to_do:
+                            group_index = self.index(g, 0)
+                            name_index = self.index(v, self.variable_fields.index("name"), group_index)
+                            color = QColor()
+                            color.setNamedColor("#ffc5c7")
+                            font = QFont()
+                            font.setStrikeOut(True)
+                            self.itemFromIndex(name_index).setBackground(color)
+                            self.itemFromIndex(name_index).setFont(font)
                         break
 
         self.blockSignals(False)

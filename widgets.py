@@ -192,6 +192,8 @@ class SequenceTrack(QWidget):
         self.ui.track_label.setText(name)
         self.channel = channel
         self.sequence_editor = sequence_editor # type: SequenceEditor
+        self.ui.track_offset.editingFinished.connect(self.offset_edited)
+        self.sequence_editor.model.dataChanged.connect(self.data_changed)
 
     def mouseDoubleClickEvent(self, event: QMouseEvent):
         self.add_event()
@@ -213,8 +215,14 @@ class SequenceTrack(QWidget):
     def row(self):
         return self.sequence_editor.layout().indexOf(self)
 
-    def model_item(self):
-        return self.sequence_editor.model.inde
+    @pyqtSlot()
+    def offset_edited(self):
+        self.get_model_item().setData(self.ui.track_offset.text(), utils.TrackOffsetRole)
+
+    @pyqtSlot()
+    def data_changed(self):
+        # Update offset
+        self.ui.track_offset.setText(self.get_model_item().data(utils.TrackOffsetRole))
 
 
 class SequenceEvent(QWidget):

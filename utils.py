@@ -6,6 +6,7 @@ TrackTypeRole = Qt.UserRole+1
 ChannelRole = Qt.UserRole+2
 VariableTypeRole = Qt.UserRole+3
 DigitalEventDurationRole = Qt.DisplayRole
+TrackOffsetRole = Qt.UserRole+5
 
 #TrackTypes
 DigitalTrack = 0
