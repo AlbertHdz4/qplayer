@@ -8,6 +8,7 @@ import config
 
 from variables import *
 from routines import *
+from playlist import *
 from widgets import *
 
 
@@ -24,6 +25,7 @@ class ControlSystemGUI(QMainWindow):
         # MODELS
         self.variables_model = VariablesModel()
         self.routines_model = RoutinesModel(self.variables_model)
+        self.playlist_model = PlaylistModel(self.routines_model)
 
         # UI SETUP
         self.sequence_editor = SequenceEditor(self.routines_model)
@@ -41,6 +43,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.iterator_variables_view.setModel(self.iterator_variables_model)
         self.ui.sequence_dbg_treeview.setModel(self.routines_model)
         self.ui.routine_combo_box.setModel(self.routines_model)
+        self.ui.playlist_view.setModel(self.playlist_model)
 
         # VIEWS SETUP
         self.ui.static_variables_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
