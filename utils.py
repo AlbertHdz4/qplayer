@@ -5,8 +5,9 @@ from PyQt5.QtGui import QValidator
 TrackTypeRole = Qt.UserRole+1
 ChannelRole = Qt.UserRole+2
 VariableTypeRole = Qt.UserRole+3
-DigitalEventDurationRole = Qt.DisplayRole
-TrackOffsetRole = Qt.UserRole+5
+EventStartRole = Qt.UserRole+4
+EventDurationRole = Qt.DisplayRole
+TrackOffsetRole = Qt.UserRole+6
 
 #TrackTypes
 DigitalTrack = 0

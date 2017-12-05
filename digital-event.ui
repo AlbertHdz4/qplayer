@@ -83,7 +83,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="start_label">
           <property name="text">
            <string>start: 0</string>
           </property>

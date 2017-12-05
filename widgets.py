@@ -250,6 +250,8 @@ class SequenceEvent(QWidget):
 
         self.customContextMenuRequested.connect(self.context_menu_requested)
 
+        self.event_item.emitDataChanged()
+
     def initialize_event_item(self, event_item):
         pass
 
@@ -290,9 +292,12 @@ class DigitalSequenceEvent(SequenceEvent):
         self.ui.state_button.toggled.connect(self.toggled)
         self.ui.event_duration.editingFinished.connect(self.duration_edited)
 
+    # Initialize the event item in the model
     def initialize_event_item(self,event_item:QStandardItem):
         event_item.setCheckable(True)
         event_item.setCheckState(Qt.Unchecked)
+        event_item.setData("0",utils.EventDurationRole)
+        event_item.setBackground(Qt.white)
 
     @pyqtSlot()
     def data_changed(self):
@@ -300,7 +305,12 @@ class DigitalSequenceEvent(SequenceEvent):
         self.ui.state_button.setChecked(self.event_item.checkState())
 
         # Update duration
-        self.ui.event_duration.setText(self.event_item.data(utils.DigitalEventDurationRole))
+        self.ui.event_duration.setText(self.event_item.data(utils.EventDurationRole))
+        brush = self.event_item.background() # type: QBrush
+        self.ui.event_duration.setStyleSheet("QLineEdit { background: "+brush.color().name()+" }")
+
+        # Update start label
+        self.ui.start_label.setText("start: "+str(self.event_item.data(utils.EventStartRole)))
 
     @pyqtSlot(bool)
     def toggled(self, checked):
@@ -311,14 +321,14 @@ class DigitalSequenceEvent(SequenceEvent):
 
     @pyqtSlot()
     def duration_edited(self):
-        self.event_item.setData(self.ui.event_duration.text(),utils.DigitalEventDurationRole)
+        self.event_item.setData(self.ui.event_duration.text(), utils.EventDurationRole)
 
 
 class AnalogSequenceEvent(SequenceEvent):
     ui_file = "analog-event.ui"
 
     def initialize_event_item(self,event_item):
-        event_item.setData("analog",Qt.DisplayRole)
+        event_item.setData("0", utils.EventDurationRole)
 
 
 class RoutinePropertiesDialog(QDialog):

@@ -94,7 +94,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_2"/>
+         <widget class="QLineEdit" name="event_duration"/>
         </item>
         <item>
          <layout class="QFormLayout" name="formLayout">
@@ -121,7 +121,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="start_label">
           <property name="text">
            <string>start: 0</string>
           </property>

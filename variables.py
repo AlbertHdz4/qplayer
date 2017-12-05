@@ -77,6 +77,19 @@ class VariablesModel(QStandardItemModel):
             group_list.append(self.item(j,0).data(Qt.DisplayRole))
         return group_list
 
+    def get_variables_dict(self):
+        variables = {}
+        num_groups = self.rowCount()
+        for g in range(num_groups):
+            group_index = self.index(g,0)
+            num_variables = self.rowCount(group_index)
+            for v in range(num_variables):
+                var_name = self.index(v, self.variable_fields.index("name"), group_index).data()
+                var_value = self.index(v, self.variable_fields.index("value"), group_index).data()
+                variables[var_name] = float(var_value)
+
+        return variables
+
     @pyqtSlot()
     def update_values(self):
 
@@ -115,7 +128,7 @@ class VariablesModel(QStandardItemModel):
                         try:
                             var_val = float(var_set)  # Cast variables which are numerical
                             val_idx = self.index(v, self.variable_fields.index("value"), group_index)
-                            self.setData(val_idx, var_val)
+                            self.setData(val_idx, "%f"%var_val)
                             variables_dict[var_name] = var_val
                         except ValueError:
                             to_do.append((g,v))

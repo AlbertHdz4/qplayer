@@ -23,7 +23,7 @@ class ControlSystemGUI(QMainWindow):
 
         # MODELS
         self.variables_model = VariablesModel()
-        self.routines_model = RoutinesModel()
+        self.routines_model = RoutinesModel(self.variables_model)
 
         # UI SETUP
         self.sequence_editor = SequenceEditor(self.routines_model)
