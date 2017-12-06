@@ -24,7 +24,6 @@ class VariableEditDelegate(QStyledItemDelegate):
             editor.setFont(font)
             editor.setTabChangesFocus(True)
             editor.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            #editor.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
 
             self.highlighter = Highlighter(editor.document())
 
@@ -42,7 +41,6 @@ class VariableEditDelegate(QStyledItemDelegate):
             editor.setPlainText(data)
         else:
             editor.setText(data)
-
 
     def setModelData(self, editor, model: QAbstractItemModel, index: QModelIndex):
         variable_type = index.data(utils.VariableTypeRole)
@@ -138,17 +136,15 @@ class SequenceEditor(QWidget):
 
         self.routine_row = None
 
-    def add_track_widget(self,track_name, channel: cards.Channel):
-        track = SequenceTrack(track_name, channel, self)
+    def add_channel_widget(self, row, track_name, channel: cards.Channel):
+        track = SequenceChannel(row, track_name, channel, self)
         self.layout().addWidget(track)
-        # line = QFrame()
-        # line.setFrameShape(QFrame.HLine)
-        # line.setFrameShadow(QFrame.Sunken)
-        # self.layout().addWidget(line)
 
     def clear(self):
         for i in reversed(range(self.layout().count())):
-            self.layout().itemAt(i).widget().setParent(None)
+            widget = self.layout().itemAt(i).widget() # type: QWidget
+            widget.setParent(None)
+            widget.destroy()
 
     def get_current_routine_item(self):
         if self.routine_row is not None:
@@ -163,12 +159,12 @@ class SequenceEditor(QWidget):
         self.clear()
 
         for i in range(routine_item.rowCount()):
-            track_item = routine_item.child(i)
-            channel = track_item.data(utils.ChannelRole) # type: cards.Channel
-            self.add_track_widget(track_item.data(Qt.DisplayRole), channel)
+            channel_item = routine_item.child(i)
+            channel = channel_item.data(utils.ChannelRole) # type: cards.Channel
+            self.add_channel_widget(i, channel_item.data(Qt.DisplayRole), channel)
 
-            for j in range(track_item.rowCount()):
-                event_item = track_item.child(j)
+            for j in range(channel_item.rowCount()):
+                event_item = channel_item.child(j)
                 self.layout().itemAt(i).widget().add_event(event_item)
 
 
@@ -179,18 +175,19 @@ class SequenceEditor(QWidget):
     @pyqtSlot()
     def data_changed(self):
         pass
-        #print("routine model data changed")
+        # print("routine model data changed")
 
 
-class SequenceTrack(QWidget):
+class SequenceChannel(QWidget):
     ui_form, ui_base = loadUiType('track-widget.ui')
 
-    def __init__(self, name, channel, sequence_editor):
+    def __init__(self, row, name, channel, sequence_editor):
         super().__init__()
         self.ui = self.ui_form()
         self.ui.setupUi(self)
         self.ui.track_label.setText(name)
         self.channel = channel
+        self.row = row
         self.sequence_editor = sequence_editor # type: SequenceEditor
         self.ui.track_offset.editingFinished.connect(self.offset_edited)
         self.sequence_editor.model.dataChanged.connect(self.data_changed)
@@ -200,7 +197,7 @@ class SequenceTrack(QWidget):
 
     def get_model_item(self):
         current_routine_index = self.sequence_editor.get_current_routine_item() # type: QStandardItem
-        return current_routine_index.child(self.row())
+        return current_routine_index.child(self.row)
 
     # if event_item is None, a new item will be added to the model
     def add_event(self, event_item=None):
@@ -212,8 +209,8 @@ class SequenceTrack(QWidget):
     def position_of_event(self, sequence_event):
         return self.ui.track_container.indexOf(sequence_event)
 
-    def row(self):
-        return self.sequence_editor.layout().indexOf(self)
+    # def row(self):
+    #     return self.sequence_editor.layout().indexOf(self)
 
     @pyqtSlot()
     def offset_edited(self):
@@ -222,6 +219,7 @@ class SequenceTrack(QWidget):
     @pyqtSlot()
     def data_changed(self):
         # Update offset
+        # if self.parent() is not None:
         self.ui.track_offset.setText(self.get_model_item().data(utils.TrackOffsetRole))
 
 
@@ -232,7 +230,7 @@ class SequenceEvent(QWidget):
     def __init__(self, sequence_track, event_item):
         super().__init__()
 
-        self.sequence_track = sequence_track # type: SequenceTrack
+        self.sequence_track = sequence_track # type: SequenceChannel
         self.event_item = event_item
 
         if self.event_item is None:
@@ -310,7 +308,7 @@ class DigitalSequenceEvent(SequenceEvent):
         self.ui.event_duration.setStyleSheet("QLineEdit { background: "+brush.color().name()+" }")
 
         # Update start label
-        self.ui.start_label.setText("start: "+str(self.event_item.data(utils.EventStartRole)))
+        self.ui.start_label.setText("start: %0.3f"%(self.event_item.data(utils.EventStartRole)))
 
     @pyqtSlot(bool)
     def toggled(self, checked):

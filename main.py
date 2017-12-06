@@ -62,6 +62,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.config_routine_button.clicked.connect(self.config_routine)
         self.ui.remove_routine_button.clicked.connect(self.remove_routine)
         self.ui.routine_combo_box.currentIndexChanged.connect(self.changed_routine)
+        self.ui.playlist_view.customContextMenuRequested.connect(self.playlist_context_menu_requested)
 
         # UTILITY VARIABLES
         self.var_idx = 0
@@ -239,9 +240,49 @@ class ControlSystemGUI(QMainWindow):
                 if ok and txt == curr_name:
                     self.variables_model.removeRow(src_idx.row(),src_idx.parent())
 
+    @pyqtSlot(QPoint)
+    def playlist_context_menu_requested(self, pos):
+        menu = QMenu()
+
+        idx = self.ui.playlist_view.indexAt(pos) # type: QModelIndex
+
+        if idx.isValid():
+            if idx.parent().isValid(): # regular item
+                remove_action = menu.addAction("Remove")
+            print("root item")
+            routines = self.routines_model.get_routine_names()
+            add_routine_actions = {}
+            add_gap_action = menu.addAction("Add gap")
+
+            if idx.data(utils.PlaylistItemTypeRole) == utils.Gap:
+                modify_gap_action = menu.addAction("Modify gap duration")
+
+            menu.addSection("Add:")
+            for r in routines:
+                add_routine_actions[r] = menu.addAction(r)
+            action = menu.exec(self.ui.playlist_view.mapToGlobal(pos))
+            if action in add_routine_actions.values():
+                self.playlist_model.add_playlist_item(idx,action.text())
+                self.ui.playlist_view.expandAll()
+            elif action == add_gap_action:
+                duration, ok = QInputDialog.getText(self,"Insert gap","Gap duration:")
+                if ok:
+                    self.playlist_model.add_gap(idx, duration)
+                    self.ui.playlist_view.expandAll()
+
+            if idx.data(utils.PlaylistItemTypeRole) == utils.Gap and action == modify_gap_action:
+                duration, ok = QInputDialog.getText(self,"Modify gap","Gap duration:")
+                if ok:
+                    self.playlist_model.modify_gap(idx, duration)
+                    self.ui.playlist_view.expandAll()
+
+            if idx.parent().isValid():  # regular item
+                if action == remove_action:
+                    self.playlist_model.removeRow(idx.row(),idx.parent())
 
 
-
+        else:
+            print("Not a valid item")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

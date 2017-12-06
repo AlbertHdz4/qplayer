@@ -189,7 +189,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_vars">
        <attribute name="title">
@@ -472,7 +472,7 @@
              <x>0</x>
              <y>0</y>
              <width>771</width>
-             <height>377</height>
+             <height>389</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5"/>
@@ -497,7 +497,11 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QTreeView" name="playlist_view"/>
+         <widget class="QTreeView" name="playlist_view">
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -516,7 +520,7 @@
      <x>0</x>
      <y>0</y>
      <width>813</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

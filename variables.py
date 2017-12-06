@@ -90,6 +90,18 @@ class VariablesModel(QStandardItemModel):
 
         return variables
 
+    def to_number(self, expr, variables=None):
+        if variables is None:
+            variables = self.get_variables_dict()
+
+        return_value = None
+        try:
+            return_value = eval(expr,variables)
+        except (SyntaxError, ValueError):
+            pass
+
+        return return_value
+
     @pyqtSlot()
     def update_values(self):
 
