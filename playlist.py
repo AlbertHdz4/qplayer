@@ -4,19 +4,36 @@ import utils
 from routines import RoutinesModel
 
 
-
 class PlaylistModel(QStandardItemModel):
     def __init__(self, routines_model: RoutinesModel):
         super().__init__()
         self.routines_model = routines_model
+        self.setHorizontalHeaderLabels(["routine", "start", "duration", "end"])
 
-        visible_root_item = QStandardItem("Sequence start")
+    def flags(self, index: QModelIndex):
+        return Qt.NoItemFlags | Qt.ItemIsEnabled
 
-        self.invisibleRootItem().appendRow(visible_root_item)
+    def add_playlist(self, playlist_name, start_time, duration, end_time):
+        playlist_name_item = QStandardItem(playlist_name)
+        font = QFont()
+        font.setBold(True)
+        playlist_name_item.setData(font,Qt.FontRole)
+
+        playlist_item = [playlist_name_item,
+                         QStandardItem(start_time),
+                         QStandardItem(duration),
+                         QStandardItem(end_time)]
+        self.invisibleRootItem().appendRow(playlist_item)
 
     def add_playlist_item(self,parent,name):
-        new_row = QStandardItem(name)
-        new_row.setData(utils.Routine,utils.PlaylistItemTypeRole)
+        item_name = QStandardItem(name)
+        item_name.setData(utils.Routine,utils.PlaylistItemTypeRole)
+
+        item_start = QStandardItem("start time")
+        item_duration = QStandardItem("duration")
+        item_end = QStandardItem("end time")
+
+        new_row = [item_name, item_start, item_duration, item_end]
         self.itemFromIndex(parent).appendRow(new_row)
 
     def add_gap(self, parent, duration):
@@ -29,4 +46,9 @@ class PlaylistModel(QStandardItemModel):
         item = self.itemFromIndex(index)
         item.setData("Gap: "+duration, Qt.DisplayRole)
         item.setData(duration,utils.GapDurationRole)
+
+    def rename_playlist(self, index, new_name):
+        item = self.itemFromIndex(index)
+        item.setData(new_name, Qt.DisplayRole)
+        # TODO: ensure unique names
 

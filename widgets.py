@@ -9,7 +9,7 @@ import utils
 import cards
 from routines import RoutinesModel
 
-
+# This class was created so that code variables have syntax highlighting
 class VariableEditDelegate(QStyledItemDelegate):
     def createEditor(self, parent: QWidget, option: QStyleOptionViewItem, index: QModelIndex):
         variable_type = index.data(utils.VariableTypeRole)
@@ -140,6 +140,7 @@ class SequenceEditor(QWidget):
         track = SequenceChannel(row, track_name, channel, self)
         self.layout().addWidget(track)
 
+    # Remove all widgets: this is used when the sequence editor is loaded with a new routine so the old one must go
     def clear(self):
         for i in reversed(range(self.layout().count())):
             widget = self.layout().itemAt(i).widget() # type: QWidget
@@ -168,7 +169,7 @@ class SequenceEditor(QWidget):
                 self.layout().itemAt(i).widget().add_event(event_item)
 
 
-        self.model.dataChanged.emit(QModelIndex(), QModelIndex()) # send data changed notification to everything to set new gui elements
+        self.model.dataChanged.emit(QModelIndex(), QModelIndex()) # send data changed notification to everything to set up new gui elements
 
 
 

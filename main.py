@@ -52,17 +52,22 @@ class ControlSystemGUI(QMainWindow):
         self.ui.static_variables_view.setItemDelegateForColumn(1, VariableEditDelegate())
 
         # SIGNALS
+        ## Variables
         self.ui.add_variable_group_button.clicked.connect(self.add_variable_group)
         self.ui.add_variable_button.clicked.connect(self.add_variable)
         self.ui.static_variables_view.customContextMenuRequested.connect(self.static_variables_context_menu_requested)
         self.ui.iterator_variables_view.customContextMenuRequested.connect(self.iterator_variables_context_menu_requested)
         self.variables_model.dataChanged.connect(self.iterator_variables_model.invalidate)
         self.variables_model.dataChanged.connect(self.static_variables_model.invalidate)
+        ## Sequence Editor
         self.ui.add_routine_button.clicked.connect(self.add_routine)
         self.ui.config_routine_button.clicked.connect(self.config_routine)
         self.ui.remove_routine_button.clicked.connect(self.remove_routine)
         self.ui.routine_combo_box.currentIndexChanged.connect(self.changed_routine)
+        ## Playlist
         self.ui.playlist_view.customContextMenuRequested.connect(self.playlist_context_menu_requested)
+        self.ui.add_playlist_button.clicked.connect(self.add_playlist)
+        ## Inspector
 
         # UTILITY VARIABLES
         self.var_idx = 0
@@ -92,6 +97,10 @@ class ControlSystemGUI(QMainWindow):
         self.routines_model.add_routine("MOT",[self.cards[0].channels[0], self.cards[0].channels[1], self.cards[2].channels[0]])
         self.routines_model.add_routine("Compression", [self.cards[3].channels[0]])
 
+    #############
+    # VARIABLES #
+    #############
+
     @pyqtSlot()
     def add_variable_group(self):
         self.variables_model.add_group( "default%02d" %self.group_idx)
@@ -111,62 +120,6 @@ class ControlSystemGUI(QMainWindow):
             parent = self.static_variables_model.mapToSource(parent_idx) # type: QStandardItem
             self.variables_model.add_variable(parent, name="var%02d" % self.var_idx, iterator=False,value="0")
             self.var_idx += 1
-
-    @pyqtSlot()
-    def add_routine(self):
-
-        dialog = RoutinePropertiesDialog(self.cards, self.routines_model)
-        rslt = dialog.exec()
-
-        if rslt == QDialog.Accepted:
-            name = dialog.name
-            active_channels = dialog.active_channels
-            routine_index = self.routines_model.add_routine(name, active_channels)
-            new_row = routine_index.row()
-            self.ui.routine_combo_box.setCurrentIndex(new_row)
-            self.sequence_editor.set_routine(new_row)
-
-    @pyqtSlot(int)
-    def changed_routine(self, row):
-        if row >= 0:
-            self.sequence_editor.set_routine(row)
-        else:
-            self.sequence_editor.clear()
-
-    @pyqtSlot()
-    def config_routine(self):
-        cb = self.ui.routine_combo_box # type: QComboBox
-        root_index = cb.rootModelIndex()
-        row = cb.currentIndex()
-        element_index = self.routines_model.index(row,0,root_index) # type: QModelIndex
-
-        dialog = RoutinePropertiesDialog(self.cards, self.routines_model, element_index)
-        rslt = dialog.exec()
-
-        if rslt == QDialog.Accepted:
-            self.routines_model.setData(element_index,dialog.name)
-            active_channels = dialog.active_channels
-            self.routines_model.set_active_channels(element_index, active_channels)
-            self.sequence_editor.set_routine(row)
-
-
-
-    @pyqtSlot()
-    def remove_routine(self):
-        cb = self.ui.routine_combo_box # type: QComboBox
-        curr_name = cb.currentText()
-        root_index = cb.rootModelIndex()
-        row = cb.currentIndex()
-        txt, ok = QInputDialog.getText(self, "Delete routine", "Are you sure you want to delete the routine named '%s'?\n"
-                                                               "If yes, type the name of the routine to confirm."%curr_name)
-        if ok and txt == curr_name:
-            self.routines_model.removeRow(row,root_index)
-
-
-    @pyqtSlot()
-    def data_changed(self):
-        pass
-        #print("Data changed!")
 
     @pyqtSlot(QPoint)
     def iterator_variables_context_menu_requested(self, pos):
@@ -240,6 +193,70 @@ class ControlSystemGUI(QMainWindow):
                 if ok and txt == curr_name:
                     self.variables_model.removeRow(src_idx.row(),src_idx.parent())
 
+    ###################
+    # SEQUENCE EDITOR #
+    ###################
+
+    @pyqtSlot()
+    def add_routine(self):
+
+        dialog = RoutinePropertiesDialog(self.cards, self.routines_model)
+        rslt = dialog.exec()
+
+        if rslt == QDialog.Accepted:
+            name = dialog.name
+            active_channels = dialog.active_channels
+            routine_index = self.routines_model.add_routine(name, active_channels)
+            new_row = routine_index.row()
+            self.ui.routine_combo_box.setCurrentIndex(new_row)
+            self.sequence_editor.set_routine(new_row)
+
+    @pyqtSlot(int)
+    def changed_routine(self, row):
+        if row >= 0:
+            self.sequence_editor.set_routine(row)
+        else:
+            self.sequence_editor.clear()
+
+    @pyqtSlot()
+    def config_routine(self):
+        cb = self.ui.routine_combo_box # type: QComboBox
+        root_index = cb.rootModelIndex()
+        row = cb.currentIndex()
+        element_index = self.routines_model.index(row,0,root_index) # type: QModelIndex
+
+        dialog = RoutinePropertiesDialog(self.cards, self.routines_model, element_index)
+        rslt = dialog.exec()
+
+        if rslt == QDialog.Accepted:
+            self.routines_model.setData(element_index,dialog.name)
+            active_channels = dialog.active_channels
+            self.routines_model.set_active_channels(element_index, active_channels)
+            self.sequence_editor.set_routine(row)
+
+
+
+    @pyqtSlot()
+    def remove_routine(self):
+        cb = self.ui.routine_combo_box # type: QComboBox
+        curr_name = cb.currentText()
+        root_index = cb.rootModelIndex()
+        row = cb.currentIndex()
+        txt, ok = QInputDialog.getText(self, "Delete routine", "Are you sure you want to delete the routine named '%s'?\n"
+                                                               "If yes, type the name of the routine to confirm."%curr_name)
+        if ok and txt == curr_name:
+            self.routines_model.removeRow(row,root_index)
+
+
+    @pyqtSlot()
+    def data_changed(self):
+        pass
+        #print("Data changed!")
+
+    ############
+    # PLAYLIST #
+    ############
+
     @pyqtSlot(QPoint)
     def playlist_context_menu_requested(self, pos):
         menu = QMenu()
@@ -249,7 +266,9 @@ class ControlSystemGUI(QMainWindow):
         if idx.isValid():
             if idx.parent().isValid(): # regular item
                 remove_action = menu.addAction("Remove")
-            print("root item")
+            else: # playlist
+                rename_playlist_action = menu.addAction("Rename Playlist")
+                delete_playlist_action = menu.addAction("Delete Playlist")
             routines = self.routines_model.get_routine_names()
             add_routine_actions = {}
             add_gap_action = menu.addAction("Add gap")
@@ -271,7 +290,8 @@ class ControlSystemGUI(QMainWindow):
                     self.ui.playlist_view.expandAll()
 
             if idx.data(utils.PlaylistItemTypeRole) == utils.Gap and action == modify_gap_action:
-                duration, ok = QInputDialog.getText(self,"Modify gap","Gap duration:")
+                old_duration = self.playlist_model.itemFromIndex(idx).data(utils.GapDurationRole)
+                duration, ok = QInputDialog.getText(self,"Modify gap","Gap duration:",text=old_duration)
                 if ok:
                     self.playlist_model.modify_gap(idx, duration)
                     self.ui.playlist_view.expandAll()
@@ -279,10 +299,27 @@ class ControlSystemGUI(QMainWindow):
             if idx.parent().isValid():  # regular item
                 if action == remove_action:
                     self.playlist_model.removeRow(idx.row(),idx.parent())
+            else: #playlist
+                if action == delete_playlist_action:
+                    curr_name = self.playlist_model.itemFromIndex(idx).data(Qt.DisplayRole)
+                    txt, ok = QInputDialog.getText(self, "Delete routine",
+                                                   "Are you sure you want to delete the routine named '%s'?\n"
+                                                   "If yes, type the name of the playlist to confirm." % curr_name)
+                    if ok and txt == curr_name:
+                        self.playlist_model.removeRow(idx.row(), idx.parent())
+                elif action == rename_playlist_action:
+                    new_name, ok = QInputDialog.getText(self, "Rename playlist", "New name:")
+                    if ok:
+                        self.playlist_model.rename_playlist(idx, new_name)
 
 
         else:
             print("Not a valid item")
+
+
+    @pyqtSlot()
+    def add_playlist(self):
+        self.playlist_model.add_playlist("A","0","-","-")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
