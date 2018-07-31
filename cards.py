@@ -16,7 +16,7 @@ class Channel:
         self.card = card
 
 
-class BussCard(Card):
+class BusCard(Card):
     def __init__(self, name, address):
         self.name = name
         self.address = address
@@ -29,11 +29,11 @@ class BussCard(Card):
         return self._channels
 
 
-class DigitalBusCard(BussCard):
+class DigitalBusCard(BusCard):
     num_channels = 16
     type = utils.DigitalTrack
 
 
-class AnalogBusCard(BussCard):
+class AnalogBusCard(BusCard):
     num_channels = 1
     type = utils.AnalogTrack

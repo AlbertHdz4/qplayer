@@ -64,7 +64,9 @@ class RoutinesModel(QStandardItemModel):
 
     @pyqtSlot()
     def update_values(self):
+        # First we block signals because update_values is called on dataChanged and we don't want to trigger it again
         self.blockSignals(True)
+
         variables = self.variables_model.get_variables_dict()
         # __builtins__ is added so eval treats 'variables' as we want
         # (it doesn't add the builtin python variables)

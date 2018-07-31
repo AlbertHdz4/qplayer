@@ -9,6 +9,7 @@ class PlaylistModel(QStandardItemModel):
         super().__init__()
         self.routines_model = routines_model
         self.setHorizontalHeaderLabels(["routine", "start", "duration", "end"])
+        self.dataChanged.connect(self.update_values)
 
     def flags(self, index: QModelIndex):
         return Qt.NoItemFlags | Qt.ItemIsEnabled
@@ -52,3 +53,15 @@ class PlaylistModel(QStandardItemModel):
         item.setData(new_name, Qt.DisplayRole)
         # TODO: ensure unique names
 
+    @pyqtSlot()
+    def update_values(self):
+
+        print("A")
+
+        # First we block signals because update_values is called on dataChanged and we don't want to trigger it again
+        self.blockSignals(True)
+
+        num_items = self.rowCount()
+        print(num_items)
+
+        self.blockSignals(False)

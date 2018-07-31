@@ -201,6 +201,7 @@ class SequenceChannel(QWidget):
         return current_routine_index.child(self.row)
 
     # if event_item is None, a new item will be added to the model
+    # event_item will be none if the event was added through a dobule click of the empty track
     def add_event(self, event_item=None):
         if self.channel.card.type == utils.DigitalTrack:
             self.ui.track_container.addWidget(DigitalSequenceEvent(self,event_item))
