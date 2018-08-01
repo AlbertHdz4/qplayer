@@ -36,17 +36,20 @@ class PlaylistModel(QStandardItemModel):
 
         new_row = [item_name, item_start, item_duration, item_end]
         self.itemFromIndex(parent).appendRow(new_row)
+        self.dataChanged.emit(parent,parent)
 
     def add_gap(self, parent, duration):
         new_row = QStandardItem("Gap: "+duration)
         new_row.setData(utils.Gap, utils.PlaylistItemTypeRole)
         new_row.setData(duration, utils.GapDurationRole)
         self.itemFromIndex(parent).appendRow(new_row)
+        self.dataChanged.emit(parent, parent)
 
     def modify_gap(self, index, duration):
         item = self.itemFromIndex(index)
         item.setData("Gap: "+duration, Qt.DisplayRole)
         item.setData(duration,utils.GapDurationRole)
+        self.dataChanged.emit(index, index)
 
     def rename_playlist(self, index, new_name):
         item = self.itemFromIndex(index)
