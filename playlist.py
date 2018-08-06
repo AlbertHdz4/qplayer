@@ -49,7 +49,6 @@ class PlaylistModel(QStandardItemModel):
         item = self.itemFromIndex(index)
         item.setData("Gap: "+duration, Qt.DisplayRole)
         item.setData(duration,utils.GapDurationRole)
-        self.dataChanged.emit(index, index)
 
     def rename_playlist(self, index, new_name):
         item = self.itemFromIndex(index)

@@ -298,12 +298,21 @@ class ControlSystemGUI(QMainWindow):
 
             if idx.parent().isValid():  # regular item
                 if action == remove_action:
-                    self.playlist_model.removeRow(idx.row(),idx.parent())
+                    if (self.playlist_model.hasChildren(idx)):
+                        curr_name = self.playlist_model.itemFromIndex(idx).data(Qt.DisplayRole)
+                        button = QMessageBox.question(self, "Remove routine",
+                                                       "The routine '%s' that you are trying to delete has children?\n"
+                                                       "Are you sure you want to remove it with all of its children?" % curr_name,
+                                                       QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel)
+                        if button == QMessageBox.Ok:
+                            self.playlist_model.removeRow(idx.row(), idx.parent())
+                    else:
+                        self.playlist_model.removeRow(idx.row(), idx.parent())
             else: #playlist
                 if action == delete_playlist_action:
                     curr_name = self.playlist_model.itemFromIndex(idx).data(Qt.DisplayRole)
-                    txt, ok = QInputDialog.getText(self, "Delete routine",
-                                                   "Are you sure you want to delete the routine named '%s'?\n"
+                    txt, ok = QInputDialog.getText(self, "Delete playlist",
+                                                   "Are you sure you want to delete the playlist named '%s'?\n"
                                                    "If yes, type the name of the playlist to confirm." % curr_name)
                     if ok and txt == curr_name:
                         self.playlist_model.removeRow(idx.row(), idx.parent())
