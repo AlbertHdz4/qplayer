@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QValidator
+from PyQt5.QtGui import QStandardItem
 
 # User-defined role to use with QStandardItemModel
 TrackTypeRole = Qt.UserRole + 1
@@ -22,3 +22,14 @@ CodeVariable = 1
 # Playlist item types
 Routine = 0
 Gap = 1
+
+def iter_tree_rows(root: QStandardItem):
+    if root is not None:
+        stack = [root]
+        while stack:
+            parent = stack.pop(0)
+            for row in range(parent.rowCount()):
+                    child = parent.child(row)
+                    yield child
+                    if child.hasChildren():
+                        stack.append(child)

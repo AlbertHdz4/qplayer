@@ -25,6 +25,7 @@ class PlaylistModel(QStandardItemModel):
                          QStandardItem(duration),
                          QStandardItem(end_time)]
         self.invisibleRootItem().appendRow(playlist_item)
+        self.dataChanged.emit(QModelIndex(), QModelIndex())
 
     def add_playlist_item(self,parent,name):
         item_name = QStandardItem(name)
@@ -57,13 +58,11 @@ class PlaylistModel(QStandardItemModel):
 
     @pyqtSlot()
     def update_values(self):
-
-        print("A")
-
         # First we block signals because update_values is called on dataChanged and we don't want to trigger it again
         self.blockSignals(True)
 
-        num_items = self.rowCount()
-        print(num_items)
+        for item in utils.iter_tree_rows(self.invisibleRootItem()): # type: QStandardItem
+            #if item.hasChildren():
+            print(item.data(Qt.DisplayRole))
 
         self.blockSignals(False)
