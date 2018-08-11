@@ -40,16 +40,20 @@ class PlaylistModel(QStandardItemModel):
         self.dataChanged.emit(parent,parent)
 
     def add_gap(self, parent, duration):
-        new_row = QStandardItem("Gap: "+duration)
-        new_row.setData(utils.Gap, utils.PlaylistItemTypeRole)
-        new_row.setData(duration, utils.GapDurationRole)
+        item_name = QStandardItem("Gap")
+        item_name.setData(utils.Gap, utils.PlaylistItemTypeRole)
+
+        item_start = QStandardItem("start time")
+        item_duration = QStandardItem(duration)
+        item_end = QStandardItem("end time")
+
+        new_row = [item_name, item_start, item_duration, item_end]
         self.itemFromIndex(parent).appendRow(new_row)
         self.dataChanged.emit(parent, parent)
 
     def modify_gap(self, index, duration):
         item = self.itemFromIndex(index)
-        item.setData("Gap: "+duration, Qt.DisplayRole)
-        item.setData(duration,utils.GapDurationRole)
+        item.parent().child(item.row(), 2).setData(duration, Qt.DisplayRole)
 
     def rename_playlist(self, index, new_name):
         item = self.itemFromIndex(index)
@@ -62,7 +66,39 @@ class PlaylistModel(QStandardItemModel):
         self.blockSignals(True)
 
         for item in utils.iter_tree_rows(self.invisibleRootItem()): # type: QStandardItem
-            #if item.hasChildren():
-            print(item.data(Qt.DisplayRole))
+            if item.parent() is not None: # This will be true for a routine and false for a playlist, which all are a root elements
+                if item.parent().parent() is None: # This will only be true for top-level routines which begin the sequence
+                    if item.data(utils.PlaylistItemTypeRole) == utils.Routine:
+                        routine_name = item.data(Qt.DisplayRole)
+                        routine_duration = self.routines_model.get_routine_duration(routine_name)
+
+                        item.parent().child(item.row(), 1).setData(0, Qt.DisplayRole)
+                        item.parent().child(item.row(), 2).setData(routine_duration, Qt.DisplayRole)
+                        item.parent().child(item.row(), 3).setData(routine_duration, Qt.DisplayRole)
+                    elif item.data(utils.PlaylistItemTypeRole) == utils.Gap:
+                        gap_duration = item.parent().child(item.row(), 2).data(Qt.DisplayRole)
+
+                        item.parent().child(item.row(), 1).setData(0, Qt.DisplayRole)
+                        item.parent().child(item.row(), 3).setData(gap_duration, Qt.DisplayRole)
+
+
+                else: #Non top-level routines
+                    parent = item.parent()
+                    parent_end_time = parent.parent().child(parent.row(), 3).data(Qt.DisplayRole)
+
+                    if item.data(utils.PlaylistItemTypeRole) == utils.Routine: #if item is a routine
+                        routine_name = item.data(Qt.DisplayRole)
+                        routine_duration = self.routines_model.get_routine_duration(routine_name)
+
+                        item.parent().child(item.row(), 1).setData(parent_end_time, Qt.DisplayRole)
+                        item.parent().child(item.row(), 2).setData(routine_duration, Qt.DisplayRole)
+                        item.parent().child(item.row(), 3).setData(float(parent_end_time)+routine_duration, Qt.DisplayRole)
+                    elif item.data(utils.PlaylistItemTypeRole) == utils.Gap:
+                        gap_duration = item.parent().child(item.row(), 2).data(Qt.DisplayRole)
+                        print(gap_duration)
+
+                        item.parent().child(item.row(), 1).setData(parent_end_time, Qt.DisplayRole)
+                        item.parent().child(item.row(), 3).setData(float(parent_end_time)+float(gap_duration), Qt.DisplayRole)
+                        # It is not good to store numbers as str in a Qt.DisplayRole. This will cause trouble.
 
         self.blockSignals(False)

@@ -62,6 +62,10 @@ class RoutinesModel(QStandardItemModel):
 
         self.dataChanged.emit(routine_index, routine_index)
 
+    def get_routine_duration(self, routine_name):
+        #TODO:
+        return 5
+
     @pyqtSlot()
     def update_values(self):
         # First we block signals because update_values is called on dataChanged and we don't want to trigger it again
