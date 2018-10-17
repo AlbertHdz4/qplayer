@@ -8,6 +8,7 @@ from PyQt5.uic import *
 import utils
 import cards
 from routines import RoutinesModel
+from playlist import PlaylistModel, PlaylistMoveRoutineProxyModel
 
 # This class was created so that code variables have syntax highlighting
 class VariableEditDelegate(QStyledItemDelegate):
@@ -332,7 +333,7 @@ class AnalogSequenceEvent(SequenceEvent):
 
 
 class RoutinePropertiesDialog(QDialog):
-    ui_form, ui_base = loadUiType('routine-properties.ui')
+    ui_form, ui_base = loadUiType('routine-properties-dialog.ui')
 
     def __init__(self, cards, model: RoutinesModel, index: QModelIndex=None):
         self.model = model
@@ -423,3 +424,31 @@ class RoutinePropertiesDialog(QDialog):
 
         return active_channels_
 
+
+class MoveRoutineDialog(QDialog):
+    ui_form, ui_base = loadUiType('move-routine-dialog.ui')
+
+    def __init__(self, playlist_model: PlaylistModel, index: QModelIndex=None):
+        self.playlist_model = playlist_model
+        self.index_to_move = index
+        self.model = PlaylistMoveRoutineProxyModel(index)
+        self.model.setSourceModel(self.playlist_model)
+
+        super().__init__()
+        self.ui = self.ui_form()
+        self.ui.setupUi(self)
+
+        self.ui.button_box.accepted.connect(self.submitted)
+
+        self.ui.tree_view.setModel(self.model)
+        self.ui.tree_view.expandAll()
+
+    @pyqtSlot()
+    def submitted(self):
+        new_parent_index = self.model.mapToSource(self.ui.tree_view.currentIndex()) # type: QModelIndex
+        new_parent_item = self.playlist_model.itemFromIndex(new_parent_index)
+        parent_of_item_to_move = self.playlist_model.itemFromIndex(self.index_to_move.parent())
+        item_to_move = parent_of_item_to_move.takeRow(self.index_to_move.row())
+        new_parent_item.appendRow(item_to_move)
+
+        self.accept()

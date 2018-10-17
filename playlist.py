@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel, pyqtSlot
+from PyQt5.QtCore import Qt, QModelIndex, QIdentityProxyModel, pyqtSlot
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont, QColor
 import utils
 from routines import RoutinesModel
@@ -26,6 +26,7 @@ class PlaylistModel(QStandardItemModel):
                          QStandardItem(end_time)]
         self.invisibleRootItem().appendRow(playlist_item)
         self.dataChanged.emit(QModelIndex(), QModelIndex())
+        # TODO: ensure unique names
 
     def add_playlist_item(self,parent,name):
         item_name = QStandardItem(name)
@@ -99,6 +100,22 @@ class PlaylistModel(QStandardItemModel):
 
                         item.parent().child(item.row(), 1).setData(parent_end_time, Qt.DisplayRole)
                         item.parent().child(item.row(), 3).setData(float(parent_end_time)+float(gap_duration), Qt.DisplayRole)
-                        # It is not good to store numbers as str in a Qt.DisplayRole. This will cause trouble.
 
         self.blockSignals(False)
+
+class PlaylistMoveRoutineProxyModel(QIdentityProxyModel): #Used for playlist move dialog
+    def __init__(self, move_index: QModelIndex):
+        super().__init__()
+        self.move_index = move_index
+
+
+    def flags(self, index: QModelIndex):
+
+        src_index = self.mapToSource(index)
+
+        if utils.is_descendant_of(self.move_index,src_index) or self.move_index == src_index:
+            _flags = Qt.NoItemFlags
+        else:
+            _flags = super().flags(index)
+        return _flags
+

@@ -266,6 +266,7 @@ class ControlSystemGUI(QMainWindow):
         if idx.isValid():
             if idx.parent().isValid(): # regular item
                 remove_action = menu.addAction("Remove")
+                move_action = menu.addAction("Move")
             else: # playlist
                 rename_playlist_action = menu.addAction("Rename Playlist")
                 delete_playlist_action = menu.addAction("Delete Playlist")
@@ -298,7 +299,7 @@ class ControlSystemGUI(QMainWindow):
 
             if idx.parent().isValid():  # regular item
                 if action == remove_action:
-                    if (self.playlist_model.hasChildren(idx)):
+                    if self.playlist_model.hasChildren(idx):
                         curr_name = self.playlist_model.itemFromIndex(idx).data(Qt.DisplayRole)
                         button = QMessageBox.question(self, "Remove routine",
                                                        "The routine '%s' that you are trying to delete has children?\n"
@@ -308,6 +309,13 @@ class ControlSystemGUI(QMainWindow):
                             self.playlist_model.removeRow(idx.row(), idx.parent())
                     else:
                         self.playlist_model.removeRow(idx.row(), idx.parent())
+
+                elif action == move_action:
+                    dialog = MoveRoutineDialog(self.playlist_model, idx)
+                    rslt = dialog.exec()
+
+                    if rslt == QDialog.Accepted:
+                        print("Accepted")
             else: #playlist
                 if action == delete_playlist_action:
                     curr_name = self.playlist_model.itemFromIndex(idx).data(Qt.DisplayRole)
@@ -329,6 +337,7 @@ class ControlSystemGUI(QMainWindow):
     @pyqtSlot()
     def add_playlist(self):
         self.playlist_model.add_playlist("A","0","-","-")
+        # TODO: ensure unique names
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

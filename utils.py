@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QModelIndex
 from PyQt5.QtGui import QStandardItem
 
 # User-defined role to use with QStandardItemModel
@@ -33,3 +33,19 @@ def iter_tree_rows(root: QStandardItem):
                     yield child
                     if child.hasChildren():
                         stack.append(child)
+
+# Check if 'index' is a descendant of 'ancestor'
+def is_descendant_of(ancestor : QModelIndex, index: QModelIndex):
+    if not index.isValid():
+        return False
+
+    if ancestor == index:
+        return False
+
+    parent = index.parent()
+    while parent.isValid(): # until parent is root element
+        if parent == ancestor:
+            return True
+        parent = parent.parent()
+
+    return False
