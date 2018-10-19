@@ -22,7 +22,10 @@ class RoutinesModel(QStandardItemModel):
         self.appendRow(new_item)
         index = new_item.index()
         self.dataChanged.emit(index,index)
-        return index
+        return new_item
+
+    def add_event(self,routine: QStandardItem ,event: QStandardItem):
+        routine.appendRow(event)
 
     def get_routine_names(self):
         names = []
@@ -32,7 +35,8 @@ class RoutinesModel(QStandardItemModel):
             names.append(name)
         return names
 
-    def _init_track_item(self,chan):
+    @staticmethod
+    def _init_track_item(chan):
         track_item = QStandardItem(chan.name)
         track_item.setData(chan.card.type, utils.TrackTypeRole)
         track_item.setData(chan, utils.ChannelRole)

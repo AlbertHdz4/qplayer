@@ -74,6 +74,7 @@ class ControlSystemGUI(QMainWindow):
         self.group_idx = 0
         self.routine_idx = 0
 
+        #############################################
         # DUMMY DATA FOR TESTING
         self.variables_model.add_group("MOT")
         self.variables_model.add_group("Compression")
@@ -94,8 +95,42 @@ class ControlSystemGUI(QMainWindow):
         prnt = self.variables_model.index(3, 0)
         self.variables_model.add_variable(prnt, name="probe_detuning", value="-40", start="-40",stop="40",increment="5",iterator=True)
 
-        self.routines_model.add_routine("MOT",[self.cards[0].channels[0], self.cards[0].channels[1], self.cards[2].channels[0]])
-        self.routines_model.add_routine("Compression", [self.cards[3].channels[0]])
+        new_routine = self.routines_model.add_routine("MOT",[self.cards[0].channels[0], self.cards[0].channels[1], self.cards[2].channels[0]])
+
+        for i in range(5):
+            new_event = QStandardItem()
+            new_event.setCheckable(True)
+            if i%2 == 0:
+                new_event.setCheckState(Qt.Unchecked)
+            else:
+                new_event.setCheckState(Qt.Checked)
+            new_event.setData("2",utils.EventDurationRole)
+            new_routine.child(0).appendRow(new_event)
+
+        for i in range(4):
+            new_event = QStandardItem()
+            new_event.setCheckable(True)
+            if i%2 == 0:
+                new_event.setCheckState(Qt.Unchecked)
+            else:
+                new_event.setCheckState(Qt.Checked)
+            new_event.setData("4",utils.EventDurationRole)
+            new_routine.child(1).appendRow(new_event)
+
+        new_routine = self.routines_model.add_routine("Compression", [self.cards[0].channels[3]])
+
+        for i in range(4):
+            new_event = QStandardItem()
+            new_event.setCheckable(True)
+            if i%2 == 0:
+                new_event.setCheckState(Qt.Unchecked)
+            else:
+                new_event.setCheckState(Qt.Checked)
+            new_event.setData("4",utils.EventDurationRole)
+            new_routine.child(0).appendRow(new_event)
+
+        self.sequence_editor.set_routine(0)
+        ########################################################
 
     #############
     # VARIABLES #
@@ -206,8 +241,8 @@ class ControlSystemGUI(QMainWindow):
         if rslt == QDialog.Accepted:
             name = dialog.name
             active_channels = dialog.active_channels
-            routine_index = self.routines_model.add_routine(name, active_channels)
-            new_row = routine_index.row()
+            routine_item = self.routines_model.add_routine(name, active_channels)
+            new_row = routine_item.row()
             self.ui.routine_combo_box.setCurrentIndex(new_row)
             self.sequence_editor.set_routine(new_row)
 
