@@ -298,7 +298,7 @@ class ControlSystemGUI(QMainWindow):
 
         idx = self.ui.playlist_view.indexAt(pos) # type: QModelIndex
 
-        if idx.isValid():
+        if idx.isValid() and idx.column() == 0:
             if idx.parent().isValid(): # regular item
                 remove_action = menu.addAction("Remove")
                 move_action = menu.addAction("Move")
@@ -315,7 +315,9 @@ class ControlSystemGUI(QMainWindow):
             menu.addSection("Add:")
             for r in routines:
                 add_routine_actions[r] = menu.addAction(r)
+
             action = menu.exec(self.ui.playlist_view.mapToGlobal(pos))
+
             if action in add_routine_actions.values():
                 self.playlist_model.add_playlist_item(idx,action.text())
                 self.ui.playlist_view.expandAll()

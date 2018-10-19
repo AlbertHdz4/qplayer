@@ -56,6 +56,14 @@ class PlaylistModel(QStandardItemModel):
         item = self.itemFromIndex(index)
         item.parent().child(item.row(), 2).setData(duration, Qt.DisplayRole)
 
+    def move_branch(self,index_to_move,new_parent_index):
+        new_parent_item = self.itemFromIndex(new_parent_index)
+        parent_of_item_to_move = self.itemFromIndex(index_to_move.parent())
+        item_to_move = parent_of_item_to_move.takeRow(index_to_move.row())
+        new_parent_item.appendRow(item_to_move)
+        self.dataChanged.emit(QModelIndex(), QModelIndex())
+
+
     def rename_playlist(self, index, new_name):
         item = self.itemFromIndex(index)
         item.setData(new_name, Qt.DisplayRole)
@@ -99,6 +107,7 @@ class PlaylistModel(QStandardItemModel):
                         print(gap_duration)
 
                         item.parent().child(item.row(), 1).setData(parent_end_time, Qt.DisplayRole)
+                        #TODO: breaks with symbolic gap
                         item.parent().child(item.row(), 3).setData(float(parent_end_time)+float(gap_duration), Qt.DisplayRole)
 
         self.blockSignals(False)
@@ -113,7 +122,9 @@ class PlaylistMoveRoutineProxyModel(QIdentityProxyModel): #Used for playlist mov
 
         src_index = self.mapToSource(index)
 
-        if utils.is_descendant_of(self.move_index,src_index) or self.move_index == src_index:
+        if src_index.column() > 0:
+            _flags = super().flags(index) & ~Qt.ItemIsEnabled
+        elif utils.is_descendant_of(self.move_index,src_index) or self.move_index == src_index:
             _flags = Qt.NoItemFlags
         else:
             _flags = super().flags(index)

@@ -10,6 +10,7 @@ EventDurationRole = Qt.DisplayRole
 TrackOffsetRole = Qt.UserRole + 6
 PlaylistItemTypeRole = Qt.UserRole + 7
 GapDurationRole = Qt.UserRole + 8
+ChannelDurationRole = Qt.UserRole + 9
 
 # TrackTypes
 DigitalTrack = 0

@@ -66,9 +66,25 @@ class RoutinesModel(QStandardItemModel):
 
         self.dataChanged.emit(routine_index, routine_index)
 
+    def get_routine_item_by_name(self, routine_name) -> QStandardItem:
+        num_routines = self.rowCount()
+        for i in range(num_routines):
+            name = self.index(i,0).data(Qt.DisplayRole)
+            if name == routine_name:
+                return self.itemFromIndex(self.index(i,0))
+
+        return None
+
     def get_routine_duration(self, routine_name):
-        #TODO:
-        return 5
+        routine_item = self.get_routine_item_by_name(routine_name)
+        num_channels = routine_item.rowCount()
+        duration = 0
+        for c in range(num_channels):
+            channel_duration = 0
+            channel_item = routine_item.child(c)
+            channel_duration = channel_item.data(utils.ChannelDurationRole)
+            duration = max(duration,channel_duration)
+        return duration
 
     @pyqtSlot()
     def update_values(self):
@@ -103,11 +119,11 @@ class RoutinesModel(QStandardItemModel):
                     self.setData(event_index,start_time,utils.EventStartRole)
                     duration = event_index.data(utils.EventDurationRole)
                     try:
-                        start_time += float(duration)
+                        start_time += float(duration) #Start time of next event
                         self.itemFromIndex(event_index).setBackground(Qt.white)
                     except ValueError:
                         try:
-                            start_time += eval(duration, variables)
+                            start_time += eval(duration, variables) #Start time of next event
                             self.itemFromIndex(event_index).setBackground(Qt.white)
                         except (SyntaxError, NameError):
                             color = QColor()
@@ -116,6 +132,9 @@ class RoutinesModel(QStandardItemModel):
                         except TypeError:
                             print(duration)
                             print(variables)
+
+                # There is no next event so start_time contains the duration of this channel
+                self.setData(channel_index,start_time,utils.ChannelDurationRole)
 
 
         self.blockSignals(False)

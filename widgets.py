@@ -222,8 +222,8 @@ class SequenceChannel(QWidget):
     @pyqtSlot()
     def data_changed(self):
         # Update offset
-        #self.ui.track_offset.setText(self.get_model_item().data(utils.TrackOffsetRole))
-        pass
+        if self.get_model_item() is not None:
+            self.ui.track_offset.setText(self.get_model_item().data(utils.TrackOffsetRole))
 
 
 class SequenceEvent(QWidget):
@@ -446,9 +446,6 @@ class MoveRoutineDialog(QDialog):
     @pyqtSlot()
     def submitted(self):
         new_parent_index = self.model.mapToSource(self.ui.tree_view.currentIndex()) # type: QModelIndex
-        new_parent_item = self.playlist_model.itemFromIndex(new_parent_index)
-        parent_of_item_to_move = self.playlist_model.itemFromIndex(self.index_to_move.parent())
-        item_to_move = parent_of_item_to_move.takeRow(self.index_to_move.row())
-        new_parent_item.appendRow(item_to_move)
+        self.playlist_model.move_branch(self.index_to_move,new_parent_index)
 
         self.accept()
