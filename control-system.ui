@@ -206,7 +206,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tab_vars">
        <attribute name="title">
@@ -386,7 +386,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_4">
+      <widget class="QWidget" name="tab_sequence">
        <attribute name="title">
         <string>Sequence Editor</string>
        </attribute>
@@ -508,7 +508,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="tab_playlist">
        <attribute name="title">
         <string>Playlist</string>
        </attribute>
@@ -559,10 +559,15 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="tab_inspector">
        <attribute name="title">
         <string>Inspector</string>
        </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <layout class="QVBoxLayout" name="inspector_plot_container"/>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
