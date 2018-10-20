@@ -12,7 +12,7 @@ class PlaylistModel(QStandardItemModel):
         self.dataChanged.connect(self.update_values)
 
     def flags(self, index: QModelIndex):
-        return Qt.NoItemFlags | Qt.ItemIsEnabled
+        return Qt.NoItemFlags | Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
     def add_playlist(self, playlist_name, start_time, duration, end_time):
         playlist_name_item = QStandardItem(playlist_name)
@@ -68,6 +68,14 @@ class PlaylistModel(QStandardItemModel):
         item = self.itemFromIndex(index)
         item.setData(new_name, Qt.DisplayRole)
         # TODO: ensure unique names
+
+    def get_playlists_names(self):
+        names = []
+        num_playlists = self.rowCount()
+        for i in range(num_playlists):
+            name = self.index(i,0).data(Qt.DisplayRole)
+            names.append(name)
+        return names
 
     @pyqtSlot()
     def update_values(self):

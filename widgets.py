@@ -449,3 +449,34 @@ class MoveRoutineDialog(QDialog):
         self.playlist_model.move_branch(self.index_to_move,new_parent_index)
 
         self.accept()
+
+class UniqueTextInputDialog(QDialog):
+    ui_form, ui_base = loadUiType('text-input-dialog.ui')
+
+    def __init__(self, text_label, existing_values):
+        self.existing_values = existing_values
+
+        super().__init__()
+        self.ui = self.ui_form()
+        self.ui.setupUi(self)
+
+
+        self.ui.button_box.accepted.connect(self.submitted)
+        self.ui.text_label.setText(text_label)
+
+    @property
+    def name(self):
+        return self.ui.text_line_edit.text()
+
+    @pyqtSlot()
+    def submitted(self):
+        if len(self.name) == 0:
+            message_box = QMessageBox(self)
+            message_box.setText("Name must not be empty.");
+            message_box.exec()
+        elif self.name in self.existing_values:
+            message_box = QMessageBox(self)
+            message_box.setText("Name must be unique.");
+            message_box.exec()
+        else:
+            self.accept()

@@ -44,6 +44,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.sequence_dbg_treeview.setModel(self.routines_model)
         self.ui.routine_combo_box.setModel(self.routines_model)
         self.ui.playlist_view.setModel(self.playlist_model)
+        self.ui.playlist_selection_combo_box.setModel(self.playlist_model)
 
         # VIEWS SETUP
         self.ui.static_variables_view.header().setSectionResizeMode(QHeaderView.ResizeToContents)
@@ -373,7 +374,12 @@ class ControlSystemGUI(QMainWindow):
 
     @pyqtSlot()
     def add_playlist(self):
-        self.playlist_model.add_playlist("A","0","-","-")
+        existing_playlists = self.playlist_model.get_playlists_names()
+        dialog = UniqueTextInputDialog("New playlist name",existing_playlists)
+        rslt = dialog.exec()
+        if rslt == QDialog.Accepted:
+            name = dialog.name
+            self.playlist_model.add_playlist(name,"0","-","-")
         # TODO: ensure unique names
 
 if __name__ == "__main__":
