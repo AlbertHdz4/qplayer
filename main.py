@@ -10,6 +10,7 @@ from variables import *
 from routines import *
 from playlist import *
 from widgets import *
+from sequence_manager import SequenceManager
 
 
 class ControlSystemGUI(QMainWindow):
@@ -26,6 +27,9 @@ class ControlSystemGUI(QMainWindow):
         self.variables_model = VariablesModel()
         self.routines_model = RoutinesModel(self.variables_model)
         self.playlist_model = PlaylistModel(self.routines_model)
+
+        # SEQUENCE MANAGER
+        self.sequence_manager = SequenceManager(self.variables_model, self.routines_model, self.playlist_model)
 
         # UI SETUP
         self.sequence_editor = SequenceEditor(self.routines_model)
@@ -53,6 +57,8 @@ class ControlSystemGUI(QMainWindow):
         self.ui.static_variables_view.setItemDelegateForColumn(1, VariableEditDelegate())
 
         # SIGNALS
+        ## General
+        self.ui.save_button.clicked.connect(self.save_sequence)
         ## Variables
         self.ui.add_variable_group_button.clicked.connect(self.add_variable_group)
         self.ui.add_variable_button.clicked.connect(self.add_variable)
@@ -132,6 +138,14 @@ class ControlSystemGUI(QMainWindow):
 
         self.sequence_editor.set_routine(0)
         ########################################################
+
+
+    ###########
+    # GENERAL #
+    ###########
+    @pyqtSlot()
+    def save_sequence(self):
+        self.sequence_manager.parse_sequence()
 
     #############
     # VARIABLES #
