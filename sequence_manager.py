@@ -21,13 +21,16 @@ class SequenceManager:
         pass
 
     def parse_sequence(self):
-        # TODO: move this to variables class
         variables = self.variables.get_parsed_variables()
-
         routines = self.routines.get_parsed_routines()
+        playlist = self.playlist.get_parsed_playlist()
 
-        sequence = {"variables":variables,"routines":routines}
+        sequence = {"variables":variables, "routines": routines, "playlist": playlist}
         print("variables")
         print(variables)
         print("routines")
         print(routines)
+        print("playlist")
+        print(playlist)
+
+        return sequence

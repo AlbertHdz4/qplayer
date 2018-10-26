@@ -8,13 +8,13 @@ class PlaylistModel(QStandardItemModel):
     def __init__(self, routines_model: RoutinesModel):
         super().__init__()
         self.routines_model = routines_model
-        self.setHorizontalHeaderLabels(["routine", "start", "duration", "end"])
+        self.setHorizontalHeaderLabels(["routine", "start", "repeat", "duration", "end"])
         self.dataChanged.connect(self.update_values)
 
     def flags(self, index: QModelIndex):
         return Qt.NoItemFlags | Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
-    def add_playlist(self, playlist_name, start_time, duration, end_time):
+    def add_playlist(self, playlist_name, start_time, repeat, duration, end_time):
         playlist_name_item = QStandardItem(playlist_name)
         font = QFont()
         font.setBold(True)
@@ -22,21 +22,23 @@ class PlaylistModel(QStandardItemModel):
 
         playlist_item = [playlist_name_item,
                          QStandardItem(start_time),
+                         QStandardItem(repeat),
                          QStandardItem(duration),
                          QStandardItem(end_time)]
         self.invisibleRootItem().appendRow(playlist_item)
         self.dataChanged.emit(QModelIndex(), QModelIndex())
         # TODO: ensure unique names
 
-    def add_playlist_item(self,parent,name):
+    def add_playlist_item(self,parent,name,repeat=1):
         item_name = QStandardItem(name)
         item_name.setData(utils.Routine,utils.PlaylistItemTypeRole)
 
         item_start = QStandardItem("start time")
+        item_repeat = QStandardItem("repeat")
         item_duration = QStandardItem("duration")
         item_end = QStandardItem("end time")
 
-        new_row = [item_name, item_start, item_duration, item_end]
+        new_row = [item_name, item_start, item_repeat, item_duration, item_end]
         self.itemFromIndex(parent).appendRow(new_row)
         self.dataChanged.emit(parent,parent)
 
@@ -45,10 +47,11 @@ class PlaylistModel(QStandardItemModel):
         item_name.setData(utils.Gap, utils.PlaylistItemTypeRole)
 
         item_start = QStandardItem("start time")
+        item_repeat = QStandardItem("repeat")
         item_duration = QStandardItem(duration)
         item_end = QStandardItem("end time")
 
-        new_row = [item_name, item_start, item_duration, item_end]
+        new_row = [item_name, item_start, item_repeat, item_duration, item_end]
         self.itemFromIndex(parent).appendRow(new_row)
         self.dataChanged.emit(parent, parent)
 
@@ -63,11 +66,12 @@ class PlaylistModel(QStandardItemModel):
         new_parent_item.appendRow(item_to_move)
         self.dataChanged.emit(QModelIndex(), QModelIndex())
 
-
     def rename_playlist(self, index, new_name):
         item = self.itemFromIndex(index)
-        item.setData(new_name, Qt.DisplayRole)
-        # TODO: ensure unique names
+        if new_name in self.get_playlists_names():
+            raise utils.SequenceException("Playlist names must be unique")
+        else:
+            item.setData(new_name, Qt.DisplayRole)
 
     def get_playlists_names(self):
         names = []
@@ -76,6 +80,22 @@ class PlaylistModel(QStandardItemModel):
             name = self.index(i,0).data(Qt.DisplayRole)
             names.append(name)
         return names
+
+    def get_parsed_playlist(self):
+        parsed_playlist = {}
+        for i in range(self.rowCount()):
+            playlist_index = self.index(i,0)
+            playlist_item = self.itemFromIndex(playlist_index)
+            playlist_name = playlist_item.data(Qt.DisplayRole)
+            branch = {}
+            stack = [playlist_item.child(j) for j in range(playlist_item.rowCount())]
+            while stack:
+                parent = stack.pop(0)
+                # TODO
+
+            parsed_playlist[playlist_name] = branch
+
+        return parsed_playlist
 
     @pyqtSlot()
     def update_values(self):
@@ -90,33 +110,33 @@ class PlaylistModel(QStandardItemModel):
                         routine_duration = self.routines_model.get_routine_duration(routine_name)
 
                         item.parent().child(item.row(), 1).setData(0, Qt.DisplayRole)
-                        item.parent().child(item.row(), 2).setData(routine_duration, Qt.DisplayRole)
                         item.parent().child(item.row(), 3).setData(routine_duration, Qt.DisplayRole)
+                        item.parent().child(item.row(), 4).setData(routine_duration, Qt.DisplayRole)
                     elif item.data(utils.PlaylistItemTypeRole) == utils.Gap:
-                        gap_duration = item.parent().child(item.row(), 2).data(Qt.DisplayRole)
+                        gap_duration = item.parent().child(item.row(), 3).data(Qt.DisplayRole)
 
                         item.parent().child(item.row(), 1).setData(0, Qt.DisplayRole)
-                        item.parent().child(item.row(), 3).setData(gap_duration, Qt.DisplayRole)
+                        item.parent().child(item.row(), 4).setData(gap_duration, Qt.DisplayRole)
 
 
                 else: #Non top-level routines
                     parent = item.parent()
-                    parent_end_time = parent.parent().child(parent.row(), 3).data(Qt.DisplayRole)
+                    parent_end_time = parent.parent().child(parent.row(), 4).data(Qt.DisplayRole)
 
                     if item.data(utils.PlaylistItemTypeRole) == utils.Routine: #if item is a routine
                         routine_name = item.data(Qt.DisplayRole)
                         routine_duration = self.routines_model.get_routine_duration(routine_name)
 
                         item.parent().child(item.row(), 1).setData(parent_end_time, Qt.DisplayRole)
-                        item.parent().child(item.row(), 2).setData(routine_duration, Qt.DisplayRole)
-                        item.parent().child(item.row(), 3).setData(float(parent_end_time)+routine_duration, Qt.DisplayRole)
+                        item.parent().child(item.row(), 3).setData(routine_duration, Qt.DisplayRole)
+                        item.parent().child(item.row(), 4).setData(float(parent_end_time)+routine_duration, Qt.DisplayRole)
                     elif item.data(utils.PlaylistItemTypeRole) == utils.Gap:
-                        gap_duration = item.parent().child(item.row(), 2).data(Qt.DisplayRole)
+                        gap_duration = item.parent().child(item.row(), 3).data(Qt.DisplayRole)
                         print(gap_duration)
 
                         item.parent().child(item.row(), 1).setData(parent_end_time, Qt.DisplayRole)
                         #TODO: breaks with symbolic gap
-                        item.parent().child(item.row(), 3).setData(float(parent_end_time)+float(gap_duration), Qt.DisplayRole)
+                        item.parent().child(item.row(), 4).setData(float(parent_end_time)+float(gap_duration), Qt.DisplayRole)
 
         self.blockSignals(False)
 

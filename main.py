@@ -377,9 +377,16 @@ class ControlSystemGUI(QMainWindow):
                     if ok and txt == curr_name:
                         self.playlist_model.removeRow(idx.row(), idx.parent())
                 elif action == rename_playlist_action:
-                    new_name, ok = QInputDialog.getText(self, "Rename playlist", "New name:")
-                    if ok:
-                        self.playlist_model.rename_playlist(idx, new_name)
+                    current_name = idx.data(Qt.DisplayRole)
+                    existing_playlists = self.playlist_model.get_playlists_names()
+                    existing_playlists.pop(existing_playlists.index(current_name)) # Remove current name
+                    dialog = UniqueTextInputDialog("New playlist name", existing_playlists, current_name)
+                    rslt = dialog.exec()
+                    if rslt == QDialog.Accepted:
+                        new_name = dialog.name
+                        # TODO: ensure unique name
+                        if new_name != current_name:
+                            self.playlist_model.rename_playlist(idx, new_name)
 
 
         else:
@@ -393,7 +400,7 @@ class ControlSystemGUI(QMainWindow):
         rslt = dialog.exec()
         if rslt == QDialog.Accepted:
             name = dialog.name
-            self.playlist_model.add_playlist(name,"0","-","-")
+            self.playlist_model.add_playlist(name, "0", "-", "-", "-")
         # TODO: ensure unique names
 
 if __name__ == "__main__":

@@ -450,7 +450,7 @@ class MoveRoutineDialog(QDialog):
 class UniqueTextInputDialog(QDialog):
     ui_form, ui_base = loadUiType('text-input-dialog.ui')
 
-    def __init__(self, text_label, existing_values):
+    def __init__(self, text_label, existing_values, initial_text = ""):
         self.existing_values = existing_values
 
         super().__init__()
@@ -460,6 +460,7 @@ class UniqueTextInputDialog(QDialog):
 
         self.ui.button_box.accepted.connect(self.submitted)
         self.ui.text_label.setText(text_label)
+        self.ui.text_line_edit.setText(initial_text)
 
     @property
     def name(self):

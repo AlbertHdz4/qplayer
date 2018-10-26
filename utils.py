@@ -50,3 +50,7 @@ def is_descendant_of(ancestor : QModelIndex, index: QModelIndex):
         parent = parent.parent()
 
     return False
+
+
+class SequenceException(Exception):
+    pass
