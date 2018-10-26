@@ -22,30 +22,12 @@ class SequenceManager:
 
     def parse_sequence(self):
         # TODO: move this to variables class
-        variables = {}
-        for i in range(self.variables.rowCount()):
-            group_index = self.variables.index(i,0)
-            group_item = self.variables.itemFromIndex(group_index)
-            group_name = group_index.data()
-            group_variables = []
-            for j in range(group_item.rowCount()):
-                variable = {}
-                for k in range(len(self.variables.variable_fields)):
-                    field_name = self.variables.variable_fields[k]
-                    if field_name != "iterator":
-                        variable[field_name] = group_item.child(j,k).data(Qt.DisplayRole)
-                    else:
-                        variable[field_name] = (group_item.child(j, k).data(Qt.CheckStateRole) == Qt.Checked)
-                group_variables.append(variable)
+        variables = self.variables.get_parsed_variables()
 
-            variables[group_name] = group_variables
+        routines = self.routines.get_parsed_routines()
 
-        routines  = {}
-        for i in range(self.routines.rowCount()):
-            routine_index = self.routines.index(i,0)
-            routine_item = self.variables.itemFromIndex(group_index)
-            routine_name = routine_index.data()
-            print(routine_name)
-
-        sequence = {"variables":variables}
-        print(sequence)
+        sequence = {"variables":variables,"routines":routines}
+        print("variables")
+        print(variables)
+        print("routines")
+        print(routines)

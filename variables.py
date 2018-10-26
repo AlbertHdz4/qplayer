@@ -77,6 +77,27 @@ class VariablesModel(QStandardItemModel):
             group_list.append(self.item(j,0).data(Qt.DisplayRole))
         return group_list
 
+    def get_parsed_variables(self):
+        parsed_variables = {}
+        for i in range(self.rowCount()):
+            group_index = self.index(i,0)
+            group_item = self.itemFromIndex(group_index)
+            group_name = group_index.data()
+            group_variables = []
+            for j in range(group_item.rowCount()):
+                variable = {}
+                for k in range(len(self.variable_fields)):
+                    field_name = self.variable_fields[k]
+                    if field_name != "iterator":
+                        variable[field_name] = group_item.child(j,k).data(Qt.DisplayRole)
+                    else:
+                        variable[field_name] = (group_item.child(j, k).data(Qt.CheckStateRole) == Qt.Checked)
+                group_variables.append(variable)
+
+                parsed_variables[group_name] = group_variables
+        return parsed_variables
+
+    # returns a dictionary of all variables and their values. This includes iterating variables.
     def get_variables_dict(self):
         variables = {}
         num_groups = self.rowCount()
@@ -166,12 +187,12 @@ class VariablesModel(QStandardItemModel):
                     variables_dict[var_name] = var_val
                     retry_attempts = 0
                 except NameError:
-                    # Return to to do list if this doesn't work (if there is no error, it should eventually work once
+                    # Return to To-Do list if this doesn't work (if there is no error, it should eventually work once
                     # all the required variables are evaluated)
                     to_do.insert(0,(g,v))
                     retry_attempts += 1
                     if len(to_do) <= retry_attempts:  # Avoid infinite retrys, give up all hope after trying everything
-                        print("Variable set cannot be numerically evaluated: %s" % str(to_do))
+                        print("Error: Variable set cannot be numerically evaluated: %s" % str(to_do))
 
                         for g,v in to_do:
                             group_index = self.index(g, 0)

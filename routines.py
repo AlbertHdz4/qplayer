@@ -43,6 +43,17 @@ class RoutinesModel(QStandardItemModel):
         track_item.setData("0", utils.TrackOffsetRole)
         return track_item
 
+    @staticmethod
+    def init_digital_event_item(event_item: QStandardItem):
+        event_item.setCheckable(True)
+        event_item.setCheckState(Qt.Unchecked)
+        event_item.setData("0", utils.EventDurationRole)
+        event_item.setBackground(Qt.white)
+
+    @staticmethod
+    def init_analog_event_item(event_item: QStandardItem):
+        event_item.setData("0", utils.EventDurationRole)
+
     # Adds missing channels to a routine and removes the inactive ones
     def set_active_channels(self, routine_index:QModelIndex, active_channels):
 
@@ -85,6 +96,38 @@ class RoutinesModel(QStandardItemModel):
             channel_duration = channel_item.data(utils.ChannelDurationRole)
             duration = max(duration,channel_duration)
         return duration
+
+    def get_parsed_routines(self):
+        parsed_routines  = {}
+        for i in range(self.rowCount()):
+            routine_index = self.index(i,0)
+            routine_item = self.itemFromIndex(routine_index)
+            routine_name = routine_index.data()
+            parsed_tracks = []
+            for j in range(routine_item.rowCount()):
+                track_item = routine_item.child(j)
+                track_name = track_item.data(Qt.DisplayRole)
+                parsed_track = {}
+                parsed_track["name"] = track_name
+                parsed_track["chan"] = track_item.data(utils.ChannelRole)
+                parsed_track["offset"] = track_item.data(utils.TrackOffsetRole)
+
+                parsed_events = []
+                for k in range(track_item.rowCount()):
+                    event_item = track_item.child(k)
+                    event_duration = event_item.data(Qt.DisplayRole)
+                    parsed_event = {"duration": event_duration}
+                    if track_item.data(utils.TrackTypeRole) == utils.DigitalTrack:
+                        parsed_event["state"] = (event_item.data(Qt.CheckStateRole) == Qt.Checked)
+                    elif track_item.data(utils.TrackTypeRole) == utils.AnalogTrack:
+                        #TODO
+                        pass
+                    parsed_events.append(parsed_event)
+                parsed_track["events"] = parsed_events
+                parsed_tracks.append(parsed_track)
+            parsed_routines[routine_name] = parsed_tracks
+
+        return parsed_routines
 
     @pyqtSlot()
     def update_values(self):
@@ -132,6 +175,9 @@ class RoutinesModel(QStandardItemModel):
                         except TypeError:
                             print(duration)
                             print(variables)
+                    except TypeError: # in case duration in None
+                        print("Error duration is:")
+                        print(duration)
 
                 # There is no next event so start_time contains the duration of this channel
                 self.setData(channel_index,start_time,utils.ChannelDurationRole)

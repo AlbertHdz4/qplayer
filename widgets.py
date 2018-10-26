@@ -238,8 +238,8 @@ class SequenceEvent(QWidget):
 
         if self.event_item is None:
             self.event_item = QStandardItem()
-            self.initialize_event_item(self.event_item)
             self.sequence_track.get_model_item().appendRow(self.event_item)
+            self.initialize_event_item(self.event_item) # we init after append so that the item has a reference to the model
 
         self.event_item.model().dataChanged.connect(self.data_changed)
 
@@ -294,11 +294,8 @@ class DigitalSequenceEvent(SequenceEvent):
         self.ui.event_duration.editingFinished.connect(self.duration_edited)
 
     # Initialize the event item in the model
-    def initialize_event_item(self,event_item:QStandardItem):
-        event_item.setCheckable(True)
-        event_item.setCheckState(Qt.Unchecked)
-        event_item.setData("0",utils.EventDurationRole)
-        event_item.setBackground(Qt.white)
+    def initialize_event_item(self, event_item: QStandardItem):
+        event_item.model().init_digital_event_item(event_item)
 
     @pyqtSlot()
     def data_changed(self):
@@ -328,8 +325,8 @@ class DigitalSequenceEvent(SequenceEvent):
 class AnalogSequenceEvent(SequenceEvent):
     ui_file = "analog-event.ui"
 
-    def initialize_event_item(self,event_item):
-        event_item.setData("0", utils.EventDurationRole)
+    def initialize_event_item(self, event_item: QStandardItem):
+        event_item.model().init_analog_event_item(event_item)
 
 
 class RoutinePropertiesDialog(QDialog):
