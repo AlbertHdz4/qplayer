@@ -13,7 +13,6 @@ class SequenceManager:
         self.routines = routines
         self.playlist = playlist
 
-
     def sequence2json(self):
         pass
 
@@ -26,11 +25,5 @@ class SequenceManager:
         playlist = self.playlist.get_parsed_playlist()
 
         sequence = {"variables":variables, "routines": routines, "playlist": playlist}
-        print("variables")
-        print(variables)
-        print("routines")
-        print(routines)
-        print("playlist")
-        print(playlist)
 
         return sequence
