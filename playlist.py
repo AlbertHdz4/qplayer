@@ -84,6 +84,9 @@ class PlaylistModel(QStandardItemModel):
             names.append(name)
         return names
 
+    def load_parsed_playlist(self, plaulist_dict):
+        pass
+
     def get_parsed_playlist(self):
 
         # This recursive function is use to travel through the tree

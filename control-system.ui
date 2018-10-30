@@ -179,7 +179,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton_5">
+       <widget class="QToolButton" name="load_button">
         <property name="toolTip">
          <string>Load sequence from file</string>
         </property>
@@ -206,7 +206,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_vars">
        <attribute name="title">

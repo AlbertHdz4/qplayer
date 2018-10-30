@@ -39,6 +39,8 @@ class VariablesModel(QStandardItemModel):
         self.appendRow(new_row)
         self.dataChanged.emit(QModelIndex(),QModelIndex())
 
+        return new_item.index()
+
     def add_variable(self, parent_idx, **kwargs):
         parent = self.itemFromIndex(parent_idx)
         new_row = []
@@ -51,12 +53,14 @@ class VariablesModel(QStandardItemModel):
                 it.setCheckable(True)
             if field == "set":
                 try:
-                    float(kwargs[field]) # If it's numeric value, it can ve converted
+                    float(kwargs[field]) # If it's numeric value, it can be converted
                     it.setData(utils.NumericVariable, utils.VariableTypeRole)
                 except ValueError: # It's not a numeric value, treat as code
                     it.setData(utils.CodeVariable,utils.VariableTypeRole)
                 except KeyError: #Field is not defined
                     pass
+                except TypeError: # "set" field is None, this occurs for iterating variables
+                    print("TypeError",field,kwargs[field])
 
             if field == "value":
                 it.setFlags(it.flags() & ~Qt.ItemIsEditable)
@@ -76,6 +80,15 @@ class VariablesModel(QStandardItemModel):
         for j in range(self.rowCount()):
             group_list.append(self.item(j,0).data(Qt.DisplayRole))
         return group_list
+
+    def load_parsed_variables(self, variables_dict):
+        groups = variables_dict.keys()
+        for group in groups:
+            group_index = self.add_group(group)
+            variables_list = variables_dict[group]
+            for variable in variables_list:
+                print(variable)
+                self.add_variable(group_index,**variable)
 
     def get_parsed_variables(self):
         parsed_variables = {}

@@ -9,11 +9,17 @@ class Card:
     def channels(self):
         pass
 
+    def parse_card(self):
+        pass
+
 
 class Channel:
     def __init__(self, name, card):
         self.name = name
         self.card = card
+
+    def parse_channel(self):
+        return {"name":self.name, "card":self.card.parse_card()}
 
 
 class BusCard(Card):
@@ -27,6 +33,9 @@ class BusCard(Card):
     @property
     def channels(self):
         return self._channels
+
+    def parse_card(self):
+        return {"name": self.name, "address": self.address, "class":self.__class__.__name__}
 
 
 class DigitalBusCard(BusCard):

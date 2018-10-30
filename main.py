@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import sys
 import config
+import json
 
 from variables import *
 from routines import *
@@ -59,6 +60,7 @@ class ControlSystemGUI(QMainWindow):
         # SIGNALS
         ## General
         self.ui.save_button.clicked.connect(self.save_sequence)
+        self.ui.load_button.clicked.connect(self.load_sequence)
         ## Variables
         self.ui.add_variable_group_button.clicked.connect(self.add_variable_group)
         self.ui.add_variable_button.clicked.connect(self.add_variable)
@@ -81,6 +83,7 @@ class ControlSystemGUI(QMainWindow):
         self.group_idx = 0
         self.routine_idx = 0
 
+        """"
         #############################################
         # DUMMY DATA FOR TESTING
         self.variables_model.add_group("MOT")
@@ -138,14 +141,24 @@ class ControlSystemGUI(QMainWindow):
 
         self.sequence_editor.set_routine(0)
         ########################################################
-
+        """
 
     ###########
     # GENERAL #
     ###########
     @pyqtSlot()
     def save_sequence(self):
-        self.sequence_manager.parse_sequence()
+        sequence = self.sequence_manager.parse_sequence()
+        with open('sequence.json','w') as outfile:
+            json.dump(sequence, outfile, indent=2)
+
+    @pyqtSlot()
+    def load_sequence(self):
+        with open('sequence.json','r') as infile:
+            sequence = json.load(infile)
+            self.sequence_manager.load_sequence(sequence)
+
+
 
     #############
     # VARIABLES #

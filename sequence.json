@@ -1,0 +1,235 @@
+{
+  "variables": {
+    "MOT": [
+      {
+        "name": "loading_time",
+        "set": "0.2",
+        "value": "0.200000",
+        "iterator": false,
+        "start": null,
+        "stop": null,
+        "increment": null,
+        "comment": "ms"
+      },
+      {
+        "name": "slower_beam_pwr",
+        "set": "1000",
+        "value": "1000.000000",
+        "iterator": false,
+        "start": null,
+        "stop": null,
+        "increment": null,
+        "comment": "W"
+      },
+      {
+        "name": "oven_shutter_time",
+        "set": "100",
+        "value": "100.000000",
+        "iterator": false,
+        "start": null,
+        "stop": null,
+        "increment": null,
+        "comment": "ms"
+      },
+      {
+        "name": "cooler_detuning",
+        "set": "-20",
+        "value": "-20.000000",
+        "iterator": false,
+        "start": null,
+        "stop": null,
+        "increment": null,
+        "comment": "MHz"
+      },
+      {
+        "name": "repumper_detuning",
+        "set": "return bottom_power+4",
+        "value": "5.471518",
+        "iterator": false,
+        "start": null,
+        "stop": null,
+        "increment": null,
+        "comment": "MHz"
+      }
+    ],
+    "Dipole Trap": [
+      {
+        "name": "evaporation_time",
+        "set": null,
+        "value": "0",
+        "iterator": true,
+        "start": "0",
+        "stop": "3000",
+        "increment": "100",
+        "comment": null
+      },
+      {
+        "name": "bottom_power",
+        "set": "y = np.exp(-5*loading_time)\namp = 4\nreturn amp*y",
+        "value": "1.471518",
+        "iterator": false,
+        "start": null,
+        "stop": null,
+        "increment": null,
+        "comment": "W"
+      }
+    ],
+    "Absorption Imaging": [
+      {
+        "name": "probe_detuning",
+        "set": null,
+        "value": "-40",
+        "iterator": true,
+        "start": "-40",
+        "stop": "40",
+        "increment": "5",
+        "comment": null
+      }
+    ]
+  },
+  "routines": {
+    "MOT": [
+      {
+        "name": "Digital 0-00",
+        "chan": {
+          "name": "Digital 0-00",
+          "card": {
+            "name": "Digital 0",
+            "address": "0x0000",
+            "class": "DigitalBusCard"
+          }
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "2",
+            "state": false
+          },
+          {
+            "duration": "2",
+            "state": true
+          },
+          {
+            "duration": "2",
+            "state": false
+          },
+          {
+            "duration": "2",
+            "state": true
+          },
+          {
+            "duration": "2",
+            "state": false
+          }
+        ]
+      },
+      {
+        "name": "Digital 0-01",
+        "chan": {
+          "name": "Digital 0-01",
+          "card": {
+            "name": "Digital 0",
+            "address": "0x0000",
+            "class": "DigitalBusCard"
+          }
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "4",
+            "state": false
+          },
+          {
+            "duration": "4",
+            "state": true
+          },
+          {
+            "duration": "4",
+            "state": false
+          },
+          {
+            "duration": "4",
+            "state": true
+          }
+        ]
+      },
+      {
+        "name": "Analog 0-00",
+        "chan": {
+          "name": "Analog 0-00",
+          "card": {
+            "name": "Analog 0",
+            "address": "0x0002",
+            "class": "AnalogBusCard"
+          }
+        },
+        "offset": "0",
+        "events": []
+      }
+    ],
+    "Compression": [
+      {
+        "name": "Digital 0-03",
+        "chan": {
+          "name": "Digital 0-03",
+          "card": {
+            "name": "Digital 0",
+            "address": "0x0000",
+            "class": "DigitalBusCard"
+          }
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "4",
+            "state": false
+          },
+          {
+            "duration": "4",
+            "state": true
+          },
+          {
+            "duration": "4",
+            "state": false
+          },
+          {
+            "duration": "4",
+            "state": true
+          }
+        ]
+      }
+    ]
+  },
+  "playlist": [
+    {
+      "name": "A",
+      "children": [
+        {
+          "type": 0,
+          "children": [
+            {
+              "type": 1,
+              "children": [
+                {
+                  "type": 0,
+                  "children": [],
+                  "name": "Compression",
+                  "repeat": "repeat"
+                }
+              ],
+              "duration": "3"
+            }
+          ],
+          "name": "MOT",
+          "repeat": "repeat"
+        },
+        {
+          "type": 0,
+          "children": [],
+          "name": "Compression",
+          "repeat": "repeat"
+        }
+      ]
+    }
+  ]
+}
