@@ -97,10 +97,12 @@ class RoutinesModel(QStandardItemModel):
             duration = max(duration,channel_duration)
         return duration
 
-    def load_parsed_routines(self, routines_dict):
-        pass
+    def load_routines_from_pystruct(self, routines_dict):
+        routine_names = routines_dict.keys()
+        for routine in routine_names:
+            self.add_routine(routine,[])
 
-    def get_parsed_routines(self):
+    def get_routines_pystruct(self):
         parsed_routines  = {}
         for i in range(self.rowCount()):
             routine_index = self.index(i,0)
@@ -112,7 +114,7 @@ class RoutinesModel(QStandardItemModel):
                 track_name = track_item.data(Qt.DisplayRole)
                 parsed_track = {}
                 parsed_track["name"] = track_name
-                parsed_track["chan"] = track_item.data(utils.ChannelRole).parse_channel()
+                parsed_track["chan"] = track_item.data(utils.ChannelRole).get_channel_dict()
                 parsed_track["offset"] = track_item.data(utils.TrackOffsetRole)
 
                 parsed_events = []

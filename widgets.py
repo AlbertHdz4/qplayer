@@ -362,8 +362,8 @@ class RoutinePropertiesDialog(QDialog):
 
         for card in cards:
             for chan in card.channels:
-                new_item = QListWidgetItem(chan.name)
-                new_item.setData(utils.ChannelRole,chan)
+                new_item = QListWidgetItem(card.name+"-"+chan.name)
+                new_item.setData(utils.ChannelRole, chan)
                 new_item.setFlags(new_item.flags() | Qt.ItemIsUserCheckable )
                 if chan in active_channels:
                     new_item.setCheckState(Qt.Checked)

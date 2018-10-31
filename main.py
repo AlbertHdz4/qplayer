@@ -154,6 +154,7 @@ class ControlSystemGUI(QMainWindow):
 
     @pyqtSlot()
     def load_sequence(self):
+        # TODO: clear current sequence
         with open('sequence.json','r') as infile:
             sequence = json.load(infile)
             self.sequence_manager.load_sequence(sequence)

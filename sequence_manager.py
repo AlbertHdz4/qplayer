@@ -12,14 +12,14 @@ class SequenceManager:
         self.playlist = playlist
 
     def load_sequence(self,sequence):
-        self.variables.load_parsed_variables(sequence["variables"])
-        self.routines.load_parsed_routines(sequence["routines"])
-        self.playlist.load_parsed_playlist(sequence["playlist"])
+        self.variables.load_variables_from_pystruct(sequence["variables"])
+        self.routines.load_routines_from_pystruct(sequence["routines"])
+        self.playlist.load_playlist_from_pystruct(sequence["playlist"])
 
     def parse_sequence(self):
-        variables = self.variables.get_parsed_variables()
-        routines = self.routines.get_parsed_routines()
-        playlist = self.playlist.get_parsed_playlist()
+        variables = self.variables.get_variables_pystruct()
+        routines = self.routines.get_routines_pystruct()
+        playlist = self.playlist.get_playlist_pystruct()
 
         sequence = {"variables": variables, "routines": routines, "playlist": playlist}
         return sequence

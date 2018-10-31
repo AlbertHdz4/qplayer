@@ -60,11 +60,10 @@ class VariablesModel(QStandardItemModel):
                 except KeyError: #Field is not defined
                     pass
                 except TypeError: # "set" field is None, this occurs for iterating variables
-                    print("TypeError",field,kwargs[field])
+                    pass
 
             if field == "value":
                 it.setFlags(it.flags() & ~Qt.ItemIsEditable)
-
 
             if kwargs is not None and field in kwargs:
                 if ftype == bool and kwargs[field]:
@@ -81,16 +80,15 @@ class VariablesModel(QStandardItemModel):
             group_list.append(self.item(j,0).data(Qt.DisplayRole))
         return group_list
 
-    def load_parsed_variables(self, variables_dict):
+    def load_variables_from_pystruct(self, variables_dict):
         groups = variables_dict.keys()
         for group in groups:
             group_index = self.add_group(group)
             variables_list = variables_dict[group]
             for variable in variables_list:
-                print(variable)
                 self.add_variable(group_index,**variable)
 
-    def get_parsed_variables(self):
+    def get_variables_pystruct(self):
         parsed_variables = {}
         for i in range(self.rowCount()):
             group_index = self.index(i,0)
