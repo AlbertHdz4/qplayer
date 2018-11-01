@@ -360,7 +360,7 @@ class RoutinePropertiesDialog(QDialog):
                 print(chan.name)
                 active_channels.append(chan)
 
-        for card in cards:
+        for card in cards.values():
             for chan in card.channels:
                 new_item = QListWidgetItem(card.name+"-"+chan.name)
                 new_item.setData(utils.ChannelRole, chan)

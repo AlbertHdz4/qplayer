@@ -17,7 +17,7 @@ from sequence_manager import SequenceManager
 class ControlSystemGUI(QMainWindow):
     def __init__(self, parent=None):
         self.config = config.Config()
-        self.cards = self.config.get_cards()
+        self.cards = self.config.get_cards_dict()
 
         QMainWindow.__init__(self, parent)
         ui_main_window, main_window = loadUiType('control-system.ui')
@@ -288,15 +288,17 @@ class ControlSystemGUI(QMainWindow):
         root_index = cb.rootModelIndex()
         row = cb.currentIndex()
         element_index = self.routines_model.index(row,0,root_index) # type: QModelIndex
+        if element_index.isValid():
+            dialog = RoutinePropertiesDialog(self.cards, self.routines_model, element_index)
+            rslt = dialog.exec()
 
-        dialog = RoutinePropertiesDialog(self.cards, self.routines_model, element_index)
-        rslt = dialog.exec()
-
-        if rslt == QDialog.Accepted:
-            self.routines_model.setData(element_index,dialog.name)
-            active_channels = dialog.active_channels
-            self.routines_model.set_active_channels(element_index, active_channels)
-            self.sequence_editor.set_routine(row)
+            if rslt == QDialog.Accepted:
+                self.routines_model.setData(element_index,dialog.name)
+                active_channels = dialog.active_channels
+                self.routines_model.set_active_channels(element_index, active_channels)
+                self.sequence_editor.set_routine(row)
+        else:
+            QMessageBox.information(self,"No routine","Please create a routine first")
 
 
 

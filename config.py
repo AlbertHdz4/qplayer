@@ -8,11 +8,11 @@ class Config:
         with open('config.json') as json_data_file:
             self._data = json.load(json_data_file)
 
-    def get_cards(self):
-        card_list = []
+    def get_cards_dict(self):
+        card_dict = {}
         for card in self._data["cards"]:
             class_ = getattr(cards, card["class"])
             card.pop("class")
-            card_list.append(class_(**card))
+            card_dict[card["name"]] =  class_(**card)
 
-        return card_list
+        return card_dict
