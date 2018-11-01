@@ -300,8 +300,6 @@ class ControlSystemGUI(QMainWindow):
         else:
             QMessageBox.information(self,"No routine","Please create a routine first")
 
-
-
     @pyqtSlot()
     def remove_routine(self):
         cb = self.ui.routine_combo_box # type: QComboBox

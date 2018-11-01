@@ -90,23 +90,20 @@
   "routines": {
     "MOT": [
       {
-        "name": "Digital 0-00",
+        "name": "D00",
         "chan": {
-          "name": "Digital 0-00",
+          "index": 0,
+          "name": "D00",
           "card": {
             "name": "Digital 0",
             "address": "0x0000",
             "class": "DigitalBusCard"
           }
         },
-        "offset": "0",
+        "offset": "1",
         "events": [
           {
-            "duration": "2",
-            "state": false
-          },
-          {
-            "duration": "2",
+            "duration": "1",
             "state": true
           },
           {
@@ -114,76 +111,57 @@
             "state": false
           },
           {
-            "duration": "2",
+            "duration": "1",
             "state": true
-          },
-          {
-            "duration": "2",
-            "state": false
           }
         ]
       },
       {
-        "name": "Digital 0-01",
+        "name": "D01",
         "chan": {
-          "name": "Digital 0-01",
+          "index": 1,
+          "name": "D01",
           "card": {
             "name": "Digital 0",
             "address": "0x0000",
             "class": "DigitalBusCard"
           }
         },
-        "offset": "0",
+        "offset": "4",
         "events": [
           {
-            "duration": "4",
-            "state": false
-          },
-          {
-            "duration": "4",
+            "duration": "2",
             "state": true
           },
           {
-            "duration": "4",
+            "duration": "1",
             "state": false
           },
           {
-            "duration": "4",
+            "duration": "2",
             "state": true
+          },
+          {
+            "duration": "1",
+            "state": false
           }
         ]
-      },
-      {
-        "name": "Analog 0-00",
-        "chan": {
-          "name": "Analog 0-00",
-          "card": {
-            "name": "Analog 0",
-            "address": "0x0002",
-            "class": "AnalogBusCard"
-          }
-        },
-        "offset": "0",
-        "events": []
       }
     ],
     "Compression": [
       {
-        "name": "Digital 0-03",
+        "name": "D03",
         "chan": {
-          "name": "Digital 0-03",
+          "index": 3,
+          "name": "D03",
           "card": {
             "name": "Digital 0",
             "address": "0x0000",
             "class": "DigitalBusCard"
           }
         },
-        "offset": "0",
+        "offset": "4",
         "events": [
-          {
-            "duration": "4",
-            "state": false
-          },
           {
             "duration": "4",
             "state": true
@@ -194,6 +172,60 @@
           },
           {
             "duration": "4",
+            "state": true
+          }
+        ]
+      },
+      {
+        "name": "D05",
+        "chan": {
+          "index": 5,
+          "name": "D05",
+          "card": {
+            "name": "Digital 0",
+            "address": "0x0000",
+            "class": "DigitalBusCard"
+          }
+        },
+        "offset": "1",
+        "events": [
+          {
+            "duration": "2",
+            "state": false
+          },
+          {
+            "duration": "2",
+            "state": true
+          },
+          {
+            "duration": "2",
+            "state": false
+          }
+        ]
+      },
+      {
+        "name": "D06",
+        "chan": {
+          "index": 6,
+          "name": "D06",
+          "card": {
+            "name": "Digital 0",
+            "address": "0x0000",
+            "class": "DigitalBusCard"
+          }
+        },
+        "offset": "3",
+        "events": [
+          {
+            "duration": "2",
+            "state": true
+          },
+          {
+            "duration": "5",
+            "state": false
+          },
+          {
+            "duration": "3",
             "state": true
           }
         ]
@@ -202,31 +234,45 @@
   },
   "playlist": [
     {
-      "name": "A",
+      "name": "Simple Sequence",
       "children": [
         {
           "type": 0,
           "children": [
             {
-              "type": 1,
+              "type": 0,
               "children": [
                 {
                   "type": 0,
                   "children": [],
-                  "name": "Compression",
+                  "name": "MOT",
                   "repeat": "repeat"
                 }
               ],
-              "duration": "3"
+              "name": "Compression",
+              "repeat": "repeat"
+            },
+            {
+              "type": 1,
+              "children": [
+                {
+                  "type": 0,
+                  "children": [
+                    {
+                      "type": 0,
+                      "children": [],
+                      "name": "Compression",
+                      "repeat": "repeat"
+                    }
+                  ],
+                  "name": "MOT",
+                  "repeat": "repeat"
+                }
+              ],
+              "duration": "10"
             }
           ],
           "name": "MOT",
-          "repeat": "repeat"
-        },
-        {
-          "type": 0,
-          "children": [],
-          "name": "Compression",
           "repeat": "repeat"
         }
       ]
