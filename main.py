@@ -26,7 +26,7 @@ class ControlSystemGUI(QMainWindow):
 
         # MODELS
         self.variables_model = VariablesModel()
-        self.routines_model = RoutinesModel(self.variables_model)
+        self.routines_model = RoutinesModel(self.variables_model, self.cards)
         self.playlist_model = PlaylistModel(self.routines_model)
 
         # SEQUENCE MANAGER

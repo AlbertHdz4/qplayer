@@ -88,6 +88,7 @@ class VariablesModel(QStandardItemModel):
             for variable in variables_list:
                 self.add_variable(group_index,**variable)
 
+    # returns the full data of this map in a plain python format for the purpose of saving
     def get_variables_pystruct(self):
         parsed_variables = {}
         for i in range(self.rowCount()):

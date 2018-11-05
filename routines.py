@@ -7,9 +7,10 @@ import numpy as np
 
 
 class RoutinesModel(QStandardItemModel):
-    def __init__(self, variables_model:VariablesModel):
+    def __init__(self, variables_model:VariablesModel, cards):
         super().__init__()
         self.variables_model = variables_model
+        self.cards = cards
         self.dataChanged.connect(self.update_values)
 
     def add_routine(self, name, channels):
@@ -99,8 +100,14 @@ class RoutinesModel(QStandardItemModel):
 
     def load_routines_from_pystruct(self, routines_dict):
         routine_names = routines_dict.keys()
-        for routine in routine_names:
-            self.add_routine(routine,[])
+        for routine_name in routine_names:
+            routine = routines_dict[routine_name]
+            channels = []
+            for track in routine:
+                card = self.cards[track["chan"]["card"]]
+                index = track["chan"]["index"]
+                channels.append(card.channels[index])
+            self.add_routine(routine_name,channels)
 
     def get_routines_pystruct(self):
         parsed_routines  = {}
@@ -113,7 +120,6 @@ class RoutinesModel(QStandardItemModel):
                 track_item = routine_item.child(j)
                 track_name = track_item.data(Qt.DisplayRole)
                 parsed_track = {}
-                parsed_track["name"] = track_name
                 parsed_track["chan"] = track_item.data(utils.ChannelRole).get_channel_dict()
                 parsed_track["offset"] = track_item.data(utils.TrackOffsetRole)
 

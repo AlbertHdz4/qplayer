@@ -22,7 +22,7 @@ class Channel:
         self.card = card
 
     def get_channel_dict(self):
-        return {"index": self.index, "name":self.name, "card":self.card.get_card_dict()}
+        return {"index": self.index, "card": self.card.name}
 
 
 class BusCard(Card):

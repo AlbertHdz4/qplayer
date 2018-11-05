@@ -123,6 +123,7 @@ class PlaylistModel(QStandardItemModel):
 
     @pyqtSlot()
     def update_values(self):
+        # TODO add full playlist duration
         # First we block signals because update_values is called on dataChanged and we don't want to trigger it again
         self.blockSignals(True)
 
