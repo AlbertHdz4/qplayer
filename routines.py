@@ -25,31 +25,37 @@ class RoutinesModel(QStandardItemModel):
         self.dataChanged.emit(index,index)
         return new_item
 
-    def add_event(self,routine: QStandardItem ,event: QStandardItem):
-        routine.appendRow(event)
+    #def add_event(self, routine: QStandardItem, event: QStandardItem):
+    #    routine.appendRow(event)
 
     def get_routine_names(self):
         names = []
         num_routines = self.rowCount()
         for i in range(num_routines):
-            name = self.index(i,0).data(Qt.DisplayRole)
+            name = self.index(i, 0).data(Qt.DisplayRole)
             names.append(name)
         return names
 
     @staticmethod
-    def _init_track_item(chan):
+    def _init_track_item(chan, offset = "0"):
         track_item = QStandardItem(chan.name)
         track_item.setData(chan.card.type, utils.TrackTypeRole)
         track_item.setData(chan, utils.ChannelRole)
-        track_item.setData("0", utils.TrackOffsetRole)
+        track_item.setData(offset, utils.TrackOffsetRole)
         return track_item
 
     @staticmethod
-    def init_digital_event_item(event_item: QStandardItem):
+    def init_digital_event_item(event_item: QStandardItem = None, data="0", checked=False):
+        if event_item is None:
+            event_item = QStandardItem()
         event_item.setCheckable(True)
-        event_item.setCheckState(Qt.Unchecked)
-        event_item.setData("0", utils.EventDurationRole)
+        if checked:
+            event_item.setCheckState(Qt.Checked)
+        else:
+            event_item.setCheckState(Qt.Unchecked)
+        event_item.setData(data, utils.EventDurationRole)
         event_item.setBackground(Qt.white)
+        return event_item
 
     @staticmethod
     def init_analog_event_item(event_item: QStandardItem):
@@ -101,13 +107,28 @@ class RoutinesModel(QStandardItemModel):
     def load_routines_from_pystruct(self, routines_dict):
         routine_names = routines_dict.keys()
         for routine_name in routine_names:
+            routine_item = QStandardItem(routine_name)
+
             routine = routines_dict[routine_name]
-            channels = []
             for track in routine:
                 card = self.cards[track["chan"]["card"]]
                 index = track["chan"]["index"]
-                channels.append(card.channels[index])
-            self.add_routine(routine_name,channels)
+                offset = track["offset"]
+                events = track["events"]
+                chan = card.channels[index]
+                track_item = self._init_track_item(chan, offset)
+                routine_item.appendRow(track_item)
+                if card.type == utils.DigitalTrack:
+                    for event in events:
+                        duration = event["duration"]
+                        state = event["state"]
+                        track_event = self.init_digital_event_item(None, duration, state)
+                        track_item.appendRow(track_event)
+                elif card.type == utils.AnalogTrack:
+                    for event in events:
+                        pass
+
+            self.appendRow(routine_item)
 
     def get_routines_pystruct(self):
         parsed_routines  = {}
