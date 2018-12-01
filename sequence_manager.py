@@ -12,6 +12,8 @@ class SequenceManager:
         self.playlist = playlist
 
     def load_sequence(self,sequence):
+        #TODO: Clear current sequence
+
         self.variables.load_variables_from_pystruct(sequence["variables"])
         self.routines.load_routines_from_pystruct(sequence["routines"])
         self.playlist.load_playlist_from_pystruct(sequence["playlist"])
