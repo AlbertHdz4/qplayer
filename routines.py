@@ -94,6 +94,7 @@ class RoutinesModel(QStandardItemModel):
         return None
 
     def get_routine_duration(self, routine_name):
+        self.update_values()
         routine_item = self.get_routine_item_by_name(routine_name)
         num_channels = routine_item.rowCount()
         duration = 0
