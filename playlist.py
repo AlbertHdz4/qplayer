@@ -37,7 +37,7 @@ class PlaylistModel(QStandardItemModel):
         item_name.setData(utils.Routine,utils.PlaylistItemTypeRole)
 
         item_start = QStandardItem("start time")
-        item_repeat = QStandardItem("repeat")
+        item_repeat = QStandardItem(str(repeat))
         item_duration = QStandardItem("duration")
         item_end = QStandardItem("end time")
 
@@ -84,8 +84,10 @@ class PlaylistModel(QStandardItemModel):
             names.append(name)
         return names
 
-    def load_playlist_from_pystruct(self, plaulist_dict):
-        pass
+    def load_playlist_from_pystruct(self, playlist_dict):
+        while len(playlist_dict) > 0:
+            playlist = playlist_dict.pop()
+            self.add_playlist(playlist['name'], "0", "-", "-", "-")
 
     def get_playlist_pystruct(self):
 
@@ -164,6 +166,7 @@ class PlaylistModel(QStandardItemModel):
                         item.parent().child(item.row(), self.column_names.index("end")).setData(float(parent_end_time)+float(gap_duration), Qt.DisplayRole)
 
         self.blockSignals(False)
+
 
 class PlaylistMoveRoutineProxyModel(QIdentityProxyModel): #Used for playlist move dialog
     def __init__(self, move_index: QModelIndex):

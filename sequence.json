@@ -150,17 +150,7 @@
           "card": "Analog 0"
         },
         "offset": "0",
-        "events": [
-          {
-            "duration": "0"
-          },
-          {
-            "duration": "0"
-          },
-          {
-            "duration": "0"
-          }
-        ]
+        "events": []
       }
     ],
     "Compression": [
@@ -199,5 +189,30 @@
       }
     ]
   },
-  "playlist": []
+  "playlist": [
+    {
+      "name": "j",
+      "children": [
+        {
+          "type": 0,
+          "children": [
+            {
+              "type": 1,
+              "children": [
+                {
+                  "type": 0,
+                  "children": [],
+                  "name": "Compression",
+                  "repeat": "1"
+                }
+              ],
+              "duration": "50"
+            }
+          ],
+          "name": "MOT",
+          "repeat": "1"
+        }
+      ]
+    }
+  ]
 }
