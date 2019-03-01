@@ -23,6 +23,7 @@ class PlaylistModel(QStandardItemModel):
         font.setBold(True)
         playlist_name_item.setData(font,Qt.FontRole)
 
+        # TODO: ensure unique names
         playlist_item = [playlist_name_item,
                          QStandardItem(start_time),
                          QStandardItem(repeat),
@@ -30,7 +31,8 @@ class PlaylistModel(QStandardItemModel):
                          QStandardItem(end_time)]
         self.invisibleRootItem().appendRow(playlist_item)
         self.dataChanged.emit(QModelIndex(), QModelIndex())
-        # TODO: ensure unique names
+        num_rows = self.rowCount()
+        return self.index(num_rows - 1, 0)
 
     def add_playlist_item(self,parent,name,repeat=1):
         item_name = QStandardItem(name)
@@ -44,6 +46,8 @@ class PlaylistModel(QStandardItemModel):
         new_row = [item_name, item_start, item_repeat, item_duration, item_end]
         self.itemFromIndex(parent).appendRow(new_row)
         self.dataChanged.emit(parent,parent)
+        num_rows = self.rowCount(parent)
+        return self.index(num_rows - 1,0,parent)
 
     def add_gap(self, parent, duration):
         item_name = QStandardItem("Gap")
@@ -57,6 +61,9 @@ class PlaylistModel(QStandardItemModel):
         new_row = [item_name, item_start, item_repeat, item_duration, item_end]
         self.itemFromIndex(parent).appendRow(new_row)
         self.dataChanged.emit(parent, parent)
+        num_rows = self.rowCount(parent)
+        return self.index(num_rows - 1,0,parent)
+
 
     def modify_gap(self, index, duration):
         item = self.itemFromIndex(index)
@@ -84,13 +91,22 @@ class PlaylistModel(QStandardItemModel):
             names.append(name)
         return names
 
-    def load_playlist_from_pystruct(self, playlist_dict):
-        while len(playlist_dict) > 0:
-            playlist = playlist_dict.pop()
-            self.add_playlist(playlist['name'], "0", "-", "-", "-")
+    def load_playlist_from_pystruct(self, playlist_list):
+
+        def inner_add_children(parent_index, children_dict):
+            for child in children_dict:
+                if child['type'] == utils.Gap:
+                    newindex = self.add_gap(parent_index, child['duration'])
+                elif child['type'] == utils.Routine:
+                    newindex = self.add_playlist_item(parent_index, child['name'], child['repeat']) # type: QModelIndex
+                inner_add_children(newindex,child['children'])
+
+        while len(playlist_list) > 0:
+            pldict = playlist_list.pop(0)
+            plindex = self.add_playlist(pldict['name'], "0", "-", "-", "-")
+            inner_add_children(plindex,pldict['children'])
 
     def get_playlist_pystruct(self):
-
         # This recursive function is use to travel through the tree
         def inner_get_parsed_playlist(children_items, children_list):
             for child_item in children_items: # type: QStandardItem
@@ -159,7 +175,6 @@ class PlaylistModel(QStandardItemModel):
                         item.parent().child(item.row(), self.column_names.index("end")).setData(float(parent_end_time)+routine_duration, Qt.DisplayRole)
                     elif item.data(utils.PlaylistItemTypeRole) == utils.Gap:
                         gap_duration = item.parent().child(item.row(), self.column_names.index("duration")).data(Qt.DisplayRole)
-                        print(gap_duration)
 
                         item.parent().child(item.row(), self.column_names.index("start")).setData(parent_end_time, Qt.DisplayRole)
                         #TODO: breaks with symbolic gap
