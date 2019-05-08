@@ -57,6 +57,10 @@ class ControlSystemGUI(QMainWindow):
         self.ui.static_variables_view.header().setSectionResizeMode(1,QHeaderView.Stretch)
         self.ui.static_variables_view.setItemDelegateForColumn(1, VariableEditDelegate())
 
+        # Inspector setup
+        self.inspector_plot_canvas = PlotCanvas(self)
+        self.ui.inspector_plot_container.addWidget(self.inspector_plot_canvas)
+
         # SIGNALS
         ## General
         self.ui.save_button.clicked.connect(self.save_sequence)
@@ -415,6 +419,11 @@ class ControlSystemGUI(QMainWindow):
             name = dialog.name
             self.playlist_model.add_playlist(name, "0", "-", "-", "-")
         # TODO: ensure unique names
+
+
+    #############
+    # INSPECTOR #
+    #############
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

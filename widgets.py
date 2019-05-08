@@ -10,6 +10,12 @@ import cards
 from routines import RoutinesModel
 from playlist import PlaylistModel, PlaylistMoveRoutineProxyModel
 
+import matplotlib
+# Make sure that we are using QT5
+matplotlib.use('Qt5Agg')
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+
 # This class was created so that code variables have syntax highlighting
 class VariableEditDelegate(QStyledItemDelegate):
     def createEditor(self, parent: QWidget, option: QStyleOptionViewItem, index: QModelIndex):
@@ -478,3 +484,20 @@ class UniqueTextInputDialog(QDialog):
             message_box.exec()
         else:
             self.accept()
+
+
+class PlotCanvas(FigureCanvas):
+    """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
+
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
+
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+
+        FigureCanvas.setSizePolicy(self,
+                                   QSizePolicy.Expanding,
+                                   QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+
