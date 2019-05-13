@@ -40,7 +40,6 @@ class ControlSystemGUI(QMainWindow):
         self.static_variables_model = VariablesProxyModel(["name","set","value","comment"], True, False, True)
         self.static_variables_model.setSourceModel(self.variables_model)
         self.iterator_variables_model = VariablesProxyModel(["name","value","start","stop","increment"], False, True, False)
-        #self.iterator_variables_model = VariablesProxyModel(VariablesModel.variable_fields, True, True, True) # Uncomment for debug
         self.iterator_variables_model.setSourceModel(self.variables_model)
 
         # ADD MODELS TO VIEWS
@@ -65,6 +64,7 @@ class ControlSystemGUI(QMainWindow):
         ## General
         self.ui.save_button.clicked.connect(self.save_sequence)
         self.ui.load_button.clicked.connect(self.load_sequence)
+        self.ui.tabWidget.currentChanged.connect(self.tab_changed)
         ## Variables
         self.ui.add_variable_group_button.clicked.connect(self.add_variable_group)
         self.ui.add_variable_button.clicked.connect(self.add_variable)
@@ -161,6 +161,14 @@ class ControlSystemGUI(QMainWindow):
         with open('sequence.json','r') as infile:
             sequence = json.load(infile)
             self.sequence_manager.load_sequence(sequence)
+
+
+    @pyqtSlot(int)
+    def tab_changed(self, tab_index):
+        if self.ui.tabWidget.tabText(tab_index) == "Inspector":
+            print("Inspector")
+            # TODO
+            #self.inspector_widget.update()
 
 
 
