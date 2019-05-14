@@ -88,7 +88,7 @@ class VariablesModel(QStandardItemModel):
             for variable in variables_list:
                 self.add_variable(group_index,**variable)
 
-    # returns the full data of this map in a plain python format for the purpose of saving
+    # returns the full data of this map in a plain python format for the purpose of saving or processing
     def get_variables_pystruct(self):
         parsed_variables = {}
         for i in range(self.rowCount()):
@@ -122,6 +122,25 @@ class VariablesModel(QStandardItemModel):
                 variables[var_name] = float(var_value)
 
         return variables
+
+    def get_iterating_variables(self):
+        iter_vars = {}
+        num_groups = self.rowCount()
+        for g in range(num_groups):
+            group_index = self.index(g,0)
+            print(group_index.data())
+            num_variables = self.rowCount(group_index)
+            for v in range(num_variables):
+                # If it is an interating variable
+                if self.index(v,self.variable_fields.index("iterator"),group_index).data(Qt.CheckStateRole) == Qt.Checked:
+                    var_name = self.index(v, self.variable_fields.index("name"), group_index).data()
+                    var_start = self.index(v, self.variable_fields.index("start"), group_index).data()
+                    var_stop = self.index(v, self.variable_fields.index("stop"), group_index).data()
+                    var_increment = self.index(v, self.variable_fields.index("increment"), group_index).data()
+                    iter_vars[var_name] = {"start":var_start, "stop":var_stop, "increment":var_increment}
+
+        return iter_vars
+
 
     def to_number(self, expr, variables=None):
         if variables is None:

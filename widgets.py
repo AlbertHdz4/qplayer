@@ -486,10 +486,12 @@ class UniqueTextInputDialog(QDialog):
             self.accept()
 
 
-class PlotCanvas(FigureCanvas):
+class InspectorWidget(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, sequence, parent=None, width=5, height=4, dpi=100):
+        self.sequence = sequence
+
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
 
@@ -500,4 +502,12 @@ class PlotCanvas(FigureCanvas):
                                    QSizePolicy.Expanding,
                                    QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
+
+    def update_inspector(self):
+        iter_vars_dict = self.sequence.variables.get_iterating_variables()
+
+        #TODO: add scrollbars
+        print(iter_vars_dict)
+
+
 

@@ -11,7 +11,7 @@ from variables import *
 from routines import *
 from playlist import *
 from widgets import *
-from sequence_manager import SequenceManager
+from sequence import Sequence
 
 
 class ControlSystemGUI(QMainWindow):
@@ -30,7 +30,7 @@ class ControlSystemGUI(QMainWindow):
         self.playlist_model = PlaylistModel(self.routines_model)
 
         # SEQUENCE MANAGER
-        self.sequence_manager = SequenceManager(self.variables_model, self.routines_model, self.playlist_model)
+        self.sequence = Sequence(self.variables_model, self.routines_model, self.playlist_model)
 
         # UI SETUP
         self.sequence_editor = SequenceEditor(self.routines_model)
@@ -57,8 +57,8 @@ class ControlSystemGUI(QMainWindow):
         self.ui.static_variables_view.setItemDelegateForColumn(1, VariableEditDelegate())
 
         # Inspector setup
-        self.inspector_plot_canvas = PlotCanvas(self)
-        self.ui.inspector_plot_container.addWidget(self.inspector_plot_canvas)
+        self.inspector_widget = InspectorWidget(self.sequence, self)
+        self.ui.inspector_plot_container.addWidget(self.inspector_widget)
 
         # SIGNALS
         ## General
@@ -152,7 +152,7 @@ class ControlSystemGUI(QMainWindow):
     ###########
     @pyqtSlot()
     def save_sequence(self):
-        sequence = self.sequence_manager.parse_sequence()
+        sequence = self.sequence.sequence_to_dict()
         with open('sequence.json','w') as outfile:
             json.dump(sequence, outfile, indent=2)
 
@@ -160,15 +160,13 @@ class ControlSystemGUI(QMainWindow):
     def load_sequence(self):
         with open('sequence.json','r') as infile:
             sequence = json.load(infile)
-            self.sequence_manager.load_sequence(sequence)
+            self.sequence.load_sequence_from_dict(sequence)
 
 
     @pyqtSlot(int)
     def tab_changed(self, tab_index):
         if self.ui.tabWidget.tabText(tab_index) == "Inspector":
-            print("Inspector")
-            # TODO
-            #self.inspector_widget.update()
+            self.inspector_widget.update_inspector()
 
 
 

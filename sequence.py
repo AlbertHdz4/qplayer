@@ -4,21 +4,22 @@ from playlist import PlaylistModel
 
 from PyQt5.QtCore import Qt
 
-class SequenceManager:
+
+class Sequence:
 
     def __init__(self,variables: VariablesModel, routines: RoutinesModel, playlist: PlaylistModel):
         self.variables = variables
         self.routines = routines
         self.playlist = playlist
 
-    def load_sequence(self,sequence):
+    def load_sequence_from_dict(self, sequence):
         #TODO: Clear current sequence
 
         self.variables.load_variables_from_pystruct(sequence["variables"])
         self.routines.load_routines_from_pystruct(sequence["routines"])
         self.playlist.load_playlist_from_pystruct(sequence["playlist"])
 
-    def parse_sequence(self):
+    def sequence_to_dict(self):
         variables = self.variables.get_variables_pystruct()
         routines = self.routines.get_routines_pystruct()
         playlist = self.playlist.get_playlist_pystruct()
