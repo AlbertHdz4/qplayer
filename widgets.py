@@ -485,29 +485,42 @@ class UniqueTextInputDialog(QDialog):
         else:
             self.accept()
 
-
-class InspectorWidget(FigureCanvas):
-    """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
-
-    def __init__(self, sequence, parent=None, width=5, height=4, dpi=100):
+class InspectorWidget(QWidget):
+    def __init__(self, sequence=None):
         self.sequence = sequence
 
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
+        super().__init__()
 
-        FigureCanvas.__init__(self, fig)
-        self.setParent(parent)
+        self.setLayout(QVBoxLayout())
 
-        FigureCanvas.setSizePolicy(self,
-                                   QSizePolicy.Expanding,
-                                   QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
+        self.fig = Figure()
+        self.axes = self.fig.add_subplot(111)
+        self.fc = FigureCanvas(self.fig)
+        self.fc.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.layout().addWidget(self.fc)
 
-    def update_inspector(self):
+        self.form_group = QWidget()
+        self.form_group.setLayout(QFormLayout())
+        self.layout().addWidget(self.form_group)
+
+    def build_inspector(self):
+        self.clear_scrollbars()
         iter_vars_dict = self.sequence.variables.get_iterating_variables()
+        for var in iter_vars_dict:
+            slider = QSlider(Qt.Horizontal)
+            smin = float(iter_vars_dict[var]['start'])
+            smax = float(iter_vars_dict[var]['stop'])
+            # TODO: use the increment value
+            sinc = float(iter_vars_dict[var]['increment'])
+            slider.setRange(smin,smax)
+            slider.setValue(smin)
+            self.form_group.layout().addRow(var, slider)
 
         #TODO: add scrollbars
         print(iter_vars_dict)
 
-
-
+    def clear_scrollbars(self):
+        for i in reversed(range(self.form_group.layout().count())):
+            widget = self.form_group.layout().itemAt(i).widget() # type: QWidget
+            widget.setParent(None)
+            widget.deleteLater()

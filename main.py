@@ -57,8 +57,8 @@ class ControlSystemGUI(QMainWindow):
         self.ui.static_variables_view.setItemDelegateForColumn(1, VariableEditDelegate())
 
         # Inspector setup
-        self.inspector_widget = InspectorWidget(self.sequence, self)
-        self.ui.inspector_plot_container.addWidget(self.inspector_widget)
+        self.inspector_widget = InspectorWidget(self.sequence)
+        self.ui.inspector_container.addWidget(self.inspector_widget)
 
         # SIGNALS
         ## General
@@ -166,7 +166,7 @@ class ControlSystemGUI(QMainWindow):
     @pyqtSlot(int)
     def tab_changed(self, tab_index):
         if self.ui.tabWidget.tabText(tab_index) == "Inspector":
-            self.inspector_widget.update_inspector()
+            self.inspector_widget.build_inspector()
 
 
 

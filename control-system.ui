@@ -488,8 +488,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>98</width>
-             <height>28</height>
+             <width>1112</width>
+             <height>761</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5"/>
@@ -565,7 +565,7 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_8">
         <item>
-         <layout class="QVBoxLayout" name="inspector_plot_container"/>
+         <layout class="QVBoxLayout" name="inspector_container"/>
         </item>
        </layout>
       </widget>
@@ -579,7 +579,7 @@
      <x>0</x>
      <y>0</y>
      <width>1134</width>
-     <height>24</height>
+     <height>14</height>
     </rect>
    </property>
   </widget>
