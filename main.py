@@ -87,66 +87,6 @@ class ControlSystemGUI(QMainWindow):
         self.group_idx = 0
         self.routine_idx = 0
 
-        """"
-        #############################################
-        # DUMMY DATA FOR TESTING
-        self.variables_model.add_group("MOT")
-        self.variables_model.add_group("Compression")
-        self.variables_model.add_group("Dipole Trap")
-        self.variables_model.add_group("Absorption Imaging")
-
-        prnt = self.variables_model.index(0,0)
-        self.variables_model.add_variable(prnt, name="loading_time", set="0.2", comment="ms")
-        self.variables_model.add_variable(prnt, name="slower_beam_pwr", set="1000", comment="W")
-        self.variables_model.add_variable(prnt, name="oven_shutter_time", set="100", comment="ms")
-        self.variables_model.add_variable(prnt, name="cooler_detuning", set="-20", comment="MHz")
-        self.variables_model.add_variable(prnt, name="repumper_detuning", set="return bottom_power+4", comment="MHz")
-
-        prnt = self.variables_model.index(2, 0)
-        self.variables_model.add_variable(prnt, name="evaporation_time", value="0", start="0",stop="3000",increment="100",iterator=True)
-        self.variables_model.add_variable(prnt, name="bottom_power", set="y = np.exp(-5*loading_time)\namp = 4\nreturn amp*y", comment="W")
-
-        prnt = self.variables_model.index(3, 0)
-        self.variables_model.add_variable(prnt, name="probe_detuning", value="-40", start="-40",stop="40",increment="5",iterator=True)
-
-        new_routine = self.routines_model.add_routine("MOT",[self.cards[0].channels[0], self.cards[0].channels[1], self.cards[2].channels[0]])
-
-        for i in range(5):
-            new_event = QStandardItem()
-            new_event.setCheckable(True)
-            if i%2 == 0:
-                new_event.setCheckState(Qt.Unchecked)
-            else:
-                new_event.setCheckState(Qt.Checked)
-            new_event.setData("2",utils.EventDurationRole)
-            new_routine.child(0).appendRow(new_event)
-
-        for i in range(4):
-            new_event = QStandardItem()
-            new_event.setCheckable(True)
-            if i%2 == 0:
-                new_event.setCheckState(Qt.Unchecked)
-            else:
-                new_event.setCheckState(Qt.Checked)
-            new_event.setData("4",utils.EventDurationRole)
-            new_routine.child(1).appendRow(new_event)
-
-        new_routine = self.routines_model.add_routine("Compression", [self.cards[0].channels[3]])
-
-        for i in range(4):
-            new_event = QStandardItem()
-            new_event.setCheckable(True)
-            if i%2 == 0:
-                new_event.setCheckState(Qt.Unchecked)
-            else:
-                new_event.setCheckState(Qt.Checked)
-            new_event.setData("4",utils.EventDurationRole)
-            new_routine.child(0).appendRow(new_event)
-
-        self.sequence_editor.set_routine(0)
-        ########################################################
-        """
-
     ###########
     # GENERAL #
     ###########

@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.uic import *
+import numpy as np
 import utils
 import cards
 from routines import RoutinesModel
@@ -503,24 +504,47 @@ class InspectorWidget(QWidget):
         self.form_group.setLayout(QFormLayout())
         self.layout().addWidget(self.form_group)
 
+        self.slider_widgets = {}
+
     def build_inspector(self):
-        self.clear_scrollbars()
+        self.clear_sliders()
         iter_vars_dict = self.sequence.variables.get_iterating_variables()
         for var in iter_vars_dict:
             slider = QSlider(Qt.Horizontal)
+            slider.valueChanged.connect(self.sliders_changed)
+            self.slider_widgets[var] = slider
+
             smin = float(iter_vars_dict[var]['start'])
             smax = float(iter_vars_dict[var]['stop'])
-            # TODO: use the increment value
             sinc = float(iter_vars_dict[var]['increment'])
-            slider.setRange(smin,smax)
-            slider.setValue(smin)
+
+            var_vals = np.arange(smin, smax, sinc)
+            slider.setRange(0, len(var_vals)-1)
+
             self.form_group.layout().addRow(var, slider)
 
-        #TODO: add scrollbars
-        print(iter_vars_dict)
+        self.sliders_changed()
 
-    def clear_scrollbars(self):
+    def clear_sliders(self):
         for i in reversed(range(self.form_group.layout().count())):
             widget = self.form_group.layout().itemAt(i).widget() # type: QWidget
             widget.setParent(None)
             widget.deleteLater()
+
+        self.slider_widgets.clear()
+
+    @pyqtSlot()
+    def sliders_changed(self):
+        scanvars_indices = {}
+        for var in self.slider_widgets:
+            scanvars_indices[var] = self.slider_widgets[var].value()
+
+        print(scanvars_indices)
+
+        self.update_plot(scanvars_indices)
+
+    def update_plot(self, scanvars_indices):
+        # TODO
+        pass
+
+
