@@ -555,4 +555,4 @@ class IteratorSlidersWidget(QWidget):
         for var in self.slider_widgets:
             scanvars_indices[var] = self.slider_widgets[var].value()
 
-        print(scanvars_indices)
+        #print(scanvars_indices)

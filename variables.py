@@ -81,7 +81,7 @@ class VariablesModel(QStandardItemModel):
         if start_idx.data() == None: #Initialize interator if start is not defined
             value_idx = var_idx.parent().child(var_idx.row(), self.variable_fields.index("value"))
             val = value_idx.data()
-            print(val)
+            #print(val)
             self.setData(start_idx,val)
 
             stop_idx = var_idx.parent().child(var_idx.row(), self.variable_fields.index("stop"))
@@ -147,7 +147,7 @@ class VariablesModel(QStandardItemModel):
         num_groups = self.rowCount()
         for g in range(num_groups):
             group_index = self.index(g,0)
-            print(group_index.data())
+            #print(group_index.data())
             num_variables = self.rowCount(group_index)
             for v in range(num_variables):
                 # If it is an interating variable
@@ -230,8 +230,7 @@ class VariablesModel(QStandardItemModel):
                     var_val = loc_dict["_return_"]
                     val_idx = self.index(v, self.variable_fields.index("value"), group_index)
                     var_name_idx = self.index(v, self.variable_fields.index("name"), group_index)
-                    self.itemFromIndex(var_name_idx).setBackground(Qt.white)
-                    self.itemFromIndex(var_name_idx).setFont(QFont())
+                    self.update_style(var_name_idx)
                     var_name = var_name_idx.data()
                     self.setData(val_idx, "%f"%var_val)
                     variables_dict[var_name] = var_val
@@ -247,17 +246,31 @@ class VariablesModel(QStandardItemModel):
                         for g,v in to_do:
                             group_index = self.index(g, 0)
                             name_index = self.index(v, self.variable_fields.index("name"), group_index)
-                            color = QColor()
-                            color.setNamedColor("#ffc5c7")
-                            font = QFont()
-                            font.setStrikeOut(True)
-                            self.itemFromIndex(name_index).setBackground(color)
-                            self.itemFromIndex(name_index).setFont(font)
+                            self.update_style(name_index, error=True)
                         break
 
         self.blockSignals(False)
 
-
+    def update_style(self,name_index :QModelIndex, error=False):
+        # TODO: find out if a variable is a code variable and change to italics acordignly
+        print(name_index.data())
+        #print(name_index.model().data(name_index,utils.VariableTypeRole))
+        code_var = False
+        color = QColor()
+        font = QFont()
+        if not code_var and not error:
+            self.itemFromIndex(name_index).setBackground(Qt.white)
+            self.itemFromIndex(name_index).setFont(font)
+        elif code_var and not error:
+            font.setItalic(True)
+            self.itemFromIndex(name_index).setBackground(Qt.white)
+            self.itemFromIndex(name_index).setFont(font)
+        elif code_var and error:
+            color.setNamedColor("#ffc5c7")
+            font.setStrikeOut(True)
+            font.setItalic(True)
+            self.itemFromIndex(name_index).setBackground(color)
+            self.itemFromIndex(name_index).setFont(font)
 
 
 class VariablesProxyModel(QSortFilterProxyModel):
