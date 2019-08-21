@@ -75,6 +75,9 @@ class VariablesModel(QStandardItemModel):
         self.dataChanged.emit(QModelIndex(), QModelIndex())
 
     def make_iterating(self, var_idx:QModelIndex):
+        self.setData(var_idx, Qt.Checked, Qt.CheckStateRole)
+        """
+        # Initialize iterating variable: commented out because it's better to have the user do it
         self.blockSignals(True)
         self.setData(var_idx, Qt.Checked, Qt.CheckStateRole)
         start_idx = var_idx.parent().child(var_idx.row(),self.variable_fields.index("start"))
@@ -91,6 +94,7 @@ class VariablesModel(QStandardItemModel):
             self.setData(increment_idx, "1")
         self.blockSignals(False)
         self.dataChanged.emit(QModelIndex(), QModelIndex())
+        """
 
 
     def get_group_list(self):
@@ -194,14 +198,18 @@ class VariablesModel(QStandardItemModel):
             # print("num_vars=%d"%num_variables)
             for v in range(num_variables):
                 iterator = self.index(v,self.variable_fields.index("iterator"),group_index).data(Qt.CheckStateRole)
-                var_name = self.index(v, self.variable_fields.index("name"), group_index).data()
+                name_idx = self.index(v, self.variable_fields.index("name"), group_index)
+                var_name = name_idx.data()
 
                 # Set iterating variables
                 if iterator == Qt.Checked:
                     var_start = self.index(v, self.variable_fields.index("start"), group_index).data()
                     val_idx = self.index(v, self.variable_fields.index("value"), group_index)
                     self.setData(val_idx, var_start)
-                    variables_dict[var_name] = float(var_start)
+                    try:
+                        variables_dict[var_name] = float(var_start)
+                    except TypeError:
+                        self.update_style(name_idx, error=True)
 
                 # Set numerical variables
                 else:
@@ -212,6 +220,7 @@ class VariablesModel(QStandardItemModel):
                             var_val = float(var_set)  # Cast variables which are numerical
                             val_idx = self.index(v, self.variable_fields.index("value"), group_index)
                             self.setData(val_idx, "%f"%var_val)
+                            self.update_style(name_idx)
                             variables_dict[var_name] = var_val
                         except ValueError:
                             to_do.append((g,v))
@@ -253,22 +262,19 @@ class VariablesModel(QStandardItemModel):
 
     def update_style(self,name_index :QModelIndex, error=False):
         # TODO: find out if a variable is a code variable and change to italics acordignly
-        print(name_index.data())
         #print(name_index.model().data(name_index,utils.VariableTypeRole))
         code_var = False
         color = QColor()
         font = QFont()
-        if not code_var and not error:
-            self.itemFromIndex(name_index).setBackground(Qt.white)
-            self.itemFromIndex(name_index).setFont(font)
-        elif code_var and not error:
+        if code_var:
             font.setItalic(True)
+
+        if not error:
             self.itemFromIndex(name_index).setBackground(Qt.white)
             self.itemFromIndex(name_index).setFont(font)
-        elif code_var and error:
+        elif error:
             color.setNamedColor("#ffc5c7")
             font.setStrikeOut(True)
-            font.setItalic(True)
             self.itemFromIndex(name_index).setBackground(color)
             self.itemFromIndex(name_index).setFont(font)
 

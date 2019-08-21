@@ -523,6 +523,7 @@ class IteratorSlidersWidget(QWidget):
         self.slider_widgets = {}
 
     def update_sliders(self):
+        # TODO: only rebuild sliders if iterating variables have changed
         self.clear_sliders()
         iter_vars_dict = self.sequence.variables.get_iterating_variables()
         for var in iter_vars_dict:
@@ -530,14 +531,18 @@ class IteratorSlidersWidget(QWidget):
             slider.valueChanged.connect(self.sliders_changed)
             self.slider_widgets[var] = slider
 
-            smin = float(iter_vars_dict[var]['start'])
-            smax = float(iter_vars_dict[var]['stop'])
-            sinc = float(iter_vars_dict[var]['increment'])
+            try:
+                smin = float(iter_vars_dict[var]['start'])
+                smax = float(iter_vars_dict[var]['stop'])
+                sinc = float(iter_vars_dict[var]['increment'])
 
-            var_vals = np.arange(smin, smax, sinc)
-            slider.setRange(0, len(var_vals)-1)
+                var_vals = np.arange(smin, smax, sinc)
+                slider.setRange(0, len(var_vals)-1)
 
-            self.form_group.layout().addRow(var, slider)
+                self.form_group.layout().addRow(var, slider)
+
+            except TypeError: # When values are not well defined
+                pass
 
         self.sliders_changed()
 
