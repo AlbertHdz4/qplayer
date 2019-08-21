@@ -56,6 +56,9 @@ class ControlSystemGUI(QMainWindow):
         self.ui.static_variables_view.header().setSectionResizeMode(1,QHeaderView.Stretch)
         self.ui.static_variables_view.setItemDelegateForColumn(1, VariableEditDelegate())
 
+        self.iterator_sliders_widget = IteratorSlidersWidget(self.sequence)
+        self.ui.iterator_sliders_container.addWidget(self.iterator_sliders_widget)
+
         # Inspector setup
         self.inspector_widget = InspectorWidget(self.sequence)
         self.ui.inspector_container.addWidget(self.inspector_widget)
@@ -72,6 +75,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.iterator_variables_view.customContextMenuRequested.connect(self.iterator_variables_context_menu_requested)
         self.variables_model.dataChanged.connect(self.iterator_variables_model.invalidate)
         self.variables_model.dataChanged.connect(self.static_variables_model.invalidate)
+        self.variables_model.dataChanged.connect(self.iterator_sliders_widget.update_sliders)
         ## Sequence Editor
         self.ui.add_routine_button.clicked.connect(self.add_routine)
         self.ui.config_routine_button.clicked.connect(self.config_routine)
@@ -185,7 +189,7 @@ class ControlSystemGUI(QMainWindow):
                 src_idx.model().setData(src_idx,new_variable_type,utils.VariableTypeRole)
             elif action == iterate_action:
                 iterator_idx = src_idx.parent().child(src_idx.row(),VariablesModel.variable_fields.index("iterator"))
-                self.variables_model.setData(iterator_idx,Qt.Checked,Qt.CheckStateRole)
+                self.variables_model.make_iterating(iterator_idx)
             elif action == delete_action:
                 self.variables_model.removeRow(src_idx.row(),src_idx.parent())
             elif action in move_actions:

@@ -74,6 +74,25 @@ class VariablesModel(QStandardItemModel):
         parent.appendRow(new_row)
         self.dataChanged.emit(QModelIndex(), QModelIndex())
 
+    def make_iterating(self, var_idx:QModelIndex):
+        self.blockSignals(True)
+        self.setData(var_idx, Qt.Checked, Qt.CheckStateRole)
+        start_idx = var_idx.parent().child(var_idx.row(),self.variable_fields.index("start"))
+        if start_idx.data() == None: #Initialize interator if start is not defined
+            value_idx = var_idx.parent().child(var_idx.row(), self.variable_fields.index("value"))
+            val = value_idx.data()
+            print(val)
+            self.setData(start_idx,val)
+
+            stop_idx = var_idx.parent().child(var_idx.row(), self.variable_fields.index("stop"))
+            self.setData(stop_idx, val)
+
+            increment_idx = var_idx.parent().child(var_idx.row(), self.variable_fields.index("increment"))
+            self.setData(increment_idx, "1")
+        self.blockSignals(False)
+        self.dataChanged.emit(QModelIndex(), QModelIndex())
+
+
     def get_group_list(self):
         group_list = []
         for j in range(self.rowCount()):

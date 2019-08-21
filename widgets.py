@@ -500,13 +500,29 @@ class InspectorWidget(QWidget):
         self.fc.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.layout().addWidget(self.fc)
 
+    def build_inspector(self):
+        # TODO
+        pass
+
+    def update_plot(self, scanvars_indices):
+        # TODO
+        pass
+
+class IteratorSlidersWidget(QWidget):
+    def __init__(self, sequence=None):
+        self.sequence = sequence
+
+        super().__init__()
+
+        self.setLayout(QVBoxLayout())
+
         self.form_group = QWidget()
         self.form_group.setLayout(QFormLayout())
         self.layout().addWidget(self.form_group)
 
         self.slider_widgets = {}
 
-    def build_inspector(self):
+    def update_sliders(self):
         self.clear_sliders()
         iter_vars_dict = self.sequence.variables.get_iterating_variables()
         for var in iter_vars_dict:
@@ -540,11 +556,3 @@ class InspectorWidget(QWidget):
             scanvars_indices[var] = self.slider_widgets[var].value()
 
         print(scanvars_indices)
-
-        self.update_plot(scanvars_indices)
-
-    def update_plot(self, scanvars_indices):
-        # TODO
-        pass
-
-
