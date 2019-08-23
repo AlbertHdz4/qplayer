@@ -74,8 +74,11 @@ class VariablesModel(QStandardItemModel):
         parent.appendRow(new_row)
         self.dataChanged.emit(QModelIndex(), QModelIndex())
 
-    def make_iterating(self, var_idx:QModelIndex):
-        self.setData(var_idx, Qt.Checked, Qt.CheckStateRole)
+    def is_iterator(self, var_index:QModelIndex):
+        return var_index.parent().child(var_index.row(),self.variable_fields.index("iterator")).data(Qt.CheckStateRole) == Qt.Checked
+
+    def make_iterating(self, var_index:QModelIndex):
+        self.setData(var_index, Qt.Checked, Qt.CheckStateRole)
 
     def is_code_var(self, var_index):
         # The variable type is part of the "set" cell only so we must refer to it directly
@@ -199,6 +202,8 @@ class VariablesModel(QStandardItemModel):
                 if iterator == Qt.Checked:
                     var_start = self.index(v, self.variable_fields.index("start"), group_index).data()
                     val_idx = self.index(v, self.variable_fields.index("value"), group_index)
+
+                    # TODO: set value according to current indices
                     self.setData(val_idx, var_start)
                     try:
                         variables_dict[var_name] = float(var_start)
@@ -255,10 +260,9 @@ class VariablesModel(QStandardItemModel):
         self.blockSignals(False)
 
     def update_style(self, name_index:QModelIndex, error=False):
-        # TODO: find out if a variable is a code variable and change to italics acordignly
         color = QColor()
         font = QFont()
-        if self.is_code_var(name_index):
+        if self.is_code_var(name_index) and not self.is_iterator(name_index):
             font.setItalic(True)
 
         if not error:
