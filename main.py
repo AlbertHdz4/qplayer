@@ -164,7 +164,7 @@ class ControlSystemGUI(QMainWindow):
 
             variable_type_action = None
             new_variable_type = None
-            if src_idx.data(utils.VariableTypeRole) == utils.CodeVariable:
+            if self.variables_model.is_code_var(src_idx):
                 variable_type_action = menu.addAction("Set as numeric variable")
                 new_variable_type = utils.NumericVariable
             else:
@@ -186,7 +186,7 @@ class ControlSystemGUI(QMainWindow):
 
             action = menu.exec(self.ui.static_variables_view.mapToGlobal(pos)) # type: QMenu
             if action == variable_type_action:
-                src_idx.model().setData(src_idx,new_variable_type,utils.VariableTypeRole)
+                self.variables_model.set_var_type(src_idx, new_variable_type)
             elif action == iterate_action:
                 iterator_idx = src_idx.parent().child(src_idx.row(),VariablesModel.variable_fields.index("iterator"))
                 self.variables_model.make_iterating(iterator_idx)

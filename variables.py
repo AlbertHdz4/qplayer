@@ -76,25 +76,19 @@ class VariablesModel(QStandardItemModel):
 
     def make_iterating(self, var_idx:QModelIndex):
         self.setData(var_idx, Qt.Checked, Qt.CheckStateRole)
-        """
-        # Initialize iterating variable: commented out because it's better to have the user do it
-        self.blockSignals(True)
-        self.setData(var_idx, Qt.Checked, Qt.CheckStateRole)
-        start_idx = var_idx.parent().child(var_idx.row(),self.variable_fields.index("start"))
-        if start_idx.data() == None: #Initialize interator if start is not defined
-            value_idx = var_idx.parent().child(var_idx.row(), self.variable_fields.index("value"))
-            val = value_idx.data()
-            #print(val)
-            self.setData(start_idx,val)
 
-            stop_idx = var_idx.parent().child(var_idx.row(), self.variable_fields.index("stop"))
-            self.setData(stop_idx, val)
+    def is_code_var(self, var_index):
+        # The variable type is part of the "set" cell only so we must refer to it directly
+        # This function works if the var_index is any cell of the variable's row
+        var_type = var_index.parent().child(var_index.row(),self.variable_fields.index("set")).data(utils.VariableTypeRole)
+        return var_type == utils.CodeVariable
 
-            increment_idx = var_idx.parent().child(var_idx.row(), self.variable_fields.index("increment"))
-            self.setData(increment_idx, "1")
-        self.blockSignals(False)
-        self.dataChanged.emit(QModelIndex(), QModelIndex())
-        """
+    def set_var_type(self, var_index:QModelIndex, var_type):
+        # The variable type is part of the "set" cell only so we must refer to it directly
+        # This function works if the var_index is any cell of the variable's row
+        var_set_idx = var_index.parent().child(var_index.row(),self.variable_fields.index("set"))
+        self.setData(var_set_idx, var_type, utils.VariableTypeRole)
+
 
 
     def get_group_list(self):
@@ -260,13 +254,11 @@ class VariablesModel(QStandardItemModel):
 
         self.blockSignals(False)
 
-    def update_style(self,name_index :QModelIndex, error=False):
+    def update_style(self, name_index:QModelIndex, error=False):
         # TODO: find out if a variable is a code variable and change to italics acordignly
-        #print(name_index.model().data(name_index,utils.VariableTypeRole))
-        code_var = False
         color = QColor()
         font = QFont()
-        if code_var:
+        if self.is_code_var(name_index):
             font.setItalic(True)
 
         if not error:
