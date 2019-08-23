@@ -541,7 +541,7 @@ class IteratorSlidersWidget(QWidget):
 
                 self.form_group.layout().addRow(var, slider)
 
-            except TypeError: # When values are not well defined
+            except (TypeError, ValueError): # When values are not well defined
                 pass
 
         self.sliders_changed()

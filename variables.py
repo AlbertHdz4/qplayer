@@ -194,20 +194,26 @@ class VariablesModel(QStandardItemModel):
             num_variables = self.rowCount(group_index)
             # print("num_vars=%d"%num_variables)
             for v in range(num_variables):
-                iterator = self.index(v,self.variable_fields.index("iterator"),group_index).data(Qt.CheckStateRole)
                 name_idx = self.index(v, self.variable_fields.index("name"), group_index)
                 var_name = name_idx.data()
 
                 # Set iterating variables
-                if iterator == Qt.Checked:
+                if self.is_iterator(name_idx):
                     var_start = self.index(v, self.variable_fields.index("start"), group_index).data()
+                    var_stop = self.index(v, self.variable_fields.index("stop"), group_index).data()
+                    var_increment = self.index(v, self.variable_fields.index("increment"), group_index).data()
                     val_idx = self.index(v, self.variable_fields.index("value"), group_index)
 
                     # TODO: set value according to current indices
                     self.setData(val_idx, var_start)
                     try:
                         variables_dict[var_name] = float(var_start)
-                    except TypeError:
+
+                        #We try to convert the stop and increment values to see if there are errors
+                        float(var_stop)
+                        float(var_increment)
+                        self.update_style(name_idx)
+                    except (TypeError, ValueError):
                         self.update_style(name_idx, error=True)
 
                 # Set numerical variables
