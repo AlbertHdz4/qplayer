@@ -523,29 +523,58 @@ class IteratorSlidersWidget(QWidget):
         self.slider_widgets = {}
 
     def update_sliders(self):
-        # TODO: only rebuild sliders if iterating variables have changed
-        self.clear_sliders()
+        # TODO: update_sliders is being called multiple times creating reace conditions
         iter_vars_dict = self.sequence.variables.get_iterating_variables()
+        self.remove_unused_sliders(iter_vars_dict)
+
         for var in iter_vars_dict:
-            slider = QSlider(Qt.Horizontal)
-            slider.valueChanged.connect(self.sliders_changed)
-            self.slider_widgets[var] = slider
 
             try:
                 smin = float(iter_vars_dict[var]['start'])
                 smax = float(iter_vars_dict[var]['stop'])
                 sinc = float(iter_vars_dict[var]['increment'])
-
                 var_vals = np.arange(smin, smax, sinc)
-                slider.setRange(0, len(var_vals)-1)
+                num_vals = len(var_vals)
 
-                self.form_group.layout().addRow(var, slider)
+                if var in self.slider_widgets: # check if the slider limits have changed
+                    curr_slider = self.slider_widgets[var] # type: QSlider
+                    if curr_slider.maximum() == num_vals-1:
+                        pass
+                    else:
+                        curr_slider.setRange(0, num_vals-1)
+
+                else:
+                    print("Adding new slider %s, current sliders %s"%(var, self.slider_widgets.keys()))
+                    slider = QSlider(Qt.Horizontal)
+                    slider.valueChanged.connect(self.sliders_changed)
+                    self.slider_widgets[var] = slider
+
+
+                    slider.setRange(0, num_vals-1)
+
+                    self.form_group.layout().addRow(var, slider)
 
             except (TypeError, ValueError): # When values are not well defined
                 pass
 
         self.sliders_changed()
 
+    def remove_unused_sliders(self, iter_vars_dict):
+        delete_list = []
+        for var in self.slider_widgets:
+            if var not in iter_vars_dict:
+                widget = self.slider_widgets[var]
+                print(type(widget))
+                widget.setParent(None)
+                widget.deleteLater()
+
+            delete_list.append(var)
+
+        for var in delete_list:
+            del self.slider_widgets[var]
+
+
+    # Removes all sliders
     def clear_sliders(self):
         for i in reversed(range(self.form_group.layout().count())):
             widget = self.form_group.layout().itemAt(i).widget() # type: QWidget
