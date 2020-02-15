@@ -523,7 +523,7 @@ class IteratorSlidersWidget(QWidget):
         self.slider_widgets = {}
 
     def update_sliders(self):
-        # TODO: update_sliders is being called multiple times creating reace conditions
+        # TODO: update_sliders is being called multiple times creating race conditions
         iter_vars_dict = self.sequence.variables.get_iterating_variables()
         self.remove_unused_sliders(iter_vars_dict)
 
@@ -546,7 +546,7 @@ class IteratorSlidersWidget(QWidget):
                 else:
                     print("Adding new slider %s, current sliders %s"%(var, self.slider_widgets.keys()))
                     slider = QSlider(Qt.Horizontal)
-                    slider.valueChanged.connect(self.sliders_changed)
+                    slider.valueChanged.connect(self.slider_value_changed)
                     self.slider_widgets[var] = slider
 
 
@@ -584,7 +584,7 @@ class IteratorSlidersWidget(QWidget):
         self.slider_widgets.clear()
 
     @pyqtSlot()
-    def sliders_changed(self):
+    def slider_value_changed(self):
         scanvars_indices = {}
         for var in self.slider_widgets:
             scanvars_indices[var] = self.slider_widgets[var].value()

@@ -101,12 +101,15 @@ class VariablesModel(QStandardItemModel):
         return group_list
 
     def load_variables_from_pystruct(self, variables_dict):
+        self.blockSignals(True)
         groups = variables_dict.keys()
         for group in groups:
             group_index = self.add_group(group)
             variables_list = variables_dict[group]
             for variable in variables_list:
                 self.add_variable(group_index,**variable)
+        self.blockSignals(False)
+        self.dataChanged.emit(QModelIndex(), QModelIndex())
 
     # returns the full data of this map in a plain python format for the purpose of saving or processing
     def get_variables_pystruct(self):
