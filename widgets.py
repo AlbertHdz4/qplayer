@@ -557,7 +557,7 @@ class IteratorSlidersWidget(QWidget):
             except (TypeError, ValueError): # When values are not well defined
                 pass
 
-        self.sliders_changed()
+        self.slider_value_changed()
 
     def remove_unused_sliders(self, iter_vars_dict):
         delete_list = []
