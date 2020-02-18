@@ -523,7 +523,7 @@ class IteratorSlidersWidget(QWidget):
         self.slider_widgets = {}
 
     def update_sliders(self):
-        # TODO: update_sliders is being called multiple times creating race conditions
+        print("Updating sliders")
         iter_vars_dict = self.sequence.variables.get_iterating_variables()
         self.remove_unused_sliders(iter_vars_dict)
 
@@ -536,9 +536,9 @@ class IteratorSlidersWidget(QWidget):
                 var_vals = np.arange(smin, smax, sinc)
                 num_vals = len(var_vals)
 
-                if var in self.slider_widgets: # check if the slider limits have changed
+                if var in self.slider_widgets: # if the slider already exists no not re-create
                     curr_slider = self.slider_widgets[var] # type: QSlider
-                    if curr_slider.maximum() == num_vals-1:
+                    if curr_slider.maximum() == num_vals-1: # check if the slider limits have changed
                         pass
                     else:
                         curr_slider.setRange(0, num_vals-1)
@@ -562,13 +562,16 @@ class IteratorSlidersWidget(QWidget):
     def remove_unused_sliders(self, iter_vars_dict):
         delete_list = []
         for var in self.slider_widgets:
-            if var not in iter_vars_dict:
-                widget = self.slider_widgets[var]
-                print(type(widget))
-                widget.setParent(None)
+            if var not in iter_vars_dict: # var is no longer an iterating variable -> remove slider
+                widget = self.slider_widgets[var] # type: QWidget
+                label = self.form_group.layout().labelForField(widget) # type: QLabel
+                print(label)
+                #widget.setParent(None)
                 widget.deleteLater()
+                #label.setParent(None)
+                label.deleteLater()
 
-            delete_list.append(var)
+                delete_list.append(var)
 
         for var in delete_list:
             del self.slider_widgets[var]
