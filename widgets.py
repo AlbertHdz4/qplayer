@@ -559,6 +559,7 @@ class IteratorSlidersWidget(QWidget):
 
         self.slider_value_changed()
 
+    # Only remove sliders of variables which are no longer scanning variables
     def remove_unused_sliders(self, iter_vars_dict):
         delete_list = []
         for var in self.slider_widgets:
@@ -566,16 +567,13 @@ class IteratorSlidersWidget(QWidget):
                 widget = self.slider_widgets[var] # type: QWidget
                 label = self.form_group.layout().labelForField(widget) # type: QLabel
                 print(label)
-                #widget.setParent(None)
                 widget.deleteLater()
-                #label.setParent(None)
                 label.deleteLater()
 
                 delete_list.append(var)
 
         for var in delete_list:
             del self.slider_widgets[var]
-
 
     # Removes all sliders
     def clear_sliders(self):
@@ -592,4 +590,4 @@ class IteratorSlidersWidget(QWidget):
         for var in self.slider_widgets:
             scanvars_indices[var] = self.slider_widgets[var].value()
 
-        #print(scanvars_indices)
+        self.sequence.variables.set_iterating_variables_indices(scanvars_indices)

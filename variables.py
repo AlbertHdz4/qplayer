@@ -92,8 +92,6 @@ class VariablesModel(QStandardItemModel):
         var_set_idx = var_index.parent().child(var_index.row(),self.variable_fields.index("set"))
         self.setData(var_set_idx, var_type, utils.VariableTypeRole)
 
-
-
     def get_group_list(self):
         group_list = []
         for j in range(self.rowCount()):
@@ -154,7 +152,7 @@ class VariablesModel(QStandardItemModel):
             #print(group_index.data())
             num_variables = self.rowCount(group_index)
             for v in range(num_variables):
-                # If it is an interating variable
+                # If it is an iterating variable
                 if self.index(v,self.variable_fields.index("iterator"),group_index).data(Qt.CheckStateRole) == Qt.Checked:
                     var_name = self.index(v, self.variable_fields.index("name"), group_index).data()
                     var_start = self.index(v, self.variable_fields.index("start"), group_index).data()
@@ -164,6 +162,12 @@ class VariablesModel(QStandardItemModel):
 
         return iter_vars
 
+    def set_iterating_variables_indices(self, scanvars_indices):
+        for (var_name,idx) in scanvars_indices.items():
+            print(var_name)
+            items = self.findItems(var_name)
+            print(items)
+            # TODO: Find out why nothing is being found and finish implementing method
 
     def to_number(self, expr, variables=None):
         if variables is None:
