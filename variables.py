@@ -164,10 +164,14 @@ class VariablesModel(QStandardItemModel):
 
     def set_iterating_variables_indices(self, scanvars_indices):
         for (var_name,idx) in scanvars_indices.items():
-            print(var_name)
-            items = self.findItems(var_name)
-            print(items)
-            # TODO: Find out why nothing is being found and finish implementing method
+
+            # only one item should be returned if names are unique
+            item = self.findItems(var_name, flags=Qt.MatchRecursive)[0] # type: QStandardItem
+            print(item)
+            print(item.parent().rowCount())
+            print(item.parent().columnCount())
+            item.parent().item(row=0, column=0) # use iterator index column
+            # TODO: Add an iterator index column and only update the index here. Have the update_values function actually update the set_value
 
     def to_number(self, expr, variables=None):
         if variables is None:
