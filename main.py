@@ -39,7 +39,7 @@ class ControlSystemGUI(QMainWindow):
         # PROXY MODELS
         self.static_variables_model = VariablesProxyModel(["name","set","value","comment"], True, False, True)
         self.static_variables_model.setSourceModel(self.variables_model)
-        self.iterator_variables_model = VariablesProxyModel(["name","value","start","stop","increment"], False, True, False)
+        self.iterator_variables_model = VariablesProxyModel(["name","value","start","stop","increment","scan index"], False, True, False)
         self.iterator_variables_model.setSourceModel(self.variables_model)
 
         # ADD MODELS TO VIEWS

@@ -523,7 +523,6 @@ class IteratorSlidersWidget(QWidget):
         self.slider_widgets = {}
 
     def update_sliders(self):
-        print("Updating sliders")
         iter_vars_dict = self.sequence.variables.get_iterating_variables()
         self.remove_unused_sliders(iter_vars_dict)
 
@@ -533,7 +532,7 @@ class IteratorSlidersWidget(QWidget):
                 smin = float(iter_vars_dict[var]['start'])
                 smax = float(iter_vars_dict[var]['stop'])
                 sinc = float(iter_vars_dict[var]['increment'])
-                var_vals = np.arange(smin, smax, sinc)
+                var_vals = np.arange(smin, smax+sinc, sinc)
                 num_vals = len(var_vals)
 
                 if var in self.slider_widgets: # if the slider already exists no not re-create
@@ -544,7 +543,7 @@ class IteratorSlidersWidget(QWidget):
                         curr_slider.setRange(0, num_vals-1)
 
                 else:
-                    print("Adding new slider %s, current sliders %s"%(var, self.slider_widgets.keys()))
+                    # print("Adding new slider %s, current sliders %s"%(var, self.slider_widgets.keys()))
                     slider = QSlider(Qt.Horizontal)
                     slider.valueChanged.connect(self.slider_value_changed)
                     self.slider_widgets[var] = slider
@@ -566,7 +565,6 @@ class IteratorSlidersWidget(QWidget):
             if var not in iter_vars_dict: # var is no longer an iterating variable -> remove slider
                 widget = self.slider_widgets[var] # type: QWidget
                 label = self.form_group.layout().labelForField(widget) # type: QLabel
-                print(label)
                 widget.deleteLater()
                 label.deleteLater()
 

@@ -9,7 +9,8 @@
         "start": null,
         "stop": null,
         "increment": null,
-        "comment": "ms"
+        "comment": "ms",
+        "scan_index": null
       },
       {
         "name": "slower_beam_pwr",
@@ -19,7 +20,8 @@
         "start": null,
         "stop": null,
         "increment": null,
-        "comment": "W"
+        "comment": "W",
+        "scan_index": null
       },
       {
         "name": "oven_shutter_time",
@@ -29,7 +31,8 @@
         "start": null,
         "stop": null,
         "increment": null,
-        "comment": "ms"
+        "comment": "ms",
+        "scan_index": null
       },
       {
         "name": "cooler_detuning",
@@ -39,7 +42,8 @@
         "start": null,
         "stop": null,
         "increment": null,
-        "comment": "MHz"
+        "comment": "MHz",
+        "scan_index": null
       },
       {
         "name": "repumper_detuning",
@@ -49,7 +53,8 @@
         "start": null,
         "stop": null,
         "increment": null,
-        "comment": "MHz"
+        "comment": "MHz",
+        "scan_index": null
       }
     ],
     "Dipole Trap": [
@@ -61,7 +66,8 @@
         "start": "0",
         "stop": "3000",
         "increment": "100",
-        "comment": null
+        "comment": null,
+        "scan_index": null
       },
       {
         "name": "bottom_power",
@@ -71,7 +77,8 @@
         "start": null,
         "stop": null,
         "increment": null,
-        "comment": "W"
+        "comment": "W",
+        "scan_index": null
       }
     ],
     "Absorption Imaging": [
@@ -83,7 +90,8 @@
         "start": "-40",
         "stop": "40",
         "increment": "5",
-        "comment": null
+        "comment": null,
+        "scan_index": null
       }
     ]
   },

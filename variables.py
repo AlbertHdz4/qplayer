@@ -13,8 +13,8 @@ import numpy as np
 
 
 class VariablesModel(QStandardItemModel):
-    variable_fields = ["name","set", "value","iterator","start","stop","increment","comment"]
-    variable_types = [str, str, float, bool, float, float, float, str]
+    variable_fields = ["name", "set", "value", "iterator", "start", "stop", "increment", "comment", "scan index"]
+    variable_types = [str, str, float, bool, float, float, float, str, int]
 
     def __init__(self):
         super().__init__()
@@ -164,14 +164,10 @@ class VariablesModel(QStandardItemModel):
 
     def set_iterating_variables_indices(self, scanvars_indices):
         for (var_name,idx) in scanvars_indices.items():
-
             # only one item should be returned if names are unique
             item = self.findItems(var_name, flags=Qt.MatchRecursive)[0] # type: QStandardItem
-            print(item)
-            print(item.parent().rowCount())
-            print(item.parent().columnCount())
-            item.parent().item(row=0, column=0) # use iterator index column
-            # TODO: Add an iterator index column and only update the index here. Have the update_values function actually update the set_value
+            print(str(idx))
+            item.parent().child(0, column=self.variable_fields.index("scan index")).setData(str(idx),Qt.DisplayRole)
 
     def to_number(self, expr, variables=None):
         if variables is None:
@@ -213,16 +209,22 @@ class VariablesModel(QStandardItemModel):
                     var_start = self.index(v, self.variable_fields.index("start"), group_index).data()
                     var_stop = self.index(v, self.variable_fields.index("stop"), group_index).data()
                     var_increment = self.index(v, self.variable_fields.index("increment"), group_index).data()
+                    var_scan_index = self.index(v, self.variable_fields.index("scan index"), group_index).data()
+
                     val_idx = self.index(v, self.variable_fields.index("value"), group_index)
 
-                    # TODO: set value according to current indices
-                    self.setData(val_idx, var_start)
                     try:
-                        variables_dict[var_name] = float(var_start)
+                        fstart = float(var_start)
+                        fstop = float(var_stop)
+                        finc = float(var_increment)
+                        isidx = int(var_scan_index)
+                        curr_val = np.arange(fstart, fstop+finc, finc)[isidx]
 
-                        #We try to convert the stop and increment values to see if there are errors
-                        float(var_stop)
-                        float(var_increment)
+                        # ToDo: sometimes set value is not displayed imediately. Force redraw?
+                        self.setData(val_idx, str(curr_val),Qt.DisplayRole)
+                        variables_dict[var_name] = curr_val
+
+                        # If no errors during conversion, set default style
                         self.update_style(name_idx)
                     except (TypeError, ValueError):
                         self.update_style(name_idx, error=True)
