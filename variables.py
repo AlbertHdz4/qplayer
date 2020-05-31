@@ -5,7 +5,7 @@
 #  
 #
 
-from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel, pyqtSlot
+from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel, pyqtSlot, pyqtSignal
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont, QColor
 import utils
 
@@ -164,9 +164,9 @@ class VariablesModel(QStandardItemModel):
 
     def set_iterating_variables_indices(self, scanvars_indices):
         for (var_name,idx) in scanvars_indices.items():
-            # only one item should be returned if names are unique
+            # only one item should be returned since variable names should be unique
             item = self.findItems(var_name, flags=Qt.MatchRecursive)[0] # type: QStandardItem
-            print(str(idx))
+            # print(str(idx))
             item.parent().child(0, column=self.variable_fields.index("scan index")).setData(str(idx),Qt.DisplayRole)
 
     def to_number(self, expr, variables=None):
@@ -183,6 +183,8 @@ class VariablesModel(QStandardItemModel):
 
     @pyqtSlot()
     def update_values(self):
+
+        value_changed = False # Flag to decide if dataChanged signal should be emited
 
         to_do = [] # reference to non-numerical variables
         variables_dict = {'np':np}
@@ -220,8 +222,9 @@ class VariablesModel(QStandardItemModel):
                         isidx = int(var_scan_index)
                         curr_val = np.arange(fstart, fstop+finc, finc)[isidx]
 
-                        # ToDo: sometimes set value is not displayed imediately. Force redraw?
-                        self.setData(val_idx, str(curr_val),Qt.DisplayRole)
+                        if str(curr_val) != self.data(val_idx, Qt.DisplayRole):
+                            self.setData(val_idx, str(curr_val),Qt.DisplayRole)
+                            value_changed = True
                         variables_dict[var_name] = curr_val
 
                         # If no errors during conversion, set default style
@@ -237,8 +240,10 @@ class VariablesModel(QStandardItemModel):
                         try:
                             var_val = float(var_set)  # Cast variables which are numerical
                             val_idx = self.index(v, self.variable_fields.index("value"), group_index)
-                            self.setData(val_idx, "%f"%var_val)
-                            self.update_style(name_idx)
+                            if "%f"%var_val != self.data(val_idx):
+                                self.setData(val_idx, "%f"%var_val)
+                                value_changed = True
+                                self.update_style(name_idx)
                             variables_dict[var_name] = var_val
                         except ValueError:
                             to_do.append((g,v))
@@ -259,7 +264,9 @@ class VariablesModel(QStandardItemModel):
                     var_name_idx = self.index(v, self.variable_fields.index("name"), group_index)
                     self.update_style(var_name_idx)
                     var_name = var_name_idx.data()
-                    self.setData(val_idx, "%f"%var_val)
+                    if "%f" % var_val != self.data(val_idx):
+                        self.setData(val_idx, "%f" % var_val)
+                        value_changed = True
                     variables_dict[var_name] = var_val
                     retry_attempts = 0
                 except NameError:
@@ -277,6 +284,9 @@ class VariablesModel(QStandardItemModel):
                         break
 
         self.blockSignals(False)
+        if value_changed:
+            self.dataChanged.emit(QModelIndex(),QModelIndex())
+            # ToDo: maybe it's more efficient to call dataChanged for each QModelIndex that was changed
 
     def update_style(self, name_index:QModelIndex, error=False):
         color = QColor()

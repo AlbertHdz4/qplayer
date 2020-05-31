@@ -508,6 +508,7 @@ class InspectorWidget(QWidget):
         # TODO
         pass
 
+
 class IteratorSlidersWidget(QWidget):
     def __init__(self, sequence=None):
         self.sequence = sequence
@@ -521,8 +522,12 @@ class IteratorSlidersWidget(QWidget):
         self.layout().addWidget(self.form_group)
 
         self.slider_widgets = {}
+        self.i = 0
 
+    # Add or remove sliders when new iterating variables are added
     def update_sliders(self):
+        print(self.i)
+        self.i += 1
         iter_vars_dict = self.sequence.variables.get_iterating_variables()
         self.remove_unused_sliders(iter_vars_dict)
 
@@ -554,6 +559,7 @@ class IteratorSlidersWidget(QWidget):
                     self.form_group.layout().addRow(var, slider)
 
             except (TypeError, ValueError): # When values are not well defined
+                # ToDo: give an indication of the problem (i.e. paint fields red maybe).
                 pass
 
         self.slider_value_changed()
@@ -572,15 +578,6 @@ class IteratorSlidersWidget(QWidget):
 
         for var in delete_list:
             del self.slider_widgets[var]
-
-    # Removes all sliders
-    def clear_sliders(self):
-        for i in reversed(range(self.form_group.layout().count())):
-            widget = self.form_group.layout().itemAt(i).widget() # type: QWidget
-            widget.setParent(None)
-            widget.deleteLater()
-
-        self.slider_widgets.clear()
 
     @pyqtSlot()
     def slider_value_changed(self):

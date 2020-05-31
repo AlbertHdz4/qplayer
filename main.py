@@ -13,7 +13,6 @@ from playlist import *
 from widgets import *
 from sequence import Sequence
 
-
 class ControlSystemGUI(QMainWindow):
     def __init__(self, parent=None):
         self.config = config.Config()
@@ -76,6 +75,8 @@ class ControlSystemGUI(QMainWindow):
         self.variables_model.dataChanged.connect(self.iterator_variables_model.invalidate)
         self.variables_model.dataChanged.connect(self.static_variables_model.invalidate)
         self.variables_model.dataChanged.connect(self.iterator_sliders_widget.update_sliders)
+        self.variables_model.dataChanged.connect(self.variable_data_changed)
+
         ## Sequence Editor
         self.ui.add_routine_button.clicked.connect(self.add_routine)
         self.ui.config_routine_button.clicked.connect(self.config_routine)
@@ -111,6 +112,11 @@ class ControlSystemGUI(QMainWindow):
     def tab_changed(self, tab_index):
         if self.ui.tabWidget.tabText(tab_index) == "Inspector":
             self.inspector_widget.build_inspector()
+
+
+    @pyqtSlot()
+    def variable_data_changed(self):
+        print("variable data changed")
 
 
 
@@ -263,12 +269,6 @@ class ControlSystemGUI(QMainWindow):
                                                                "If yes, type the name of the routine to confirm."%curr_name)
         if ok and txt == curr_name:
             self.routines_model.removeRow(row,root_index)
-
-
-    @pyqtSlot()
-    def data_changed(self):
-        pass
-        #print("Data changed!")
 
     ############
     # PLAYLIST #
