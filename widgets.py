@@ -486,6 +486,7 @@ class UniqueTextInputDialog(QDialog):
         else:
             self.accept()
 
+
 class InspectorWidget(QWidget):
     def __init__(self, sequence=None):
         self.sequence = sequence
@@ -499,14 +500,19 @@ class InspectorWidget(QWidget):
         self.fc = FigureCanvas(self.fig)
         self.fc.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.layout().addWidget(self.fc)
+        self.active = False
 
     def build_inspector(self):
-        # TODO
-        pass
+        self.active = True
+        self.update_plot()
 
-    def update_plot(self, scanvars_indices):
+    def set_inactive(self):
+        self.active = False
+
+    def update_plot(self):
         # TODO
-        pass
+        if self.active:
+            print("update plot")
 
 
 class IteratorSlidersWidget(QWidget):
@@ -522,12 +528,9 @@ class IteratorSlidersWidget(QWidget):
         self.layout().addWidget(self.form_group)
 
         self.slider_widgets = {}
-        self.i = 0
 
     # Add or remove sliders when new iterating variables are added
     def update_sliders(self):
-        print(self.i)
-        self.i += 1
         iter_vars_dict = self.sequence.variables.get_iterating_variables()
         self.remove_unused_sliders(iter_vars_dict)
 

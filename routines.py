@@ -102,7 +102,7 @@ class RoutinesModel(QStandardItemModel):
             channel_duration = 0
             channel_item = routine_item.child(c)
             channel_duration = channel_item.data(utils.ChannelDurationRole)
-            duration = max(duration,channel_duration)
+            duration = max(duration, channel_duration)
         return duration
 
     def load_routines_from_pystruct(self, routines_dict):
@@ -164,6 +164,8 @@ class RoutinesModel(QStandardItemModel):
 
     @pyqtSlot()
     def update_values(self):
+        value_changed = False # Flag to decide if dataChanged signal should be emited
+
         # First we block signals because update_values is called on dataChanged and we don't want to trigger it again
         self.blockSignals(True)
 
@@ -192,7 +194,9 @@ class RoutinesModel(QStandardItemModel):
                 num_events = self.rowCount(channel_index)
                 for e in range(num_events):
                     event_index = self.index(e,0,channel_index)
-                    self.setData(event_index,start_time,utils.EventStartRole)
+                    if start_time != self.data(event_index, utils.EventStartRole):
+                        self.setData(event_index, start_time, utils.EventStartRole)
+                        value_changed = True
                     duration = event_index.data(utils.EventDurationRole)
                     try:
                         start_time += float(duration) #Start time of next event
@@ -213,7 +217,11 @@ class RoutinesModel(QStandardItemModel):
                         print(duration)
 
                 # There is no next event so start_time contains the duration of this channel
-                self.setData(channel_index,start_time,utils.ChannelDurationRole)
-
+                if start_time != self.data(channel_index, utils.ChannelDurationRole):
+                    value_changed = True
+                    self.setData(channel_index,start_time, utils.ChannelDurationRole)
 
         self.blockSignals(False)
+        if value_changed:
+            self.dataChanged.emit(QModelIndex(),QModelIndex())
+            # ToDo: maybe it's more efficient to call dataChanged for each QModelIndex that was changed

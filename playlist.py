@@ -2,14 +2,17 @@ from PyQt5.QtCore import Qt, QModelIndex, QIdentityProxyModel, pyqtSlot
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont, QColor
 import utils
 from routines import RoutinesModel
+from variables import VariablesModel
+import numpy as np
 
 
 class PlaylistModel(QStandardItemModel):
 
     column_names = ["routine", "start", "repeat", "duration", "end"]
 
-    def __init__(self, routines_model: RoutinesModel):
+    def __init__(self, variables_model: VariablesModel, routines_model: RoutinesModel):
         super().__init__()
+        self.variables_model = variables_model
         self.routines_model = routines_model
         self.setHorizontalHeaderLabels(self.column_names)
         self.dataChanged.connect(self.update_values)
@@ -141,9 +144,20 @@ class PlaylistModel(QStandardItemModel):
 
     @pyqtSlot()
     def update_values(self):
+
+        value_changed = False  # Flag to decide if dataChanged signal should be emited
+
         # TODO add full playlist duration
         # First we block signals because update_values is called on dataChanged and we don't want to trigger it again
         self.blockSignals(True)
+
+        variables = self.variables_model.get_variables_dict()
+        # __builtins__ is added so eval treats 'variables' as we want
+        # (it doesn't add the builtin python variables)
+        variables["__builtins__"] = {}
+
+        # Make numpy available
+        variables['np'] = np
 
         for item in utils.iter_tree_rows(self.invisibleRootItem()): # type: QStandardItem
             if item.parent() is not None: # This will be true for a routine and false for a playlist, which all are a root elements
@@ -152,35 +166,79 @@ class PlaylistModel(QStandardItemModel):
                         routine_name = item.data(Qt.DisplayRole)
                         routine_duration = self.routines_model.get_routine_duration(routine_name)
 
-                        item.parent().child(item.row(), self.column_names.index("start")).setData(0, Qt.DisplayRole)
-                        item.parent().child(item.row(), self.column_names.index("duration")).setData(routine_duration, Qt.DisplayRole)
-                        item.parent().child(item.row(), self.column_names.index("end")).setData(routine_duration, Qt.DisplayRole)
+                        if item.parent().child(item.row(), self.column_names.index("start")).data(Qt.DisplayRole) != "0":
+                            item.parent().child(item.row(), self.column_names.index("start")).setData("0", Qt.DisplayRole)
+                            value_changed = True
+
+                        if item.parent().child(item.row(), self.column_names.index("duration")).data(Qt.DisplayRole) != "%g"%routine_duration:
+                            item.parent().child(item.row(), self.column_names.index("duration")).setData("%g"%routine_duration, Qt.DisplayRole)
+                            value_changed = True
+
+                        if item.parent().child(item.row(), self.column_names.index("end")).data(Qt.DisplayRole) != "%g"%routine_duration:
+                            item.parent().child(item.row(), self.column_names.index("end")).setData("%g"%routine_duration, Qt.DisplayRole)
+                            value_changed = True
+
                     elif item.data(utils.PlaylistItemTypeRole) == utils.Gap:
                         gap_duration = item.parent().child(item.row(), self.column_names.index("duration")).data(Qt.DisplayRole)
 
-                        item.parent().child(item.row(), self.column_names.index("start")).setData(0, Qt.DisplayRole)
-                        item.parent().child(item.row(), self.column_names.index("end")).setData(gap_duration, Qt.DisplayRole)
+                        if item.parent().child(item.row(), self.column_names.index("start")).data(Qt.DisplayRole) != '0':
+                            item.parent().child(item.row(), self.column_names.index("start")).setData('0', Qt.DisplayRole)
+                            value_changed = True
 
+                        if item.parent().child(item.row(), self.column_names.index("end")).data(Qt.DisplayRole) != "%g"%gap_duration:
+                            item.parent().child(item.row(), self.column_names.index("end")).setData("%g"%gap_duration, Qt.DisplayRole)
+                            value_changed = True
 
-                else: #Non top-level routines
+                else: # Non top-level routines
                     parent = item.parent()
                     parent_end_time = parent.parent().child(parent.row(), self.column_names.index("end")).data(Qt.DisplayRole)
 
-                    if item.data(utils.PlaylistItemTypeRole) == utils.Routine: #if item is a routine
+                    if item.data(utils.PlaylistItemTypeRole) == utils.Routine: # if item is a routine
                         routine_name = item.data(Qt.DisplayRole)
                         routine_duration = self.routines_model.get_routine_duration(routine_name)
 
-                        item.parent().child(item.row(), self.column_names.index("start")).setData(parent_end_time, Qt.DisplayRole)
-                        item.parent().child(item.row(), self.column_names.index("duration")).setData(routine_duration, Qt.DisplayRole)
-                        item.parent().child(item.row(), self.column_names.index("end")).setData(float(parent_end_time)+routine_duration, Qt.DisplayRole)
+                        if item.parent().child(item.row(), self.column_names.index("start")).data(Qt.DisplayRole) != parent_end_time:
+                            item.parent().child(item.row(), self.column_names.index("start")).setData(parent_end_time, Qt.DisplayRole)
+                            value_changed = True
+
+                        if item.parent().child(item.row(), self.column_names.index("duration")).data(Qt.DisplayRole) != "%g"%routine_duration:
+                            item.parent().child(item.row(), self.column_names.index("duration")).setData("%g"%routine_duration, Qt.DisplayRole)
+                            value_changed = True
+
+                        try:
+                            if item.parent().child(item.row(), self.column_names.index("end")).data(Qt.DisplayRole) != "%g"%(float(parent_end_time)+routine_duration):
+                                item.parent().child(item.row(), self.column_names.index("end")).setData("%g"%(float(parent_end_time)+routine_duration), Qt.DisplayRole)
+                                value_changed = True
+                        except TypeError:
+                            print('Argh!')
+                            # TODO: give notice
+
                     elif item.data(utils.PlaylistItemTypeRole) == utils.Gap:
                         gap_duration = item.parent().child(item.row(), self.column_names.index("duration")).data(Qt.DisplayRole)
 
-                        item.parent().child(item.row(), self.column_names.index("start")).setData(parent_end_time, Qt.DisplayRole)
+                        if item.parent().child(item.row(), self.column_names.index("start")).data(Qt.DisplayRole) != parent_end_time:
+                            item.parent().child(item.row(), self.column_names.index("start")).setData(parent_end_time, Qt.DisplayRole)
+                            value_changed = True
+
                         #TODO: breaks with symbolic gap
-                        item.parent().child(item.row(), self.column_names.index("end")).setData(float(parent_end_time)+float(gap_duration), Qt.DisplayRole)
+                        try:
+                            if item.parent().child(item.row(), self.column_names.index("end")).data(Qt.DisplayRole) != "%g"%(float(parent_end_time)+float(gap_duration)):
+                                item.parent().child(item.row(), self.column_names.index("end")).setData("%g"%(float(parent_end_time)+float(gap_duration)), Qt.DisplayRole)
+                                value_changed = True
+                        except ValueError:
+                            gap_duration_time = eval(gap_duration, variables)
+                            if item.parent().child(item.row(), self.column_names.index("end")).data(Qt.DisplayRole) != "%g"%(float(parent_end_time)+gap_duration_time):
+                                item.parent().child(item.row(), self.column_names.index("end")).setData("%g"%(float(parent_end_time)+gap_duration_time), Qt.DisplayRole)
+                                value_changed = True
+                        except TypeError:
+                            print('Argh!')
+                            # TODO: give notice
+
 
         self.blockSignals(False)
+        if value_changed:
+            self.dataChanged.emit(QModelIndex(),QModelIndex())
+            # ToDo: maybe it's more efficient to call dataChanged for each QModelIndex that was changed
 
 
 class PlaylistMoveRoutineProxyModel(QIdentityProxyModel): #Used for playlist move dialog

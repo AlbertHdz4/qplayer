@@ -4,94 +4,94 @@
       {
         "name": "loading_time",
         "set": "0.2",
-        "value": "0.200000",
-        "iterator": false,
-        "start": null,
-        "stop": null,
-        "increment": null,
+        "value": "0.0",
+        "iterator": true,
+        "start": "0",
+        "stop": "1",
+        "increment": "0.1",
         "comment": "ms",
-        "scan_index": null
+        "scan index": "0"
       },
       {
         "name": "slower_beam_pwr",
         "set": "1000",
-        "value": "1000.000000",
+        "value": "1000",
         "iterator": false,
         "start": null,
         "stop": null,
         "increment": null,
         "comment": "W",
-        "scan_index": null
+        "scan index": null
       },
       {
         "name": "oven_shutter_time",
         "set": "100",
-        "value": "100.000000",
+        "value": "100",
         "iterator": false,
         "start": null,
         "stop": null,
         "increment": null,
         "comment": "ms",
-        "scan_index": null
+        "scan index": null
       },
       {
         "name": "cooler_detuning",
         "set": "-20",
-        "value": "-20.000000",
+        "value": "-20",
         "iterator": false,
         "start": null,
         "stop": null,
         "increment": null,
         "comment": "MHz",
-        "scan_index": null
+        "scan index": null
       },
       {
         "name": "repumper_detuning",
         "set": "return bottom_power+4",
-        "value": "5.471518",
+        "value": "8",
         "iterator": false,
         "start": null,
         "stop": null,
         "increment": null,
         "comment": "MHz",
-        "scan_index": null
+        "scan index": null
       }
     ],
     "Dipole Trap": [
       {
         "name": "evaporation_time",
         "set": null,
-        "value": "0",
+        "value": "3000.0",
         "iterator": true,
         "start": "0",
         "stop": "3000",
         "increment": "100",
         "comment": null,
-        "scan_index": null
+        "scan index": "30"
       },
       {
         "name": "bottom_power",
         "set": "y = np.exp(-5*loading_time)\namp = 4\nreturn amp*y",
-        "value": "1.471518",
+        "value": "4",
         "iterator": false,
         "start": null,
         "stop": null,
         "increment": null,
         "comment": "W",
-        "scan_index": null
+        "scan index": null
       }
     ],
     "Absorption Imaging": [
       {
         "name": "probe_detuning",
         "set": null,
-        "value": "-40",
+        "value": "-40.0",
         "iterator": true,
         "start": "-40",
         "stop": "40",
         "increment": "5",
         "comment": null,
-        "scan_index": null
+        "scan index": "0"
       }
     ]
   },
@@ -109,7 +109,7 @@
             "state": false
           },
           {
-            "duration": "1",
+            "duration": "evaporation_time",
             "state": true
           },
           {
@@ -270,7 +270,7 @@
                   "repeat": "1"
                 }
               ],
-              "duration": "50"
+              "duration": "loading_time"
             }
           ],
           "name": "MOT",

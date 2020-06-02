@@ -26,7 +26,7 @@ class ControlSystemGUI(QMainWindow):
         # MODELS
         self.variables_model = VariablesModel()
         self.routines_model = RoutinesModel(self.variables_model, self.cards)
-        self.playlist_model = PlaylistModel(self.routines_model)
+        self.playlist_model = PlaylistModel(self.variables_model, self.routines_model)
 
         # SEQUENCE MANAGER
         self.sequence = Sequence(self.variables_model, self.routines_model, self.playlist_model)
@@ -44,7 +44,6 @@ class ControlSystemGUI(QMainWindow):
         # ADD MODELS TO VIEWS
         self.ui.static_variables_view.setModel(self.static_variables_model)
         self.ui.iterator_variables_view.setModel(self.iterator_variables_model)
-        self.ui.sequence_dbg_treeview.setModel(self.routines_model)
         self.ui.routine_combo_box.setModel(self.routines_model)
         self.ui.playlist_view.setModel(self.playlist_model)
         self.ui.playlist_selection_combo_box.setModel(self.playlist_model)
@@ -75,17 +74,19 @@ class ControlSystemGUI(QMainWindow):
         self.variables_model.dataChanged.connect(self.iterator_variables_model.invalidate)
         self.variables_model.dataChanged.connect(self.static_variables_model.invalidate)
         self.variables_model.dataChanged.connect(self.iterator_sliders_widget.update_sliders)
-        self.variables_model.dataChanged.connect(self.variable_data_changed)
 
         ## Sequence Editor
         self.ui.add_routine_button.clicked.connect(self.add_routine)
         self.ui.config_routine_button.clicked.connect(self.config_routine)
         self.ui.remove_routine_button.clicked.connect(self.remove_routine)
         self.ui.routine_combo_box.currentIndexChanged.connect(self.changed_routine)
+        self.variables_model.dataChanged.connect(self.routines_model.update_values)
         ## Playlist
         self.ui.playlist_view.customContextMenuRequested.connect(self.playlist_context_menu_requested)
         self.ui.add_playlist_button.clicked.connect(self.add_playlist)
+        self.variables_model.dataChanged.connect(self.playlist_model.update_values)
         ## Inspector
+        self.variables_model.dataChanged.connect(self.inspector_widget.update_plot)
 
         # UTILITY VARIABLES
         self.var_idx = 0
@@ -112,13 +113,8 @@ class ControlSystemGUI(QMainWindow):
     def tab_changed(self, tab_index):
         if self.ui.tabWidget.tabText(tab_index) == "Inspector":
             self.inspector_widget.build_inspector()
-
-
-    @pyqtSlot()
-    def variable_data_changed(self):
-        print("variable data changed")
-
-
+        else:
+            self.inspector_widget.set_inactive()
 
     #############
     # VARIABLES #

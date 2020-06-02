@@ -222,8 +222,8 @@ class VariablesModel(QStandardItemModel):
                         isidx = int(var_scan_index)
                         curr_val = np.arange(fstart, fstop+finc, finc)[isidx]
 
-                        if str(curr_val) != self.data(val_idx, Qt.DisplayRole):
-                            self.setData(val_idx, str(curr_val),Qt.DisplayRole)
+                        if "%g"%curr_val != self.data(val_idx):
+                            self.setData(val_idx, "%g"%curr_val)
                             value_changed = True
                         variables_dict[var_name] = curr_val
 
@@ -240,8 +240,8 @@ class VariablesModel(QStandardItemModel):
                         try:
                             var_val = float(var_set)  # Cast variables which are numerical
                             val_idx = self.index(v, self.variable_fields.index("value"), group_index)
-                            if "%f"%var_val != self.data(val_idx):
-                                self.setData(val_idx, "%f"%var_val)
+                            if "%g"%var_val != self.data(val_idx):
+                                self.setData(val_idx, "%g"%var_val)
                                 value_changed = True
                                 self.update_style(name_idx)
                             variables_dict[var_name] = var_val
@@ -264,8 +264,8 @@ class VariablesModel(QStandardItemModel):
                     var_name_idx = self.index(v, self.variable_fields.index("name"), group_index)
                     self.update_style(var_name_idx)
                     var_name = var_name_idx.data()
-                    if "%f" % var_val != self.data(val_idx):
-                        self.setData(val_idx, "%f" % var_val)
+                    if "%g" % var_val != self.data(val_idx):
+                        self.setData(val_idx, "%g" % var_val)
                         value_changed = True
                     variables_dict[var_name] = var_val
                     retry_attempts = 0
