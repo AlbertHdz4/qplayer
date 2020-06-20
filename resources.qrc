@@ -22,5 +22,7 @@
     <file>icons/media-playback-start-rtl.svg</file>
     <file>icons/media-playback-start.svg</file>
     <file>icons/media-playback-pause.svg</file>
+    <file>icons/state-off.svg</file>
+    <file>icons/state-on.svg</file>
   </qresource>
 </RCC>

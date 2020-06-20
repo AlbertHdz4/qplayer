@@ -6,6 +6,7 @@ from PyQt5.QtCore import *
 import sys
 import config
 import json
+import os
 
 from variables import *
 from routines import *
@@ -22,6 +23,7 @@ class ControlSystemGUI(QMainWindow):
         ui_main_window, main_window = loadUiType('control-system.ui')
         self.ui = ui_main_window()
         self.ui.setupUi(self)
+        self.setWindowIcon(QIcon('icons' + os.path.sep + 'pyPlayer_icon.svg'))
 
         # MODELS
         self.variables_model = VariablesModel()

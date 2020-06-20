@@ -138,11 +138,16 @@
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">QPushButton:checked { background-color: rgb(228, 128, 128); }
-QPushButton { background-color: rgb(238, 238, 236); }</string>
+         <string notr="true">QPushButton:checked { background-color: '#6e6e6e'; }
+QPushButton { background-color: '#e1e1e1'; }</string>
         </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/actions/icons/state-off.svg</normaloff>
+          <normalon>:/actions/icons/state-on.svg</normalon>:/actions/icons/state-off.svg</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -157,6 +162,8 @@ QPushButton { background-color: rgb(238, 238, 236); }</string>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
