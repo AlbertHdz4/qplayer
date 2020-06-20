@@ -49,3 +49,7 @@ class DigitalBusCard(BusCard):
 class AnalogBusCard(BusCard):
     num_channels = 2
     type = utils.AnalogTrack
+
+    def __init__(self, name, address, channels, samplerate):
+        super(AnalogBusCard, self).__init__(name, address, channels)
+        self.samplerate = samplerate

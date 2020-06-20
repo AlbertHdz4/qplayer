@@ -34,6 +34,7 @@
       "class":"AnalogBusCard",
       "address":"0x0002",
       "name": "Analog 0",
+      "samplerate": 100000,
       "channels": [
         "A00",
         "A01"
@@ -43,6 +44,7 @@
       "class":"AnalogBusCard",
       "address":"0x0003",
       "name": "Analog 1",
+      "samplerate": 10000,
       "channels": [
         "A00",
         "A01"

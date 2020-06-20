@@ -11,11 +11,17 @@ import cards
 from routines import RoutinesModel
 from playlist import PlaylistModel, PlaylistMoveRoutineProxyModel
 
+
+# Not using matplotlib because it's slow. Use pyqtgraph instead.
 import matplotlib
 # Make sure that we are using QT5
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+
+
+# pyQtGraph
+#import pyqtgraph as pg
 
 # This class was created so that code variables have syntax highlighting
 class VariableEditDelegate(QStyledItemDelegate):
@@ -315,7 +321,11 @@ class DigitalSequenceEvent(SequenceEvent):
         self.ui.event_duration.setStyleSheet("QLineEdit { background: "+brush.color().name()+" }")
 
         # Update start label
-        self.ui.start_label.setText("start: %0.3f"%(self.event_item.data(utils.EventStartRole)))
+        self.ui.start_label.setText("%g"%(self.event_item.data(utils.EventStartRole)))
+        try:
+            self.ui.duration_label.setText("%g"%(self.event_item.data(utils.EventDurationRoleNum)))
+        except TypeError:
+            self.ui.duration_label.setText("-")
 
     @pyqtSlot(bool)
     def toggled(self, checked):
@@ -495,11 +505,25 @@ class InspectorWidget(QWidget):
 
         self.setLayout(QVBoxLayout())
 
+
+        # Not using matplotlib because it is slow
         self.fig = Figure()
         self.axes = self.fig.add_subplot(111)
         self.fc = FigureCanvas(self.fig)
         self.fc.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.layout().addWidget(self.fc)
+
+
+        """
+        # pyQtGraph
+        pg.setConfigOption('background', 'w')
+        pg.setConfigOption('foreground', 'k')
+
+        self.plot = pg.PlotWidget()
+        self.layout().addWidget(self.plot)
+        """
+
+
         self.active = False
 
     def build_inspector(self):
@@ -509,10 +533,37 @@ class InspectorWidget(QWidget):
     def set_inactive(self):
         self.active = False
 
+    def format_points_for_plotting(self, points):
+        pl_points = {}
+
+        for chan in points:
+            pl_points[chan] = [(0,0)]
+            num_chan_points = len(points[chan])
+            for i in range(num_chan_points):
+                t,y = points[chan][i]
+                lt, ly = pl_points[chan][-1] # last-added pl_points
+                if y != ly:
+                    pl_points[chan].append((t,ly))
+                pl_points[chan].append((t, y))
+
+        return pl_points
+
     def update_plot(self):
-        # TODO
         if self.active:
-            print("update plot")
+            points = self.sequence.playlist.get_active_playlist_points()
+            if points is None:
+                return
+            pl_points = self.format_points_for_plotting(points)
+            self.axes.cla()
+            self.axes.set_xlabel('Time (ms)')
+
+            for chan in pl_points:
+                chan_name, chan_index = chan
+                trace = np.array(pl_points[chan])
+                t,y = trace[:,0], trace[:,1]
+                self.axes.plot(t,0.8*y+chan_index, label=chan_name)
+
+            self.fig.canvas.draw_idle()
 
 
 class IteratorSlidersWidget(QWidget):
@@ -549,6 +600,7 @@ class IteratorSlidersWidget(QWidget):
                         pass
                     else:
                         curr_slider.setRange(0, num_vals-1)
+
 
                 else:
                     # print("Adding new slider %s, current sliders %s"%(var, self.slider_widgets.keys()))

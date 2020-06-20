@@ -86,6 +86,17 @@ class VariablesModel(QStandardItemModel):
         var_type = var_index.parent().child(var_index.row(),self.variable_fields.index("set")).data(utils.VariableTypeRole)
         return var_type == utils.CodeVariable
 
+    def variable_exists(self, var_name) -> bool:
+        num_groups = self.rowCount()
+        for g in range(num_groups):
+            group_index = self.index(g,0)
+            num_variables = self.rowCount(group_index)
+            for v in range(num_variables):
+                if var_name == self.index(v, self.variable_fields.index("name"), group_index).data():
+                    return True
+        return False
+
+
     def set_var_type(self, var_index:QModelIndex, var_type):
         # The variable type is part of the "set" cell only so we must refer to it directly
         # This function works if the var_index is any cell of the variable's row
@@ -163,11 +174,14 @@ class VariablesModel(QStandardItemModel):
         return iter_vars
 
     def set_iterating_variables_indices(self, scanvars_indices):
+        self.blockSignals(True)
         for (var_name,idx) in scanvars_indices.items():
             # only one item should be returned since variable names should be unique
-            item = self.findItems(var_name, flags=Qt.MatchRecursive)[0] # type: QStandardItem
-            # print(str(idx))
-            item.parent().child(0, column=self.variable_fields.index("scan index")).setData(str(idx),Qt.DisplayRole)
+            item = self.findItems(var_name, flags=Qt.MatchRecursive, column=0)[0] # type: QStandardItem
+            item.parent().child(item.row(), column=self.variable_fields.index("scan index")).setData(str(idx), Qt.DisplayRole)
+
+        self.blockSignals(False)
+        self.update_values()
 
     def to_number(self, expr, variables=None):
         if variables is None:
@@ -183,11 +197,10 @@ class VariablesModel(QStandardItemModel):
 
     @pyqtSlot()
     def update_values(self):
-
         value_changed = False # Flag to decide if dataChanged signal should be emited
 
         to_do = [] # reference to non-numerical variables
-        variables_dict = {'np':np}
+        variables_dict = {'np':np, 'int':int}
 
         # __builtins__ is added so eval treats 'variables' as we want
         # (it doesn't add the builtin python variables)
@@ -223,6 +236,7 @@ class VariablesModel(QStandardItemModel):
                         curr_val = np.arange(fstart, fstop+finc, finc)[isidx]
 
                         if "%g"%curr_val != self.data(val_idx):
+                            #print("Iter var Changed from %s to %g"%(self.data(val_idx), curr_val))
                             self.setData(val_idx, "%g"%curr_val)
                             value_changed = True
                         variables_dict[var_name] = curr_val
@@ -241,6 +255,7 @@ class VariablesModel(QStandardItemModel):
                             var_val = float(var_set)  # Cast variables which are numerical
                             val_idx = self.index(v, self.variable_fields.index("value"), group_index)
                             if "%g"%var_val != self.data(val_idx):
+                                #print("Numeric var Changed from %s to %g"%(self.data(val_idx), var_val))
                                 self.setData(val_idx, "%g"%var_val)
                                 value_changed = True
                                 self.update_style(name_idx)
@@ -265,17 +280,18 @@ class VariablesModel(QStandardItemModel):
                     self.update_style(var_name_idx)
                     var_name = var_name_idx.data()
                     if "%g" % var_val != self.data(val_idx):
+                        #print("Code var Changed from %s to %g"%(self.data(val_idx), var_val))
                         self.setData(val_idx, "%g" % var_val)
                         value_changed = True
                     variables_dict[var_name] = var_val
                     retry_attempts = 0
-                except NameError:
+                except (NameError, TypeError) as e:
                     # Return to To-Do list if this doesn't work (if there is no error, it should eventually work once
                     # all the required variables are evaluated)
                     to_do.insert(0,(g,v))
                     retry_attempts += 1
                     if len(to_do) <= retry_attempts:  # Avoid infinite retrys, give up all hope after trying everything
-                        print("Error: Variable set cannot be numerically evaluated: %s" % str(to_do))
+                        print("Error: Variable set cannot be numerically evaluated: %s %s" % (str(to_do), e))
 
                         for g,v in to_do:
                             group_index = self.index(g, 0)

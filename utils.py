@@ -6,11 +6,12 @@ TrackTypeRole = Qt.UserRole + 1
 ChannelRole = Qt.UserRole + 2
 VariableTypeRole = Qt.UserRole + 3
 EventStartRole = Qt.UserRole + 4
-EventDurationRole = Qt.DisplayRole
-TrackOffsetRole = Qt.UserRole + 6
-PlaylistItemTypeRole = Qt.UserRole + 7
-GapDurationRole = Qt.UserRole + 8
-ChannelDurationRole = Qt.UserRole + 9
+EventDurationRole = Qt.DisplayRole # set value for the duration of an event
+EventDurationRoleNum = Qt.UserRole + 6 # numerical value for the duration of an event
+TrackOffsetRole = Qt.UserRole + 7
+PlaylistItemTypeRole = Qt.UserRole + 8
+GapDurationRole = Qt.UserRole + 9
+ChannelDurationRole = Qt.UserRole + 10
 
 # TrackTypes
 DigitalTrack = 0
@@ -24,16 +25,18 @@ CodeVariable = 1
 Routine = 0
 Gap = 1
 
+
 def iter_tree_rows(root: QStandardItem):
     if root is not None:
         stack = [root]
         while stack:
             parent = stack.pop(0)
             for row in range(parent.rowCount()):
-                    child = parent.child(row)
-                    yield child
-                    if child.hasChildren():
-                        stack.append(child)
+                child = parent.child(row)
+                yield child
+                if child.hasChildren():
+                    stack.append(child)
+
 
 # Check if 'index' is a descendant of 'ancestor'
 def is_descendant_of(ancestor : QModelIndex, index: QModelIndex):

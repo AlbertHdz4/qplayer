@@ -16,6 +16,7 @@ class PlaylistModel(QStandardItemModel):
         self.routines_model = routines_model
         self.setHorizontalHeaderLabels(self.column_names)
         self.dataChanged.connect(self.update_values)
+        self.active_playlist = None
 
     def flags(self, index: QModelIndex):
         return Qt.NoItemFlags | Qt.ItemIsEnabled | Qt.ItemIsSelectable
@@ -57,7 +58,7 @@ class PlaylistModel(QStandardItemModel):
         item_name.setData(utils.Gap, utils.PlaylistItemTypeRole)
 
         item_start = QStandardItem("start time")
-        item_repeat = QStandardItem("repeat")
+        item_repeat = QStandardItem("-")
         item_duration = QStandardItem(duration)
         item_end = QStandardItem("end time")
 
@@ -109,6 +110,7 @@ class PlaylistModel(QStandardItemModel):
             plindex = self.add_playlist(pldict['name'], "0", "-", "-", "-")
             inner_add_children(plindex,pldict['children'])
 
+    # Returns a python dictionary containing the playlist info por the purpose of saving to a file
     def get_playlist_pystruct(self):
         # This recursive function is use to travel through the tree
         def inner_get_parsed_playlist(children_items, children_list):
@@ -185,8 +187,8 @@ class PlaylistModel(QStandardItemModel):
                             item.parent().child(item.row(), self.column_names.index("start")).setData('0', Qt.DisplayRole)
                             value_changed = True
 
-                        if item.parent().child(item.row(), self.column_names.index("end")).data(Qt.DisplayRole) != "%g"%gap_duration:
-                            item.parent().child(item.row(), self.column_names.index("end")).setData("%g"%gap_duration, Qt.DisplayRole)
+                        if item.parent().child(item.row(), self.column_names.index("end")).data(Qt.DisplayRole) != gap_duration:
+                            item.parent().child(item.row(), self.column_names.index("end")).setData(gap_duration, Qt.DisplayRole)
                             value_changed = True
 
                 else: # Non top-level routines
@@ -220,7 +222,6 @@ class PlaylistModel(QStandardItemModel):
                             item.parent().child(item.row(), self.column_names.index("start")).setData(parent_end_time, Qt.DisplayRole)
                             value_changed = True
 
-                        #TODO: breaks with symbolic gap
                         try:
                             if item.parent().child(item.row(), self.column_names.index("end")).data(Qt.DisplayRole) != "%g"%(float(parent_end_time)+float(gap_duration)):
                                 item.parent().child(item.row(), self.column_names.index("end")).setData("%g"%(float(parent_end_time)+float(gap_duration)), Qt.DisplayRole)
@@ -234,11 +235,67 @@ class PlaylistModel(QStandardItemModel):
                             print('Argh!')
                             # TODO: give notice
 
-
         self.blockSignals(False)
         if value_changed:
             self.dataChanged.emit(QModelIndex(),QModelIndex())
             # ToDo: maybe it's more efficient to call dataChanged for each QModelIndex that was changed
+
+    @pyqtSlot(int)
+    def set_active_playlist(self, index):
+        self.active_playlist = index
+
+    # Returns  a dict with the states and times for each transition in all of the channels in the active playlist
+    # where key is channel name and value is is a list of (time,state) pairs.
+    def get_active_playlist_points(self):
+
+        def inner_playlist_branch_points(routine_item : QStandardItem):
+            points = {}
+            tend = 0 # end time of current routine
+
+            if routine_item.data(utils.PlaylistItemTypeRole) == utils.Routine:
+                # find routine points relative to routine start
+
+                routine_name = routine_item.data(Qt.DisplayRole)
+                routine_points = self.routines_model.get_routine_points(routine_name)
+
+                for chan in routine_points:
+                    offset = routine_points[chan]["offset"]
+                    events = routine_points[chan]["events"]
+
+                    if chan not in points:
+                        #points[chan] = [(offset, events[0][1])]
+                        points[chan] = []
+                    t = offset
+                    for event in events:
+                        time, state  = event[0], event[1]
+                        points[chan].append((t, state))
+                        t += time
+                        tend = max(tend, t)
+                    points[chan].append((t,state)) # the last point is added to know how long to hold the state for
+
+            elif routine_item.data(utils.PlaylistItemTypeRole) == utils.Gap:
+                # if gap has children add children points with gap delay added
+                # else if gap is last in sequence add points at end with previous value (can this be even done with a recursive function?)
+                # TODO
+                pass
+
+            for i in range(routine_item.rowCount()):
+                child_item = routine_item.child(i)
+                child_points = inner_playlist_branch_points(child_item)
+
+                for chan in child_points:
+                    if chan not in points:
+                        points[chan] = []
+                    for chan_point in child_points[chan]:
+                        time, state = chan_point
+                        points[chan].append((tend+time, state))
+
+            return points
+        if self.active_playlist is not None:
+            active_pl_item = self.item(self.active_playlist) # type: QStandardItem
+            return inner_playlist_branch_points(active_pl_item)
+        else:
+            return None
 
 
 class PlaylistMoveRoutineProxyModel(QIdentityProxyModel): #Used for playlist move dialog

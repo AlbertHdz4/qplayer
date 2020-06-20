@@ -20,7 +20,6 @@ class Config:
             else:
                 card_names.append(card["name"])
 
-
     def get_cards_dict(self):
         card_dict = {}
         for card in self._data["cards"]:

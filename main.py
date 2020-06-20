@@ -66,6 +66,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.save_button.clicked.connect(self.save_sequence)
         self.ui.load_button.clicked.connect(self.load_sequence)
         self.ui.tabWidget.currentChanged.connect(self.tab_changed)
+        self.ui.playlist_selection_combo_box.currentIndexChanged.connect(self.playlist_model.set_active_playlist)
         ## Variables
         self.ui.add_variable_group_button.clicked.connect(self.add_variable_group)
         self.ui.add_variable_button.clicked.connect(self.add_variable)
@@ -137,6 +138,8 @@ class ControlSystemGUI(QMainWindow):
                 parent_idx = parent_idx.parent()
 
             parent = self.static_variables_model.mapToSource(parent_idx) # type: QStandardItem
+            while self.variables_model.variable_exists("var%02d" % self.var_idx):
+                self.var_idx += 1
             self.variables_model.add_variable(parent, name="var%02d" % self.var_idx, iterator=False,value="0")
             self.var_idx += 1
 

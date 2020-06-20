@@ -105,6 +105,43 @@ class RoutinesModel(QStandardItemModel):
             duration = max(duration, channel_duration)
         return duration
 
+    # Returns a dict with the states and time to hold the state for, for all of the channels in the routine
+    # where key is channel name and value is is a list of (time,state) pairs.
+    def get_routine_points(self, routine_name):
+        points = {}
+
+        variables = self.variables_model.get_variables_dict()
+        # __builtins__ is added so eval treats 'variables' as we want
+        # (it doesn't add the builtin python variables)
+        variables["__builtins__"] = {}
+
+        # Make numpy available
+        variables['np'] = np
+
+        routine_item = self.get_routine_item_by_name(routine_name)
+        num_tracks = routine_item.rowCount()
+        for c in range(num_tracks):
+            track_item  = routine_item.child(c)
+            chan = track_item.data(utils.ChannelRole).get_channel_dict()
+            chan_key = (chan['card'], chan['index'])
+            track_offset = eval(track_item.data(utils.TrackOffsetRole),variables)
+
+            points[chan_key] = {"offset":track_offset, "events":[]}
+            for k in range(track_item.rowCount()):
+                event_item = track_item.child(k)
+                event_duration = eval(event_item.data(utils.EventDurationRole), variables) # TODO: confundido si debería ser EventDurationRole o DisplayRole
+
+                if track_item.data(utils.TrackTypeRole) == utils.DigitalTrack:
+                    event_state = int(event_item.data(Qt.CheckStateRole) == Qt.Checked)
+                    points[chan_key]['events'].append((event_duration, event_state))
+
+                elif track_item.data(utils.TrackTypeRole) == utils.AnalogTrack:
+                    # TODO
+                    pass
+
+        return points
+
+
     def load_routines_from_pystruct(self, routines_dict):
         routine_names = routines_dict.keys()
         for routine_name in routine_names:
@@ -128,6 +165,7 @@ class RoutinesModel(QStandardItemModel):
                 elif card.type == utils.AnalogTrack:
                     for event in events:
                         pass
+                        # TODO
 
             self.appendRow(routine_item)
 
@@ -199,11 +237,15 @@ class RoutinesModel(QStandardItemModel):
                         value_changed = True
                     duration = event_index.data(utils.EventDurationRole)
                     try:
-                        start_time += float(duration) #Start time of next event
+                        dur_num = float(duration) # duration of event
+                        self.setData(event_index, dur_num, utils.EventDurationRoleNum)
+                        start_time += dur_num #Start time of next event
                         self.itemFromIndex(event_index).setBackground(Qt.white)
                     except ValueError:
                         try:
-                            start_time += eval(duration, variables) #Start time of next event
+                            dur_num = eval(duration, variables) # duration of event
+                            self.setData(event_index, dur_num, utils.EventDurationRoleNum)
+                            start_time += dur_num  #Start time of next event
                             self.itemFromIndex(event_index).setBackground(Qt.white)
                         except (SyntaxError, NameError):
                             color = QColor()
