@@ -651,6 +651,7 @@ class InspectorWidget(QWidget):
 
 
         self.active = False
+        self.fix_timescale = False
 
     def build_inspector(self):
         self.active = True
@@ -680,6 +681,8 @@ class InspectorWidget(QWidget):
             if points is None:
                 return
             pl_points = self.format_points_for_plotting(points)
+            if self.fix_timescale:
+                xlim = self.axes.get_xlim()
             self.axes.cla()
             self.axes.set_xlabel('Time (ms)')
 
@@ -689,7 +692,13 @@ class InspectorWidget(QWidget):
                 t,y = trace[:,0], trace[:,1]
                 self.axes.plot(t,0.8*y+chan_index, label=chan_name)
 
+            if self.fix_timescale:
+                self.axes.set_xlim(xlim)
+
             self.fig.canvas.draw_idle()
+
+    def fix_timescale_toggled(self):
+        self.fix_timescale = not self.fix_timescale
 
 
 class IteratorSlidersWidget(QWidget):
