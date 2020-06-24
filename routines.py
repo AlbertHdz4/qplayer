@@ -58,8 +58,40 @@ class RoutinesModel(QStandardItemModel):
         return event_item
 
     @staticmethod
-    def init_analog_event_item(event_item: QStandardItem):
-        event_item.setData("0", utils.EventDurationRole)
+    def init_analog_event_item(event_item: QStandardItem, **kwargs):
+        if event_item is None:
+            event_item = QStandardItem()
+        if len(kwargs) == 0:
+            event_item.setData("0", utils.EventDurationRole)
+            event_item.setData("constant", utils.AEventFunctionRole)
+            event_item.setData("0", utils.AEventValueRole)
+
+        for key, value in kwargs.items():
+            print(key,value)
+            if key == "duration":
+                event_item.setData(value, utils.EventDurationRole)
+            elif key == "function":
+                event_item.setData(value, utils.AEventFunctionRole)
+            elif key == "val":
+                event_item.setData(value, utils.AEventValueRole)
+            elif key == "start_val":
+                event_item.setData(value, utils.AEventStartValRole)
+            elif key == "end_val":
+                event_item.setData(value, utils.AEventEndValRole)
+            elif key == "gamma":
+                event_item.setData(value, utils.AEventGammaRole)
+            elif key == "frequency":
+                event_item.setData(value, utils.AEventFrequencyRole)
+            elif key == "phase":
+                event_item.setData(value, utils.AEventPhaseRole)
+            elif key == "amplitude":
+                event_item.setData(value, utils.AEventAmplitudeRole)
+            elif key == "offset":
+                event_item.setData(value, utils.AEventOffsetRole)
+            else:
+                raise utils.SequenceException("Parameter '%s' not recognized"%key)
+
+        return event_item
 
     # Adds missing channels to a routine and removes the inactive ones
     def set_active_channels(self, routine_index:QModelIndex, active_channels):
@@ -136,8 +168,18 @@ class RoutinesModel(QStandardItemModel):
                     points[chan_key]['events'].append((event_duration, event_state))
 
                 elif track_item.data(utils.TrackTypeRole) == utils.AnalogTrack:
-                    # TODO
-                    pass
+                    if event_item.data(utils.AEventFunctionRole) == 'constant':
+                        value = eval(event_item.data(utils.AEventValueRole), variables)
+                        points[chan_key]['events'].append((event_duration, value))
+                    elif event_item.data(utils.AEventFunctionRole) == 'linear':
+                        start_val = eval(event_item.data(utils.AEventStartValRole), variables)
+                        end_val = eval(event_item.data(utils.AEventEndValRole), variables)
+                        N = 200 # TODO: get this from card maybe
+                        vals = np.linspace(start_val, end_val, N)
+                        points[chan_key]['events'].extend([(event_duration/(N-1), v) for v in vals])
+                        # TODO check that duration is correct
+
+                    # TODO other function
 
         return points
 
@@ -164,8 +206,31 @@ class RoutinesModel(QStandardItemModel):
                         track_item.appendRow(track_event)
                 elif card.type == utils.AnalogTrack:
                     for event in events:
-                        pass
-                        # TODO
+                        ftype = event['function']
+                        duration = event['duration']
+                        if ftype == 'constant':
+                            track_event = self.init_analog_event_item(None, function=ftype, val=event['val'], duration=duration)
+                        elif ftype == 'linear':
+                            track_event = self.init_analog_event_item(None, function=ftype,
+                                                                      start_val=event['start_val'],
+                                                                      end_val=event['end_val'],
+                                                                      duration=duration)
+                        elif ftype == 'exp':
+                            track_event = self.init_analog_event_item(None, function=ftype,
+                                                                      start_val=event['start_val'],
+                                                                      end_val=event['end_val'],
+                                                                      gamma=event['gamma'],
+                                                                      duration=duration)
+                        elif ftype == 'sin':
+                            track_event = self.init_analog_event_item(None, function=ftype,
+                                                                      frequency=event['frequency'],
+                                                                      amplitude=event['amplitude'],
+                                                                      offset=event['offset'],
+                                                                      phase=event['phase'],
+                                                                      duration=duration)
+                        else:
+                            raise utils.SequenceException('Unknown function type: %s'%ftype)
+                        track_item.appendRow(track_event)
 
             self.appendRow(routine_item)
 
@@ -191,8 +256,22 @@ class RoutinesModel(QStandardItemModel):
                     if track_item.data(utils.TrackTypeRole) == utils.DigitalTrack:
                         parsed_event["state"] = (event_item.data(Qt.CheckStateRole) == Qt.Checked)
                     elif track_item.data(utils.TrackTypeRole) == utils.AnalogTrack:
-                        #TODO
-                        pass
+                        ftype = event_item.data(utils.AEventFunctionRole)
+                        parsed_event['function'] = ftype
+                        if ftype == "constant":
+                            parsed_event['val'] = event_item.data(utils.AEventValueRole)
+                        elif ftype == "linear":
+                            parsed_event['start_val'] = event_item.data(utils.AEventStartValRole)
+                            parsed_event['end_val'] = event_item.data(utils.AEventEndValRole)
+                        elif ftype == "exp":
+                            parsed_event['start_val'] = event_item.data(utils.AEventStartValRole)
+                            parsed_event['end_val'] = event_item.data(utils.AEventEndValRole)
+                            parsed_event['gamma.'] = event_item.data(utils.AEventGammaRole)
+                        elif ftype == "sin":
+                            parsed_event['frequency'] = event_item.data(utils.AEventFrequencyRole)
+                            parsed_event['amplitude'] = event_item.data(utils.AEventAmplitudeRole)
+                            parsed_event['offset'] = event_item.data(utils.AEventOffsetRole)
+                            parsed_event['phase'] = event_item.data(utils.AEventPhaseRole)
                     parsed_events.append(parsed_event)
                 parsed_track["events"] = parsed_events
                 parsed_tracks.append(parsed_track)
@@ -255,8 +334,7 @@ class RoutinesModel(QStandardItemModel):
                             print(duration)
                             print(variables)
                     except TypeError: # in case duration in None
-                        print("Error duration is:")
-                        print(duration)
+                        print("Error duration is: %s"%duration)
 
                 # There is no next event so start_time contains the duration of this channel
                 if start_time != self.data(channel_index, utils.ChannelDurationRole):

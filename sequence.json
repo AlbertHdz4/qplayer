@@ -195,6 +195,33 @@
           }
         ]
       }
+    ],
+    "d": [
+      {
+        "chan": {
+          "index": 0,
+          "card": "Analog 0"
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "1",
+            "function": "constant",
+            "val": "3"
+          },
+          {
+            "duration": "2",
+            "function": "linear",
+            "start_val": "3",
+            "end_val": "4"
+          },
+          {
+            "duration": "3",
+            "function": "constant",
+            "val": "4"
+          }
+        ]
+      }
     ]
   },
   "playlist": [

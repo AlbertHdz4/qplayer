@@ -264,7 +264,7 @@ class SequenceEvent(QWidget):
 
         self.customContextMenuRequested.connect(self.context_menu_requested)
 
-        self.event_item.emitDataChanged()
+        #self.event_item.emitDataChanged()
 
     def initialize_event_item(self, event_item):
         pass
@@ -320,7 +320,7 @@ class DigitalSequenceEvent(SequenceEvent):
         brush = self.event_item.background() # type: QBrush
         self.ui.event_duration.setStyleSheet("QLineEdit { background: "+brush.color().name()+" }")
 
-        # Update start label
+        # Update start and duration label
         self.ui.start_label.setText("%g"%(self.event_item.data(utils.EventStartRole)))
         try:
             self.ui.duration_label.setText("%g"%(self.event_item.data(utils.EventDurationRoleNum)))
@@ -342,8 +342,134 @@ class DigitalSequenceEvent(SequenceEvent):
 class AnalogSequenceEvent(SequenceEvent):
     ui_file = "analog-event.ui"
 
+    def __init__(self, sequence_track, event_item):
+
+        # load uis for each kind of function
+        self.function_types = ["constant", "linear", "exp", "sin"]
+        self.uis = {}
+        self.widgets = {}
+        for ftype in self.function_types:
+            w = QWidget()
+            ui_form, ui_base = loadUiType("analog-event-"+ftype+".ui")
+            ui = ui_form()
+            ui.setupUi(w)
+            self.uis[ftype] = ui
+            self.widgets[ftype] = w
+
+        super().__init__(sequence_track, event_item)
+        self.ui.function_selection_combobox.addItems(self.function_types)
+        self.ui.function_selection_combobox.currentTextChanged.connect(self.update_function_type)
+
+        # Maybe more elegant way to do this but this will do
+        self.uis['constant'].duration.editingFinished.connect(self.const_duration_edited)
+        self.uis['constant'].val.editingFinished.connect(self.const_val_edited)
+
+        self.uis['linear'].duration.editingFinished.connect(self.lin_duration_edited)
+        self.uis['linear'].start_val.editingFinished.connect(self.lin_start_val_edited)
+        self.uis['linear'].end_val.editingFinished.connect(self.lin_end_val_edited)
+
+        self.uis['exp'].duration.editingFinished.connect(self.exp_duration_edited)
+        self.uis['exp'].start_val.editingFinished.connect(self.exp_start_val_edited)
+        self.uis['exp'].end_val.editingFinished.connect(self.exp_end_val_edited)
+        self.uis['exp'].gamma.editingFinished.connect(self.exp_gamma_edited)
+
+        self.uis['sin'].duration.editingFinished.connect(self.sin_duration_edited)
+        self.uis['sin'].frequency.editingFinished.connect(self.sin_frequency_edited)
+        self.uis['sin'].amplitude.editingFinished.connect(self.sin_amplitude_edited)
+        self.uis['sin'].phase.editingFinished.connect(self.sin_phase_edited)
+        self.uis['sin'].offset.editingFinished.connect(self.sin_offset_edited)
+
+        self.data_changed()
+
+
+
+    @pyqtSlot()
+    def data_changed(self):
+
+        ftype = self.event_item.data(utils.AEventFunctionRole)
+        self.ui.function_selection_combobox.setCurrentText(ftype)
+
+        if not self.ui.event_params_layout.isEmpty():
+            widget = self.ui.event_params_layout.itemAt(0).widget()  # type: QWidget
+            widget.setParent(None)
+        self.ui.event_params_layout.addWidget(self.widgets[ftype])
+
+        # they all must have duration so we can set that for all
+        self.uis[ftype].duration.setText(self.event_item.data(utils.EventDurationRole))
+        # Get bg color duration
+        brush = self.event_item.background()  # type: QBrush
+        self.uis[ftype].duration.setStyleSheet("QLineEdit { background: " + brush.color().name() + " }")
+
+        if ftype == "constant":
+            self.uis[ftype].val.setText(self.event_item.data(utils.AEventValueRole))
+        elif ftype == "linear":
+            self.uis[ftype].start_val.setText(self.event_item.data(utils.AEventStartValRole))
+            self.uis[ftype].end_val.setText(self.event_item.data(utils.AEventEndValRole))
+        elif ftype == "exp":
+            self.uis[ftype].start_val.setText(self.event_item.data(utils.AEventStartValRole))
+            self.uis[ftype].end_val.setText(self.event_item.data(utils.AEventEndValRole))
+            self.uis[ftype].gamma.setText(self.event_item.data(utils.AEventGammaRole))
+        elif ftype == "sin":
+            self.uis[ftype].frequency.setText(self.event_item.data(utils.AEventFrequencyRole))
+            self.uis[ftype].amplitude.setText(self.event_item.data(utils.AEventAmplitudeRole))
+            self.uis[ftype].offset.setText(self.event_item.data(utils.AEventOffsetRole))
+            self.uis[ftype].phase.setText(self.event_item.data(utils.AEventPhaseRole))
+
+        # Update start and duration label
+        self.ui.start_label.setText("%g"%(self.event_item.data(utils.EventStartRole)))
+        try:
+            self.ui.duration_label.setText("%g"%(self.event_item.data(utils.EventDurationRoleNum)))
+        except TypeError:
+            self.ui.duration_label.setText("-")
+
+    @pyqtSlot(str)
+    def update_function_type(self, text):
+        self.event_item.setData(text, utils.AEventFunctionRole)
+
     def initialize_event_item(self, event_item: QStandardItem):
         event_item.model().init_analog_event_item(event_item)
+
+    def const_duration_edited(self):
+        self.event_item.setData(self.uis['constant'].duration.text(), utils.EventDurationRole)
+
+    def const_val_edited(self):
+        self.event_item.setData(self.uis['constant'].val.text(), utils.AEventValueRole)
+
+    def lin_duration_edited(self):
+        self.event_item.setData(self.uis['linear'].duration.text(), utils.EventDurationRole)
+
+    def lin_start_val_edited(self):
+        self.event_item.setData(self.uis['linear'].start_val.text(), utils.AEventStartValRole)
+
+    def lin_end_val_edited(self):
+        self.event_item.setData(self.uis['linear'].end_val.text(), utils.AEventEndValRole)
+
+    def exp_duration_edited(self):
+        self.event_item.setData(self.uis['exp'].duration.text(), utils.EventDurationRole)
+
+    def exp_start_val_edited(self):
+        self.event_item.setData(self.uis['exp'].start_val.text(), utils.AEventStartValRole)
+
+    def exp_end_val_edited(self):
+        self.event_item.setData(self.uis['exp'].end_val.text(), utils.AEventEndValRole)
+
+    def exp_gamma_edited(self):
+        self.event_item.setData(self.uis['exp'].gamma.text(), utils.AEventGammaRole)
+
+    def sin_duration_edited(self):
+        self.event_item.setData(self.uis['sin'].duration.text(), utils.EventDurationRole)
+
+    def sin_frequency_edited(self):
+        self.event_item.setData(self.uis['sin'].frequency.text(), utils.AEventFrequencyRole)
+
+    def sin_amplitude_edited(self):
+        self.event_item.setData(self.uis['sin'].amplitude.text(), utils.AEventAmplitudeRole)
+
+    def sin_phase_edited(self):
+        self.event_item.setData(self.uis['sin'].phase.text(), utils.AEventPhaseRole)
+
+    def sin_offset_edited(self):
+        self.event_item.setData(self.uis['sin'].offset.text(), utils.AEventOffsetRole)
 
 
 class RoutinePropertiesDialog(QDialog):

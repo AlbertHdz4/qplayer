@@ -12,6 +12,15 @@ TrackOffsetRole = Qt.UserRole + 7
 PlaylistItemTypeRole = Qt.UserRole + 8
 GapDurationRole = Qt.UserRole + 9
 ChannelDurationRole = Qt.UserRole + 10
+AEventFunctionRole = Qt.UserRole + 11
+AEventValueRole = Qt.UserRole + 12
+AEventStartValRole = AEventValueRole
+AEventEndValRole = Qt.UserRole + 13
+AEventGammaRole = Qt.UserRole + 14
+AEventAmplitudeRole = Qt.UserRole + 15
+AEventPhaseRole = Qt.UserRole + 16
+AEventFrequencyRole = Qt.UserRole + 17
+AEventOffsetRole = AEventValueRole
 
 # TrackTypes
 DigitalTrack = 0
@@ -24,6 +33,13 @@ CodeVariable = 1
 # Playlist item types
 Routine = 0
 Gap = 1
+
+# Function Types
+Constant = 0
+Linear = 1
+ExpRise = 2
+ExpFall = 3
+Sine = 4
 
 
 def iter_tree_rows(root: QStandardItem):

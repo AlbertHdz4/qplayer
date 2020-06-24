@@ -266,12 +266,13 @@ class PlaylistModel(QStandardItemModel):
                         #points[chan] = [(offset, events[0][1])]
                         points[chan] = []
                     t = offset
-                    for event in events:
-                        time, state  = event[0], event[1]
-                        points[chan].append((t, state))
-                        t += time
-                        tend = max(tend, t)
-                    points[chan].append((t,state)) # the last point is added to know how long to hold the state for
+                    if len(events) > 0:
+                        for event in events:
+                            time, state  = event[0], event[1]
+                            points[chan].append((t, state))
+                            t += time
+                            tend = max(tend, t)
+                        points[chan].append((t,state)) # the last point is added to know how long to hold the state for
 
             elif routine_item.data(utils.PlaylistItemTypeRole) == utils.Gap:
                 # if gap has children add children points with gap delay added
