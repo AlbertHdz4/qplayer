@@ -17,6 +17,7 @@ import matplotlib
 # Make sure that we are using QT5
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
 
@@ -637,7 +638,10 @@ class InspectorWidget(QWidget):
         self.axes = self.fig.add_subplot(111)
         self.fc = FigureCanvas(self.fig)
         self.fc.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.toolbar = NavigationToolbar(self.fc, self)
         self.layout().addWidget(self.fc)
+        self.layout().addWidget(self.toolbar)
+
 
 
         """
@@ -651,7 +655,7 @@ class InspectorWidget(QWidget):
 
 
         self.active = False
-        self.fix_timescale = False
+        self.fix_scale = False
 
     def build_inspector(self):
         self.active = True
@@ -681,8 +685,9 @@ class InspectorWidget(QWidget):
             if points is None:
                 return
             pl_points = self.format_points_for_plotting(points)
-            if self.fix_timescale:
+            if self.fix_scale:
                 xlim = self.axes.get_xlim()
+                ylim = self.axes.get_ylim()
             self.axes.cla()
             self.axes.set_xlabel('Time (ms)')
 
@@ -692,13 +697,15 @@ class InspectorWidget(QWidget):
                 t,y = trace[:,0], trace[:,1]
                 self.axes.plot(t,0.8*y+chan_index, label=chan_name)
 
-            if self.fix_timescale:
+            if self.fix_scale:
                 self.axes.set_xlim(xlim)
+                self.axes.set_ylim(ylim)
 
             self.fig.canvas.draw_idle()
 
-    def fix_timescale_toggled(self):
-        self.fix_timescale = not self.fix_timescale
+    def fix_scale_toggled(self):
+        self.fix_scale = not self.fix_scale
+        self.update_plot()
 
 
 class IteratorSlidersWidget(QWidget):

@@ -90,7 +90,7 @@ class ControlSystemGUI(QMainWindow):
         self.variables_model.dataChanged.connect(self.playlist_model.update_values)
         ## Inspector
         self.variables_model.dataChanged.connect(self.inspector_widget.update_plot)
-        self.ui.fix_timescale.toggled.connect(self.inspector_widget.fix_timescale_toggled)
+        self.ui.fix_scale.toggled.connect(self.inspector_widget.fix_scale_toggled)
 
         # UTILITY VARIABLES
         self.var_idx = 0

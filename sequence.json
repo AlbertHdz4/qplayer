@@ -44,6 +44,17 @@
         "increment": null,
         "comment": null,
         "scan index": null
+      },
+      {
+        "name": "var01",
+        "set": null,
+        "value": "1",
+        "iterator": true,
+        "start": "-1",
+        "stop": "1",
+        "increment": "0.1",
+        "comment": null,
+        "scan index": "20"
       }
     ]
   },
@@ -99,28 +110,61 @@
         "offset": "0",
         "events": [
           {
-            "duration": "t",
+            "duration": "1",
             "state": false
           },
           {
-            "duration": "2*t",
+            "duration": "1",
             "state": true
           },
           {
-            "duration": "t",
+            "duration": "1",
             "state": false
           },
           {
-            "duration": "t",
+            "duration": "1",
             "state": true
           },
           {
-            "duration": "t",
+            "duration": "1",
             "state": false
           },
           {
-            "duration": "t",
+            "duration": "1",
             "state": true
+          },
+          {
+            "duration": "1",
+            "state": false
+          },
+          {
+            "duration": "1",
+            "state": true
+          },
+          {
+            "duration": "1",
+            "state": false
+          },
+          {
+            "duration": "1",
+            "state": true
+          }
+        ]
+      },
+      {
+        "chan": {
+          "index": 1,
+          "card": "Analog 0"
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "10",
+            "function": "sin",
+            "frequency": "1",
+            "amplitude": "0.5",
+            "offset": "2",
+            "phase": "0"
           }
         ]
       }
@@ -213,12 +257,20 @@
             "duration": "2",
             "function": "linear",
             "start_val": "3",
-            "end_val": "4"
+            "end_val": "3+var01"
           },
           {
             "duration": "3",
             "function": "constant",
-            "val": "4"
+            "val": "3+var01"
+          },
+          {
+            "duration": "10",
+            "function": "sin",
+            "frequency": "1",
+            "amplitude": "0.2",
+            "offset": "3+var01",
+            "phase": "0"
           }
         ]
       }
@@ -245,6 +297,12 @@
           "type": 0,
           "children": [],
           "name": "c",
+          "repeat": "1"
+        },
+        {
+          "type": 0,
+          "children": [],
+          "name": "d",
           "repeat": "1"
         }
       ]

@@ -67,7 +67,6 @@ class RoutinesModel(QStandardItemModel):
             event_item.setData("0", utils.AEventValueRole)
 
         for key, value in kwargs.items():
-            print(key,value)
             if key == "duration":
                 event_item.setData(value, utils.EventDurationRole)
             elif key == "function":
@@ -161,7 +160,7 @@ class RoutinesModel(QStandardItemModel):
             points[chan_key] = {"offset":track_offset, "events":[]}
             for k in range(track_item.rowCount()):
                 event_item = track_item.child(k)
-                event_duration = eval(event_item.data(utils.EventDurationRole), variables) # TODO: confundido si debería ser EventDurationRole o DisplayRole
+                event_duration = eval(event_item.data(utils.EventDurationRole), variables)
 
                 if track_item.data(utils.TrackTypeRole) == utils.DigitalTrack:
                     event_state = int(event_item.data(Qt.CheckStateRole) == Qt.Checked)
@@ -174,10 +173,21 @@ class RoutinesModel(QStandardItemModel):
                     elif event_item.data(utils.AEventFunctionRole) == 'linear':
                         start_val = eval(event_item.data(utils.AEventStartValRole), variables)
                         end_val = eval(event_item.data(utils.AEventEndValRole), variables)
-                        N = 200 # TODO: get this from card maybe
+                        N = 500 # TODO: get this from card maybe
                         vals = np.linspace(start_val, end_val, N)
-                        points[chan_key]['events'].extend([(event_duration/(N-1), v) for v in vals])
+                        points[chan_key]['events'].extend([(event_duration/(N-1), v) for v in vals[:-1]])
+                        points[chan_key]['events'].append((0,vals[-1]))
                         # TODO check that duration is correct
+                    elif  event_item.data(utils.AEventFunctionRole) == 'sin':
+                        frequency =  eval(event_item.data(utils.AEventFrequencyRole), variables)
+                        amplitude = eval(event_item.data(utils.AEventAmplitudeRole), variables)
+                        offset =  eval(event_item.data(utils.AEventOffsetRole), variables)
+                        phase =  eval(event_item.data(utils.AEventPhaseRole), variables)
+                        N = 500  # TODO: get this from card maybe
+                        t = np.linspace(0, event_duration, N)
+                        vals = amplitude*np.sin(2*np.pi*frequency*t+phase)+offset
+                        points[chan_key]['events'].extend([(event_duration / (N - 1), v) for v in vals[:-1]])
+                        points[chan_key]['events'].append((0, vals[-1]))
 
                     # TODO other function
 

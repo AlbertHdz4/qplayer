@@ -638,9 +638,9 @@
              </layout>
             </item>
             <item>
-             <widget class="QPushButton" name="fix_timescale">
+             <widget class="QPushButton" name="fix_scale">
               <property name="text">
-               <string>Fix timescale</string>
+               <string>Freeze scale</string>
               </property>
               <property name="checkable">
                <bool>true</bool>
