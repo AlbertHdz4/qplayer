@@ -40,7 +40,7 @@ class ControlSystemGUI(QMainWindow):
         # PROXY MODELS
         self.static_variables_model = VariablesProxyModel(["name","set","value","comment"], True, False, True)
         self.static_variables_model.setSourceModel(self.variables_model)
-        self.iterator_variables_model = VariablesProxyModel(["name","value","start","stop","increment","scan index"], False, True, False)
+        self.iterator_variables_model = VariablesProxyModel(["name","value","start","stop","increment","scan index", "nesting level"], False, True, False)
         self.iterator_variables_model.setSourceModel(self.variables_model)
 
         # ADD MODELS TO VIEWS
@@ -150,16 +150,19 @@ class ControlSystemGUI(QMainWindow):
     def iterator_variables_context_menu_requested(self, pos):
         menu = QMenu()
         no_iterate_action = menu.addAction("Set as static")
+        menu.addSeparator()
+        increase_nesting =  menu.addAction("Increase nesting level")
+        decrease_nesting = menu.addAction("Decrease nesting level")
 
         idx = self.ui.iterator_variables_view.indexAt(pos) # type: QModelIndex
         src_idx = self.iterator_variables_model.mapToSource(idx)
 
         if src_idx.parent().isValid(): # if a variable is selected
 
-            action = menu.exec(self.ui.iterator_variables_view.mapToGlobal(pos)) # type: QMenu
+            action = menu.exec(self.ui.iterator_variables_view.mapToGlobal(pos))
             if action == no_iterate_action:
                 iterator_idx = src_idx.parent().child(src_idx.row(),VariablesModel.variable_fields.index("iterator"))
-                self.variables_model.setData(iterator_idx,Qt.Unchecked,Qt.CheckStateRole)
+                self.variables_model.make_static(iterator_idx)
 
     @pyqtSlot(QPoint)
     def static_variables_context_menu_requested(self, pos):

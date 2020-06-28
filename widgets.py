@@ -307,6 +307,8 @@ class DigitalSequenceEvent(SequenceEvent):
         self.ui.state_button.toggled.connect(self.toggled)
         self.ui.event_duration.editingFinished.connect(self.duration_edited)
 
+        self.data_changed()
+
     # Initialize the event item in the model
     def initialize_event_item(self, event_item: QStandardItem):
         event_item.model().init_digital_event_item(event_item)
@@ -322,7 +324,10 @@ class DigitalSequenceEvent(SequenceEvent):
         self.ui.event_duration.setStyleSheet("QLineEdit { background: "+brush.color().name()+" }")
 
         # Update start and duration label
-        self.ui.start_label.setText("%g"%(self.event_item.data(utils.EventStartRole)))
+        try:
+            self.ui.start_label.setText("%g" % (self.event_item.data(utils.EventStartRole)))
+        except TypeError:
+            self.ui.start_label.setText("-")
         try:
             self.ui.duration_label.setText("%g"%(self.event_item.data(utils.EventDurationRoleNum)))
         except TypeError:
@@ -417,7 +422,10 @@ class AnalogSequenceEvent(SequenceEvent):
             self.uis[ftype].phase.setText(self.event_item.data(utils.AEventPhaseRole))
 
         # Update start and duration label
-        self.ui.start_label.setText("%g"%(self.event_item.data(utils.EventStartRole)))
+        try:
+            self.ui.start_label.setText("%g"%(self.event_item.data(utils.EventStartRole)))
+        except TypeError:
+            self.ui.start_label.setText("-")
         try:
             self.ui.duration_label.setText("%g"%(self.event_item.data(utils.EventDurationRoleNum)))
         except TypeError:

@@ -1,6 +1,6 @@
 {
   "variables": {
-    "default00": [
+    "MOT": [
       {
         "name": "v",
         "set": "1",
@@ -10,7 +10,8 @@
         "stop": "8",
         "increment": "1",
         "comment": "00",
-        "scan index": "0"
+        "scan index": "0",
+        "nesting level": "0"
       },
       {
         "name": "t",
@@ -21,7 +22,8 @@
         "stop": "5",
         "increment": "1",
         "comment": null,
-        "scan index": "0"
+        "scan index": "0",
+        "nesting level": "1"
       },
       {
         "name": "f",
@@ -32,7 +34,8 @@
         "stop": "10",
         "increment": "1",
         "comment": null,
-        "scan index": "0"
+        "scan index": "0",
+        "nesting level": "2"
       },
       {
         "name": "var00",
@@ -43,18 +46,46 @@
         "stop": null,
         "increment": null,
         "comment": null,
-        "scan index": null
-      },
+        "scan index": null,
+        "nesting level": null
+      }
+    ],
+    "Dipole trap": [
       {
         "name": "var01",
         "set": null,
-        "value": "1",
+        "value": "-1",
         "iterator": true,
         "start": "-1",
         "stop": "1",
         "increment": "0.1",
         "comment": null,
-        "scan index": "20"
+        "scan index": "0",
+        "nesting level": "3"
+      },
+      {
+        "name": "var02",
+        "set": "5",
+        "value": "5",
+        "iterator": false,
+        "start": null,
+        "stop": null,
+        "increment": null,
+        "comment": null,
+        "scan index": null,
+        "nesting level": null
+      },
+      {
+        "name": "var03",
+        "set": "return 2*(v/8-0.5)",
+        "value": "-1",
+        "iterator": false,
+        "start": null,
+        "stop": null,
+        "increment": null,
+        "comment": null,
+        "scan index": null,
+        "nesting level": null
       }
     ]
   },
@@ -109,6 +140,14 @@
         },
         "offset": "0",
         "events": [
+          {
+            "duration": "1",
+            "state": false
+          },
+          {
+            "duration": "1",
+            "state": true
+          },
           {
             "duration": "1",
             "state": false
@@ -278,31 +317,32 @@
   },
   "playlist": [
     {
-      "name": "g",
+      "name": "basic",
       "children": [
         {
           "type": 0,
           "children": [
             {
               "type": 0,
-              "children": [],
+              "children": [
+                {
+                  "type": 0,
+                  "children": [],
+                  "name": "d",
+                  "repeat": "1"
+                }
+              ],
               "name": "b",
+              "repeat": "1"
+            },
+            {
+              "type": 0,
+              "children": [],
+              "name": "c",
               "repeat": "1"
             }
           ],
           "name": "a",
-          "repeat": "1"
-        },
-        {
-          "type": 0,
-          "children": [],
-          "name": "c",
-          "repeat": "1"
-        },
-        {
-          "type": 0,
-          "children": [],
-          "name": "d",
           "repeat": "1"
         }
       ]

@@ -177,8 +177,13 @@ class RoutinesModel(QStandardItemModel):
                         vals = np.linspace(start_val, end_val, N)
                         points[chan_key]['events'].extend([(event_duration/(N-1), v) for v in vals[:-1]])
                         points[chan_key]['events'].append((0,vals[-1]))
-                        # TODO check that duration is correct
-                    elif  event_item.data(utils.AEventFunctionRole) == 'sin':
+                    elif event_item.data(utils.AEventFunctionRole) == 'exp':
+                        start_val = eval(event_item.data(utils.AEventStartValRole), variables)
+                        end_val = eval(event_item.data(utils.AEventEndValRole), variables)
+                        gamma = eval(event_item.data(utils.AEventGammaRole), variables)
+                        N = 500  # TODO: get this from card maybe
+
+                    elif event_item.data(utils.AEventFunctionRole) == 'sin':
                         frequency =  eval(event_item.data(utils.AEventFrequencyRole), variables)
                         amplitude = eval(event_item.data(utils.AEventAmplitudeRole), variables)
                         offset =  eval(event_item.data(utils.AEventOffsetRole), variables)

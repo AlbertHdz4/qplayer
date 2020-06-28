@@ -13,8 +13,8 @@ import numpy as np
 
 
 class VariablesModel(QStandardItemModel):
-    variable_fields = ["name", "set", "value", "iterator", "start", "stop", "increment", "comment", "scan index"]
-    variable_types = [str, str, float, bool, float, float, float, str, int]
+    variable_fields = ["name", "set", "value", "iterator", "start", "stop", "increment", "comment", "scan index", "nesting level"]
+    variable_types = [str, str, float, bool, float, float, float, str, int, int]
 
     def __init__(self):
         super().__init__()
@@ -62,7 +62,7 @@ class VariablesModel(QStandardItemModel):
                 except TypeError: # "set" field is None, this occurs for iterating variables
                     pass
 
-            if field == "value":
+            if field in ["value", "scan index", "nesting level"]:
                 it.setFlags(it.flags() & ~Qt.ItemIsEditable)
 
             if kwargs is not None and field in kwargs:
@@ -77,8 +77,38 @@ class VariablesModel(QStandardItemModel):
     def is_iterator(self, var_index:QModelIndex):
         return var_index.parent().child(var_index.row(),self.variable_fields.index("iterator")).data(Qt.CheckStateRole) == Qt.Checked
 
-    def make_iterating(self, var_index:QModelIndex):
-        self.setData(var_index, Qt.Checked, Qt.CheckStateRole)
+    def make_iterating(self, var_iterator_index:QModelIndex):
+        # set the nesting level to be the maximum of the current iterating variables
+        new_nesting_level = len(self.get_iterating_variables())
+        self.setData(var_iterator_index.parent().child(var_iterator_index.row(), self.variable_fields.index("nesting level")), new_nesting_level)
+        self.setData(var_iterator_index, Qt.Checked, Qt.CheckStateRole)
+
+    def make_static(self, var_iterator_index:QModelIndex):
+        self.setData(var_iterator_index, Qt.Unchecked, Qt.CheckStateRole)
+        self.sort_nesting_levels()
+
+    def sort_nesting_levels(self):
+        # build a dict where key is nesting level and value is the nesting level QModelIndex
+
+        nesting_level_indices = {}
+        num_groups = self.rowCount()
+        for g in range(num_groups):
+            group_index = self.index(g,0)
+            num_variables = self.rowCount(group_index)
+            for v in range(num_variables):
+                # If it is an iterating variable
+                if self.index(v,self.variable_fields.index("iterator"),group_index).data(Qt.CheckStateRole) == Qt.Checked:
+                    nesting_level_index = self.index(v, self.variable_fields.index("nesting level"), group_index)
+                    nesting_level_indices[nesting_level_index.data()] = nesting_level_index
+
+        old_levels = list(nesting_level_indices.keys())
+        print(old_levels)
+        old_levels.sort()
+        print(old_levels)
+        new_level = 0
+        for old_nesting_level in old_levels:
+            self.setData(nesting_level_indices[old_nesting_level], new_level)
+            new_level += 1
 
     def is_code_var(self, var_index):
         # The variable type is part of the "set" cell only so we must refer to it directly
