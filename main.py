@@ -151,8 +151,8 @@ class ControlSystemGUI(QMainWindow):
         menu = QMenu()
         no_iterate_action = menu.addAction("Set as static")
         menu.addSeparator()
-        increase_nesting =  menu.addAction("Increase nesting level")
-        decrease_nesting = menu.addAction("Decrease nesting level")
+        increase_nesting_lvl =  menu.addAction("Increase nesting level")
+        decrease_nesting_lvl = menu.addAction("Decrease nesting level")
 
         idx = self.ui.iterator_variables_view.indexAt(pos) # type: QModelIndex
         src_idx = self.iterator_variables_model.mapToSource(idx)
@@ -161,8 +161,11 @@ class ControlSystemGUI(QMainWindow):
 
             action = menu.exec(self.ui.iterator_variables_view.mapToGlobal(pos))
             if action == no_iterate_action:
-                iterator_idx = src_idx.parent().child(src_idx.row(),VariablesModel.variable_fields.index("iterator"))
-                self.variables_model.make_static(iterator_idx)
+                self.variables_model.make_static(src_idx)
+            elif action == increase_nesting_lvl:
+                self.variables_model.increase_nesting_level(src_idx)
+            elif action == decrease_nesting_lvl:
+                self.variables_model.decrease_nesting_level(src_idx)
 
     @pyqtSlot(QPoint)
     def static_variables_context_menu_requested(self, pos):
@@ -199,8 +202,7 @@ class ControlSystemGUI(QMainWindow):
             if action == variable_type_action:
                 self.variables_model.set_var_type(src_idx, new_variable_type)
             elif action == iterate_action:
-                iterator_idx = src_idx.parent().child(src_idx.row(),VariablesModel.variable_fields.index("iterator"))
-                self.variables_model.make_iterating(iterator_idx)
+                self.variables_model.make_iterating(src_idx)
             elif action == delete_action:
                 self.variables_model.removeRow(src_idx.row(),src_idx.parent())
             elif action in move_actions:

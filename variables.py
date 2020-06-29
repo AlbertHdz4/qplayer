@@ -77,19 +77,33 @@ class VariablesModel(QStandardItemModel):
     def is_iterator(self, var_index:QModelIndex):
         return var_index.parent().child(var_index.row(),self.variable_fields.index("iterator")).data(Qt.CheckStateRole) == Qt.Checked
 
-    def make_iterating(self, var_iterator_index:QModelIndex):
+    def make_iterating(self, var_index:QModelIndex):
+        var_iterator_index = var_index.parent().child(var_index.row(),self.variable_fields.index("iterator"))
         # set the nesting level to be the maximum of the current iterating variables
         new_nesting_level = len(self.get_iterating_variables())
         self.setData(var_iterator_index.parent().child(var_iterator_index.row(), self.variable_fields.index("nesting level")), new_nesting_level)
         self.setData(var_iterator_index, Qt.Checked, Qt.CheckStateRole)
 
-    def make_static(self, var_iterator_index:QModelIndex):
+    def make_static(self, var_index:QModelIndex):
+        var_iterator_index = var_index.parent().child(var_index.row(),self.variable_fields.index("iterator"))
         self.setData(var_iterator_index, Qt.Unchecked, Qt.CheckStateRole)
         self.sort_nesting_levels()
 
-    def sort_nesting_levels(self):
-        # build a dict where key is nesting level and value is the nesting level QModelIndex
+    def increase_nesting_level(self, var_index: QModelIndex):
+        nesting_level_index = var_index.parent().child(var_index.row(), self.variable_fields.index("nesting level"))
+        old_nesting_level = float(self.data(nesting_level_index))
+        self.setData(nesting_level_index, old_nesting_level+1.5)
+        self.sort_nesting_levels()
 
+    def decrease_nesting_level(self, var_index: QModelIndex):
+        nesting_level_index = var_index.parent().child(var_index.row(), self.variable_fields.index("nesting level"))
+        old_nesting_level = float(self.data(nesting_level_index))
+        self.setData(nesting_level_index, old_nesting_level-1.5)
+        self.sort_nesting_levels()
+
+    def sort_nesting_levels(self):
+
+        # build a dict where key is nesting level and value is the nesting level QModelIndex
         nesting_level_indices = {}
         num_groups = self.rowCount()
         for g in range(num_groups):
@@ -99,7 +113,7 @@ class VariablesModel(QStandardItemModel):
                 # If it is an iterating variable
                 if self.index(v,self.variable_fields.index("iterator"),group_index).data(Qt.CheckStateRole) == Qt.Checked:
                     nesting_level_index = self.index(v, self.variable_fields.index("nesting level"), group_index)
-                    nesting_level_indices[nesting_level_index.data()] = nesting_level_index
+                    nesting_level_indices[float(nesting_level_index.data())] = nesting_level_index
 
         old_levels = list(nesting_level_indices.keys())
         print(old_levels)
