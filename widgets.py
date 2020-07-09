@@ -767,6 +767,26 @@ class IteratorSlidersWidget(QWidget):
                 # ToDo: give an indication of the problem (i.e. paint fields red maybe).
                 pass
 
+        # sort sliders by nesting level
+        ## get dict of nesting level --> var name
+        nesting_levels = {}
+        for var in iter_vars_dict:
+            nesting_levels[int(iter_vars_dict[var]["nesting level"])] = var
+
+        levels = list(nesting_levels.keys())
+        levels.sort()
+
+        i = 0
+        while i < self.form_group.layout().rowCount():
+            var_name = self.form_group.layout().itemAt(i, QFormLayout.LabelRole).widget().text()
+            if nesting_levels[i] == var_name:
+                # slider is in the correct place
+                i += 1
+            else:
+                # move slide one place further
+                row = self.form_group.layout().takeRow(i) # type: QFormLayout.TakeRowResult
+                self.form_group.layout().insertRow(i+1, row.labelItem.widget(), row.fieldItem.widget())
+
         self.slider_value_changed()
 
     # Only remove sliders of variables which are no longer scanning variables

@@ -92,14 +92,20 @@ class VariablesModel(QStandardItemModel):
     def increase_nesting_level(self, var_index: QModelIndex):
         nesting_level_index = var_index.parent().child(var_index.row(), self.variable_fields.index("nesting level"))
         old_nesting_level = float(self.data(nesting_level_index))
+        self.blockSignals(True)
         self.setData(nesting_level_index, old_nesting_level+1.5)
         self.sort_nesting_levels()
+        self.blockSignals(False)
+        self.dataChanged.emit(QModelIndex(), QModelIndex())
 
     def decrease_nesting_level(self, var_index: QModelIndex):
         nesting_level_index = var_index.parent().child(var_index.row(), self.variable_fields.index("nesting level"))
         old_nesting_level = float(self.data(nesting_level_index))
+        self.blockSignals(True)
         self.setData(nesting_level_index, old_nesting_level-1.5)
         self.sort_nesting_levels()
+        self.blockSignals(False)
+        self.dataChanged.emit(QModelIndex(), QModelIndex())
 
     def sort_nesting_levels(self):
 
@@ -116,9 +122,7 @@ class VariablesModel(QStandardItemModel):
                     nesting_level_indices[float(nesting_level_index.data())] = nesting_level_index
 
         old_levels = list(nesting_level_indices.keys())
-        print(old_levels)
         old_levels.sort()
-        print(old_levels)
         new_level = 0
         for old_nesting_level in old_levels:
             self.setData(nesting_level_indices[old_nesting_level], new_level)
@@ -213,7 +217,8 @@ class VariablesModel(QStandardItemModel):
                     var_start = self.index(v, self.variable_fields.index("start"), group_index).data()
                     var_stop = self.index(v, self.variable_fields.index("stop"), group_index).data()
                     var_increment = self.index(v, self.variable_fields.index("increment"), group_index).data()
-                    iter_vars[var_name] = {"start":var_start, "stop":var_stop, "increment":var_increment}
+                    var_nesting_lvl = self.index(v, self.variable_fields.index("nesting level"), group_index).data()
+                    iter_vars[var_name] = {"start":var_start, "stop":var_stop, "increment":var_increment, "nesting level":var_nesting_lvl}
 
         return iter_vars
 
