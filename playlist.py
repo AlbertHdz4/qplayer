@@ -248,7 +248,7 @@ class PlaylistModel(QStandardItemModel):
     # where key is channel name and value is is a list of (time,state) pairs.
     def get_active_playlist_points(self):
 
-        def inner_playlist_branch_points(routine_item : QStandardItem):
+        def inner_get_playlist_branch_points(routine_item : QStandardItem):
             points = {}
             tend = 0 # end time of current routine
 
@@ -282,7 +282,7 @@ class PlaylistModel(QStandardItemModel):
 
             for i in range(routine_item.rowCount()):
                 child_item = routine_item.child(i)
-                child_points = inner_playlist_branch_points(child_item)
+                child_points = inner_get_playlist_branch_points(child_item)
 
                 for chan in child_points:
                     if chan not in points:
@@ -294,7 +294,7 @@ class PlaylistModel(QStandardItemModel):
             return points
         if self.active_playlist is not None:
             active_pl_item = self.item(self.active_playlist) # type: QStandardItem
-            return inner_playlist_branch_points(active_pl_item)
+            return inner_get_playlist_branch_points(active_pl_item)
         else:
             return None
 

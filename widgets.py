@@ -183,10 +183,7 @@ class SequenceEditor(QWidget):
                 event_item = channel_item.child(j)
                 self.layout().itemAt(i).widget().add_event(event_item)
 
-
         self.model.dataChanged.emit(QModelIndex(), QModelIndex()) # send data changed notification to everything to set up new gui elements
-
-
 
     @pyqtSlot()
     def data_changed(self):
@@ -195,7 +192,7 @@ class SequenceEditor(QWidget):
 
 
 class SequenceChannel(QWidget):
-    ui_form, ui_base = loadUiType('track-widget.ui')
+    ui_form, ui_base = loadUiType('uis/track-widget.ui')
 
     def __init__(self, row, name, channel, sequence_editor):
         super().__init__()
@@ -300,7 +297,7 @@ class SequenceEvent(QWidget):
 
 
 class DigitalSequenceEvent(SequenceEvent):
-    ui_file = "digital-event.ui"
+    ui_file = "uis/digital-event.ui"
 
     def __init__(self, sequence_track, event_item):
         super().__init__(sequence_track, event_item)
@@ -346,7 +343,7 @@ class DigitalSequenceEvent(SequenceEvent):
 
 
 class AnalogSequenceEvent(SequenceEvent):
-    ui_file = "analog-event.ui"
+    ui_file = "uis/analog-event.ui"
 
     def __init__(self, sequence_track, event_item):
 
@@ -356,7 +353,7 @@ class AnalogSequenceEvent(SequenceEvent):
         self.widgets = {}
         for ftype in self.function_types:
             w = QWidget()
-            ui_form, ui_base = loadUiType("analog-event-"+ftype+".ui")
+            ui_form, ui_base = loadUiType("uis/analog-event-"+ftype+".ui")
             ui = ui_form()
             ui.setupUi(w)
             self.uis[ftype] = ui
@@ -482,7 +479,7 @@ class AnalogSequenceEvent(SequenceEvent):
 
 
 class RoutinePropertiesDialog(QDialog):
-    ui_form, ui_base = loadUiType('routine-properties-dialog.ui')
+    ui_form, ui_base = loadUiType('uis/routine-properties-dialog.ui')
 
     def __init__(self, cards, model: RoutinesModel, index: QModelIndex=None):
         self.model = model
@@ -575,7 +572,7 @@ class RoutinePropertiesDialog(QDialog):
 
 
 class MoveRoutineDialog(QDialog):
-    ui_form, ui_base = loadUiType('move-routine-dialog.ui')
+    ui_form, ui_base = loadUiType('uis/move-routine-dialog.ui')
 
     def __init__(self, playlist_model: PlaylistModel, index: QModelIndex=None):
         self.playlist_model = playlist_model
@@ -600,7 +597,7 @@ class MoveRoutineDialog(QDialog):
         self.accept()
 
 class UniqueTextInputDialog(QDialog):
-    ui_form, ui_base = loadUiType('text-input-dialog.ui')
+    ui_form, ui_base = loadUiType('uis/text-input-dialog.ui')
 
     def __init__(self, text_label, existing_values, initial_text = ""):
         self.existing_values = existing_values

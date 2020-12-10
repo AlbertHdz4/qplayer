@@ -20,7 +20,7 @@ class ControlSystemGUI(QMainWindow):
         self.cards = self.config.get_cards_dict()
 
         QMainWindow.__init__(self, parent)
-        ui_main_window, main_window = loadUiType('control-system.ui')
+        ui_main_window, main_window = loadUiType('uis/control-system.ui')
         self.ui = ui_main_window()
         self.ui.setupUi(self)
         self.setWindowIcon(QIcon('icons' + os.path.sep + 'pyPlayer_icon.svg'))
