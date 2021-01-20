@@ -2,11 +2,12 @@
 
 class Scheduler:
 
-    def __init__(self, sequence):
+    def __init__(self, sequence, hardware):
         self.sequence = sequence
+        self.hardware = hardware
 
     def run_single(self):
-        pass
+        print("Run single")
 
     def iterate(self):
         pass

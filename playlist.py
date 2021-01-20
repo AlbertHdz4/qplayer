@@ -244,6 +244,64 @@ class PlaylistModel(QStandardItemModel):
     def set_active_playlist(self, index):
         self.active_playlist = index
 
+    # Returns a representation of the sequence written in absolute times with all variable values replaced.
+    # The return structure is a dict where the key is a channel and the value is a list of output instructions.
+    # An output instruction is a dict with the necessary parameters:
+    # * For a digital channel an output instruction contains 'time' and 'state' (1 or 0).
+    # * For an analog channel an output instruction structure can vary depending on the type of instruction
+    #   but all have 'type' (constant, sin, exp, etc.), 'time', 'duration' and the necesary additiona parameters.
+    # TODO: delete get_active_playlist_points() and replace usages with get_compiled_active_playlist()
+    def compile_active_playlist(self):
+
+        def _compile_playlist_branch(routine_item : QStandardItem):
+            points = {}
+            tend = 0 # end time of current routine
+
+            if routine_item.data(utils.PlaylistItemTypeRole) == utils.Routine:
+                # find routine points relative to routine start
+
+                routine_name = routine_item.data(Qt.DisplayRole)
+                routine_points = self.routines_model.compile_routine(routine_name)
+
+                for chan in routine_points:
+                    offset = routine_points[chan]["offset"]
+                    events = routine_points[chan]["events"]
+
+                    if chan not in points:
+                        points[chan] = []
+                    t = offset
+                    if len(events) > 0:
+                        for event in events:
+                            event['time'] = t
+                            points[chan].append(event)
+                            t += event['duration']
+                            tend = max(tend, t)
+
+            elif routine_item.data(utils.PlaylistItemTypeRole) == utils.Gap:
+                # if gap has children add children points with gap delay added
+                # else if gap is last in sequence add points at end with previous value (can this be even done with a recursive function?)
+                # TODO
+                pass
+
+            for i in range(routine_item.rowCount()):
+                child_item = routine_item.child(i)
+                child_points = _compile_playlist_branch(child_item)
+
+                for chan in child_points:
+                    if chan not in points:
+                        points[chan] = []
+                    for chan_point in child_points[chan]:
+                        chan_point['time'] = chan_point['time']+tend
+                        points[chan].append(chan_point)
+
+            return points
+        if self.active_playlist is not None:
+            active_pl_item = self.item(self.active_playlist) # type: QStandardItem
+            return _compile_playlist_branch(active_pl_item)
+        else:
+            return None
+
+
     # Returns  a dict with the states and times for each transition in all of the channels in the active playlist
     # where key is channel name and value is is a list of (time,state) pairs.
     def get_active_playlist_points(self):

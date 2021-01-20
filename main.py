@@ -13,6 +13,8 @@ from routines import *
 from playlist import *
 from widgets import *
 from sequence import Sequence
+from scheduler import Scheduler
+from hardware import Hardware
 
 class ControlSystemGUI(QMainWindow):
     def __init__(self, parent=None):
@@ -32,6 +34,9 @@ class ControlSystemGUI(QMainWindow):
 
         # SEQUENCE MANAGER
         self.sequence = Sequence(self.variables_model, self.routines_model, self.playlist_model)
+
+        self.hardware = Hardware() # TODO: generate this object from configuration
+        self.scheduler = Scheduler(self.sequence, self.hardware)
 
         # UI SETUP
         self.sequence_editor = SequenceEditor(self.routines_model)
@@ -67,8 +72,12 @@ class ControlSystemGUI(QMainWindow):
         ## General
         self.ui.save_button.clicked.connect(self.save_sequence)
         self.ui.load_button.clicked.connect(self.load_sequence)
+        self.ui.play_button.clicked.connect(self.play_sequence)
+        self.ui.stop_button.clicked.connect(self.stop_sequence)
+        self.ui.iterate_button.clicked.connect(self.iterate_sequence)
         self.ui.tabWidget.currentChanged.connect(self.tab_changed)
         self.ui.playlist_selection_combo_box.currentIndexChanged.connect(self.playlist_model.set_active_playlist)
+
         ## Variables
         self.ui.add_variable_group_button.clicked.connect(self.add_variable_group)
         self.ui.add_variable_button.clicked.connect(self.add_variable)
@@ -112,6 +121,22 @@ class ControlSystemGUI(QMainWindow):
             sequence = json.load(infile)
             self.sequence.load_sequence_from_dict(sequence)
 
+    @pyqtSlot()
+    def play_sequence(self):
+        self.scheduler.run_single()
+        self.enable_inputs()
+
+    @pyqtSlot()
+    def stop_sequence(self):
+        self.scheduler.stop()
+        self.enable_inputs()
+
+    @pyqtSlot()
+    def iterate_sequence(self):
+        self.scheduler.iterate()
+        self.disable_inputs()
+        # TODO: check if shuffle is enabled
+
 
     @pyqtSlot(int)
     def tab_changed(self, tab_index):
@@ -119,6 +144,14 @@ class ControlSystemGUI(QMainWindow):
             self.inspector_widget.build_inspector()
         else:
             self.inspector_widget.set_inactive()
+
+    # Blocks inputs during interations
+    def disable_inputs(self):
+        pass # TODO
+
+    # Enable inputs after interation has ended
+    def enable_inputs(self):
+        pass # TODO
 
     #############
     # VARIABLES #

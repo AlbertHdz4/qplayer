@@ -2,13 +2,13 @@ from PyQt5.QtCore import Qt, QModelIndex
 from PyQt5.QtGui import QStandardItem
 
 # User-defined role to use with QStandardItemModel
-TrackTypeRole = Qt.UserRole + 1
-ChannelRole = Qt.UserRole + 2
+TrackTypeRole = Qt.UserRole + 1 # Digital/Analog
+ChannelRole = Qt.UserRole + 2 # An instance of cards.Channel
 VariableTypeRole = Qt.UserRole + 3
 EventStartRole = Qt.UserRole + 4
 EventDurationRole = Qt.DisplayRole # set value for the duration of an event
 EventDurationRoleNum = Qt.UserRole + 6 # numerical value for the duration of an event
-TrackOffsetRole = Qt.UserRole + 7
+TrackOffsetRole = Qt.UserRole + 7 # Time offset for the first event in the track
 PlaylistItemTypeRole = Qt.UserRole + 8
 GapDurationRole = Qt.UserRole + 9
 ChannelDurationRole = Qt.UserRole + 10

@@ -18,7 +18,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QToolButton" name="toolButton">
+       <widget class="QToolButton" name="play_button">
         <property name="toolTip">
          <string>Run</string>
         </property>
@@ -26,7 +26,7 @@
          <string>run</string>
         </property>
         <property name="icon">
-         <iconset resource="resources.qrc">
+         <iconset resource="../resources.qrc">
           <normaloff>:/actions/icons/media-playback-start.svg</normaloff>:/actions/icons/media-playback-start.svg</iconset>
         </property>
         <property name="iconSize">
@@ -38,7 +38,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton_8">
+       <widget class="QToolButton" name="iterate_button">
         <property name="toolTip">
          <string>Iterate</string>
         </property>
@@ -46,7 +46,7 @@
          <string>iterate</string>
         </property>
         <property name="icon">
-         <iconset resource="resources.qrc">
+         <iconset resource="../resources.qrc">
           <normaloff>:/actions/icons/media-seek-forward.svg</normaloff>:/actions/icons/media-seek-forward.svg</iconset>
         </property>
         <property name="iconSize">
@@ -58,7 +58,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton_7">
+       <widget class="QToolButton" name="stop_button">
         <property name="toolTip">
          <string>Stop</string>
         </property>
@@ -66,7 +66,7 @@
          <string>stop</string>
         </property>
         <property name="icon">
-         <iconset resource="resources.qrc">
+         <iconset resource="../resources.qrc">
           <normaloff>:/actions/icons/media-playback-stop.svg</normaloff>:/actions/icons/media-playback-stop.svg</iconset>
         </property>
         <property name="iconSize">
@@ -85,17 +85,23 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="shuffle_button">
         <property name="toolTip">
          <string>Shuffle iterations</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">/** Style needed for theme icons to work **/
+QPushButton:checked{
+    background-color: lightgray;
+}</string>
         </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/actions/icons/media-playlist-repeat.svg</normaloff>
-          <activeon>:/actions/icons/media-playlist-shuffle.svg</activeon>:/actions/icons/media-playlist-repeat.svg</iconset>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/actions/icons/media-playlist-ordered.svg</normaloff>
+          <normalon>:/actions/icons/media-playlist-shuffle.svg</normalon>:/actions/icons/media-playlist-ordered.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -105,6 +111,15 @@
         </property>
         <property name="checkable">
          <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <property name="autoRepeat">
+         <bool>false</bool>
+        </property>
+        <property name="autoExclusive">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -147,7 +162,7 @@
          <string>save</string>
         </property>
         <property name="icon">
-         <iconset resource="resources.qrc">
+         <iconset resource="../resources.qrc">
           <normaloff>:/actions/icons/document-save.svg</normaloff>:/actions/icons/document-save.svg</iconset>
         </property>
         <property name="iconSize">
@@ -162,7 +177,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton_6">
+       <widget class="QToolButton" name="saveas_button">
         <property name="toolTip">
          <string>Save sequence as</string>
         </property>
@@ -170,7 +185,7 @@
          <string>save as</string>
         </property>
         <property name="icon">
-         <iconset resource="resources.qrc">
+         <iconset resource="../resources.qrc">
           <normaloff>:/actions/icons/document-save-as.svg</normaloff>:/actions/icons/document-save-as.svg</iconset>
         </property>
         <property name="iconSize">
@@ -193,7 +208,7 @@
          <string>load</string>
         </property>
         <property name="icon">
-         <iconset resource="resources.qrc">
+         <iconset resource="../resources.qrc">
           <normaloff>:/actions/icons/document-open.svg</normaloff>:/actions/icons/document-open.svg</iconset>
         </property>
         <property name="iconSize">
@@ -233,7 +248,7 @@
              <string>collapse</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/actions/icons/object-group.svg</normaloff>:/actions/icons/object-group.svg</iconset>
             </property>
             <property name="iconSize">
@@ -253,7 +268,7 @@
              <string>expand</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/actions/icons/object-ungroup.svg</normaloff>:/actions/icons/object-ungroup.svg</iconset>
             </property>
             <property name="iconSize">
@@ -347,7 +362,7 @@
              <string>add variable</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/actions/icons/document-new.svg</normaloff>:/actions/icons/document-new.svg</iconset>
             </property>
             <property name="iconSize">
@@ -367,7 +382,7 @@
              <string>add group</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/actions/icons/folder-new.svg</normaloff>:/actions/icons/folder-new.svg</iconset>
             </property>
             <property name="iconSize">
@@ -428,7 +443,7 @@
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/actions/icons/list-add.svg</normaloff>:/actions/icons/list-add.svg</iconset>
             </property>
             <property name="iconSize">
@@ -448,7 +463,7 @@
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/actions/icons/edit.svg</normaloff>:/actions/icons/edit.svg</iconset>
             </property>
             <property name="iconSize">
@@ -468,7 +483,7 @@
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/actions/icons/list-remove.svg</normaloff>:/actions/icons/list-remove.svg</iconset>
             </property>
             <property name="iconSize">
@@ -530,7 +545,7 @@
              <string>add playlist</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/actions/icons/list-add.svg</normaloff>:/actions/icons/list-add.svg</iconset>
             </property>
             <property name="iconSize">
@@ -550,7 +565,7 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../resources.qrc">
               <normaloff>:/actions/icons/object-ungroup.svg</normaloff>:/actions/icons/object-ungroup.svg</iconset>
             </property>
             <property name="iconSize">
@@ -694,7 +709,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections>
   <connection>

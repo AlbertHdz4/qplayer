@@ -136,6 +136,11 @@ class RoutinesModel(QStandardItemModel):
             duration = max(duration, channel_duration)
         return duration
 
+    # Returns a dict in which the structure {'''offset'}
+    # TODO: delete get_routine_points
+    def compile_routine(self, routine_name):
+        pass
+
     # Returns a dict with the states and time to hold the state for, for all of the channels in the routine
     # where key is channel name and value is is a list of (time,state) pairs.
     def get_routine_points(self, routine_name):
@@ -152,7 +157,7 @@ class RoutinesModel(QStandardItemModel):
         routine_item = self.get_routine_item_by_name(routine_name)
         num_tracks = routine_item.rowCount()
         for c in range(num_tracks):
-            track_item  = routine_item.child(c)
+            track_item = routine_item.child(c)
             chan = track_item.data(utils.ChannelRole).get_channel_dict()
             chan_key = (chan['card'], chan['index'])
             track_offset = eval(track_item.data(utils.TrackOffsetRole),variables)
