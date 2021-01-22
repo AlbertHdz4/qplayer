@@ -254,7 +254,7 @@ class PlaylistModel(QStandardItemModel):
     def compile_active_playlist(self):
 
         def _compile_playlist_branch(routine_item : QStandardItem):
-            points = {}
+            sequence = {}
             tend = 0 # end time of current routine
 
             if routine_item.data(utils.PlaylistItemTypeRole) == utils.Routine:
@@ -263,17 +263,18 @@ class PlaylistModel(QStandardItemModel):
                 routine_name = routine_item.data(Qt.DisplayRole)
                 routine_points = self.routines_model.compile_routine(routine_name)
 
-                for chan in routine_points:
-                    offset = routine_points[chan]["offset"]
-                    events = routine_points[chan]["events"]
+                for chan_key in routine_points:
+                    offset = routine_points[chan_key]["offset"]
+                    events = routine_points[chan_key]["events"]
+                    channel = routine_points[chan_key]["chan"]
 
-                    if chan not in points:
-                        points[chan] = []
+                    if chan_key not in sequence:
+                        sequence[chan_key] = {'chan': channel, 'events': []}
                     t = offset
                     if len(events) > 0:
                         for event in events:
                             event['time'] = t
-                            points[chan].append(event)
+                            sequence[chan_key]['events'].append(event)
                             t += event['duration']
                             tend = max(tend, t)
 
@@ -287,72 +288,17 @@ class PlaylistModel(QStandardItemModel):
                 child_item = routine_item.child(i)
                 child_points = _compile_playlist_branch(child_item)
 
-                for chan in child_points:
-                    if chan not in points:
-                        points[chan] = []
-                    for chan_point in child_points[chan]:
+                for chan_key in child_points:
+                    if chan_key not in sequence:
+                        sequence[chan_key] = {'chan': child_points[chan_key]['chan'], 'events': []}
+                    for chan_point in child_points[chan_key]['events']:
                         chan_point['time'] = chan_point['time']+tend
-                        points[chan].append(chan_point)
+                        sequence[chan_key]['events'].append(chan_point)
 
-            return points
+            return sequence
         if self.active_playlist is not None:
             active_pl_item = self.item(self.active_playlist) # type: QStandardItem
             return _compile_playlist_branch(active_pl_item)
-        else:
-            return None
-
-
-    # Returns  a dict with the states and times for each transition in all of the channels in the active playlist
-    # where key is channel name and value is is a list of (time,state) pairs.
-    def get_active_playlist_points(self):
-
-        def inner_get_playlist_branch_points(routine_item : QStandardItem):
-            points = {}
-            tend = 0 # end time of current routine
-
-            if routine_item.data(utils.PlaylistItemTypeRole) == utils.Routine:
-                # find routine points relative to routine start
-
-                routine_name = routine_item.data(Qt.DisplayRole)
-                routine_points = self.routines_model.get_routine_points(routine_name)
-
-                for chan in routine_points:
-                    offset = routine_points[chan]["offset"]
-                    events = routine_points[chan]["events"]
-
-                    if chan not in points:
-                        #points[chan] = [(offset, events[0][1])]
-                        points[chan] = []
-                    t = offset
-                    if len(events) > 0:
-                        for event in events:
-                            time, state  = event[0], event[1]
-                            points[chan].append((t, state))
-                            t += time
-                            tend = max(tend, t)
-                        points[chan].append((t,state)) # the last point is added to know how long to hold the state for
-
-            elif routine_item.data(utils.PlaylistItemTypeRole) == utils.Gap:
-                # if gap has children add children points with gap delay added
-                # else if gap is last in sequence add points at end with previous value (can this be even done with a recursive function?)
-                # TODO
-                pass
-
-            for i in range(routine_item.rowCount()):
-                child_item = routine_item.child(i)
-                child_points = inner_get_playlist_branch_points(child_item)
-
-                for chan in child_points:
-                    if chan not in points:
-                        points[chan] = []
-                    for chan_point in child_points[chan]:
-                        time, state = chan_point
-                        points[chan].append((tend+time, state))
-
-            return points
-        if self.active_playlist is not None:
-            active_pl_item = self.item(self.active_playlist) # type: QStandardItem
-            return inner_get_playlist_branch_points(active_pl_item)
         else:
             return None
 

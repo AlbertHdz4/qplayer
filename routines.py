@@ -136,14 +136,10 @@ class RoutinesModel(QStandardItemModel):
             duration = max(duration, channel_duration)
         return duration
 
-    # Returns a dict in which the structure {'''offset'}
+    # Returns a dict representing the named routine in which the variables have been replaced by their numerical values.
+    # The dict has the structure key->{'offset':num, 'events':[], 'chan':cards.Channel} where key is a pair  (card, chan_num)
     # TODO: delete get_routine_points
     def compile_routine(self, routine_name):
-        pass
-
-    # Returns a dict with the states and time to hold the state for, for all of the channels in the routine
-    # where key is channel name and value is is a list of (time,state) pairs.
-    def get_routine_points(self, routine_name):
         points = {}
 
         variables = self.variables_model.get_variables_dict()
@@ -158,51 +154,60 @@ class RoutinesModel(QStandardItemModel):
         num_tracks = routine_item.rowCount()
         for c in range(num_tracks):
             track_item = routine_item.child(c)
-            chan = track_item.data(utils.ChannelRole).get_channel_dict()
-            chan_key = (chan['card'], chan['index'])
-            track_offset = eval(track_item.data(utils.TrackOffsetRole),variables)
+            chan = track_item.data(utils.ChannelRole)
+            chan_dict = chan.get_channel_dict()
+            chan_key = (chan_dict['card'], chan_dict['index'])
+            track_offset = eval(track_item.data(utils.TrackOffsetRole), variables)
 
-            points[chan_key] = {"offset":track_offset, "events":[]}
+            points[chan_key] = {"offset": track_offset, "events": [], "chan": chan}
             for k in range(track_item.rowCount()):
                 event_item = track_item.child(k)
                 event_duration = eval(event_item.data(utils.EventDurationRole), variables)
 
                 if track_item.data(utils.TrackTypeRole) == utils.DigitalTrack:
                     event_state = int(event_item.data(Qt.CheckStateRole) == Qt.Checked)
-                    points[chan_key]['events'].append((event_duration, event_state))
+                    points[chan_key]['events'].append({'type': 'boolean',
+                                                       'duration': event_duration,
+                                                       'state': event_state })
 
                 elif track_item.data(utils.TrackTypeRole) == utils.AnalogTrack:
                     if event_item.data(utils.AEventFunctionRole) == 'constant':
                         value = eval(event_item.data(utils.AEventValueRole), variables)
-                        points[chan_key]['events'].append((event_duration, value))
+                        points[chan_key]['events'].append({'type': 'constant',
+                                                           'duration': event_duration,
+                                                           'value': value})
                     elif event_item.data(utils.AEventFunctionRole) == 'linear':
                         start_val = eval(event_item.data(utils.AEventStartValRole), variables)
                         end_val = eval(event_item.data(utils.AEventEndValRole), variables)
-                        N = 500 # TODO: get this from card maybe
-                        vals = np.linspace(start_val, end_val, N)
-                        points[chan_key]['events'].extend([(event_duration/(N-1), v) for v in vals[:-1]])
-                        points[chan_key]['events'].append((0,vals[-1]))
+                        points[chan_key]['events'].append({'type': 'linear',
+                                                           'duration': event_duration,
+                                                           'start_val': start_val,
+                                                           'end_val': end_val})
                     elif event_item.data(utils.AEventFunctionRole) == 'exp':
                         start_val = eval(event_item.data(utils.AEventStartValRole), variables)
                         end_val = eval(event_item.data(utils.AEventEndValRole), variables)
                         gamma = eval(event_item.data(utils.AEventGammaRole), variables)
-                        N = 500  # TODO: get this from card maybe
+                        points[chan_key]['events'].append({'type': 'exp',
+                                                           'duration': event_duration,
+                                                           'start_val': start_val,
+                                                           'end_val': end_val,
+                                                           'gamma': gamma})
 
                     elif event_item.data(utils.AEventFunctionRole) == 'sin':
-                        frequency =  eval(event_item.data(utils.AEventFrequencyRole), variables)
+                        frequency = eval(event_item.data(utils.AEventFrequencyRole), variables)
                         amplitude = eval(event_item.data(utils.AEventAmplitudeRole), variables)
-                        offset =  eval(event_item.data(utils.AEventOffsetRole), variables)
-                        phase =  eval(event_item.data(utils.AEventPhaseRole), variables)
-                        N = 500  # TODO: get this from card maybe
-                        t = np.linspace(0, event_duration, N)
-                        vals = amplitude*np.sin(2*np.pi*frequency*t+phase)+offset
-                        points[chan_key]['events'].extend([(event_duration / (N - 1), v) for v in vals[:-1]])
-                        points[chan_key]['events'].append((0, vals[-1]))
+                        offset = eval(event_item.data(utils.AEventOffsetRole), variables)
+                        phase = eval(event_item.data(utils.AEventPhaseRole), variables)
+                        points[chan_key]['events'].append({'type': 'sin',
+                                                           'duration': event_duration,
+                                                           'frequency': frequency,
+                                                           'amplitude': amplitude,
+                                                           'offset': offset,
+                                                           'phase': phase})
 
                     # TODO other function
 
         return points
-
 
     def load_routines_from_pystruct(self, routines_dict):
         routine_names = routines_dict.keys()

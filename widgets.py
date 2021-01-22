@@ -669,27 +669,53 @@ class InspectorWidget(QWidget):
     def set_inactive(self):
         self.active = False
 
-    def format_points_for_plotting(self, points):
+    def format_sequence_for_plotting(self, compiled_sequence):
         pl_points = {}
 
-        for chan in points:
-            pl_points[chan] = [(0,0)]
-            num_chan_points = len(points[chan])
-            for i in range(num_chan_points):
-                t,y = points[chan][i]
-                lt, ly = pl_points[chan][-1] # last-added pl_points
-                if y != ly:
-                    pl_points[chan].append((t,ly))
-                pl_points[chan].append((t, y))
+        for chan in compiled_sequence:
+            pl_points[chan] = []
+            events = compiled_sequence[chan]['events']
+            for i in range(len(events)):
+                event = events[i]
+
+                # Add edges to value changes
+                if len(pl_points[chan]) > 0:
+                    pl_points[chan].append((event['time'], pl_points[chan][-1][1]))
+
+                if event['type'] == 'boolean':
+                    pl_points[chan].append((event['time'], event['state']))
+                    pl_points[chan].append((event['time']+event['duration'], event['state']))
+                elif event['type'] == 'constant':
+                    pl_points[chan].append((event['time'], event['value']))
+                    pl_points[chan].append((event['time']+event['duration'], event['value']))
+                elif event['type'] == 'linear':
+                    pl_points[chan].append((event['time'], event['start_val']))
+                    pl_points[chan].append((event['time']+event['duration'], event['end_val']))
+                elif event['type'] == 'sin':
+                    N = 500  # TODO: get this from card maybe
+                    t = np.linspace(event['time'], event['time']+event['duration'], N)
+                    y = event['amplitude'] * np.sin(2 * np.pi * event['frequency'] * (t-t[0]) + event['phase']) + event['offset']
+                    pl_points[chan].extend(zip(t, y))
+                elif event['type'] == 'exp':
+                    N = 500  # TODO: get this from card maybe
+                    t = np.linspace(event['time'], event['time']+event['duration'], N)
+                    egd = np.exp(event['gamma'] * event['duration'])
+                    c1 = (-event['start_val'] + event['end_val']) / (egd - 1)
+                    c2 = (-event['end_val'] + event['start_val']*egd) / (egd - 1)
+                    y = c1 * np.exp( event['gamma'] * (t-t[0]) ) + c2
+                    pl_points[chan].extend(zip(t, y))
+
 
         return pl_points
 
     def update_plot(self):
         if self.active:
             points = self.sequence.playlist.get_active_playlist_points()
-            if points is None:
+            csequence = self.sequence.playlist.compile_active_playlist()
+            if csequence is None:
                 return
-            pl_points = self.format_points_for_plotting(points)
+            pl_points = self.format_sequence_for_plotting(csequence)
+            pl_points_old = self.format_points_for_plotting(points)
             if self.fix_scale:
                 xlim = self.axes.get_xlim()
                 ylim = self.axes.get_ylim()
@@ -699,8 +725,10 @@ class InspectorWidget(QWidget):
             for chan in pl_points:
                 chan_name, chan_index = chan
                 trace = np.array(pl_points[chan])
-                t,y = trace[:,0], trace[:,1]
-                self.axes.plot(t,0.8*y+chan_index, label=chan_name)
+                if len(trace) > 0:
+                    t,y = trace[:,0], trace[:,1]
+                    self.axes.plot(t,0.8*y+chan_index, label=chan_name)
+                    #self.axes.plot(t, y, label=chan_name)
 
             if self.fix_scale:
                 self.axes.set_xlim(xlim)
