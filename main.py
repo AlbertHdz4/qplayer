@@ -35,7 +35,7 @@ class ControlSystemGUI(QMainWindow):
         # SEQUENCE MANAGER
         self.sequence = Sequence(self.variables_model, self.routines_model, self.playlist_model)
 
-        self.hardware = Hardware() # TODO: generate this object from configuration
+        self.hardware = Hardware() # TODO: generate this object from configuration or maybe this could be self.cards
         self.scheduler = Scheduler(self.sequence, self.hardware)
 
         # UI SETUP

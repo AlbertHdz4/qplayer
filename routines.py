@@ -291,7 +291,7 @@ class RoutinesModel(QStandardItemModel):
                         elif ftype == "exp":
                             parsed_event['start_val'] = event_item.data(utils.AEventStartValRole)
                             parsed_event['end_val'] = event_item.data(utils.AEventEndValRole)
-                            parsed_event['gamma.'] = event_item.data(utils.AEventGammaRole)
+                            parsed_event['gamma'] = event_item.data(utils.AEventGammaRole)
                         elif ftype == "sin":
                             parsed_event['frequency'] = event_item.data(utils.AEventFrequencyRole)
                             parsed_event['amplitude'] = event_item.data(utils.AEventAmplitudeRole)

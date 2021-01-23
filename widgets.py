@@ -710,12 +710,10 @@ class InspectorWidget(QWidget):
 
     def update_plot(self):
         if self.active:
-            points = self.sequence.playlist.get_active_playlist_points()
             csequence = self.sequence.playlist.compile_active_playlist()
             if csequence is None:
                 return
             pl_points = self.format_sequence_for_plotting(csequence)
-            pl_points_old = self.format_points_for_plotting(points)
             if self.fix_scale:
                 xlim = self.axes.get_xlim()
                 ylim = self.axes.get_ylim()

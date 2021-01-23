@@ -54,13 +54,13 @@
       {
         "name": "var01",
         "set": null,
-        "value": "-1",
+        "value": "1",
         "iterator": true,
         "start": "-1",
         "stop": "1",
         "increment": "0.1",
         "comment": null,
-        "scan index": "0",
+        "scan index": "20",
         "nesting level": "3"
       },
       {
@@ -200,10 +200,17 @@
           {
             "duration": "10",
             "function": "sin",
-            "frequency": "1",
+            "frequency": "0.5",
             "amplitude": "0.5",
             "offset": "2",
             "phase": "0"
+          },
+          {
+            "duration": "5",
+            "function": "exp",
+            "start_val": "2",
+            "end_val": "0",
+            "gamma": "var01"
           }
         ]
       }
