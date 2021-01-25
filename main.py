@@ -18,8 +18,7 @@ from hardware import Hardware
 
 class ControlSystemGUI(QMainWindow):
     def __init__(self, parent=None):
-        self.config = config.Config()
-        self.cards = self.config.get_cards_dict()
+        self.hardware = config.Config.get_hardware()
 
         QMainWindow.__init__(self, parent)
         ui_main_window, main_window = loadUiType('uis/control-system.ui')
@@ -29,13 +28,12 @@ class ControlSystemGUI(QMainWindow):
 
         # MODELS
         self.variables_model = VariablesModel()
-        self.routines_model = RoutinesModel(self.variables_model, self.cards)
+        self.routines_model = RoutinesModel(self.variables_model, self.hardware)
         self.playlist_model = PlaylistModel(self.variables_model, self.routines_model)
 
         # SEQUENCE MANAGER
         self.sequence = Sequence(self.variables_model, self.routines_model, self.playlist_model)
 
-        self.hardware = Hardware() # TODO: generate this object from configuration or maybe this could be self.cards
         self.scheduler = Scheduler(self.sequence, self.hardware)
 
         # UI SETUP
@@ -263,7 +261,7 @@ class ControlSystemGUI(QMainWindow):
     @pyqtSlot()
     def add_routine(self):
 
-        dialog = RoutinePropertiesDialog(self.cards, self.routines_model)
+        dialog = RoutinePropertiesDialog(self.hardware, self.routines_model)
         rslt = dialog.exec()
 
         if rslt == QDialog.Accepted:
@@ -288,7 +286,7 @@ class ControlSystemGUI(QMainWindow):
         row = cb.currentIndex()
         element_index = self.routines_model.index(row,0,root_index) # type: QModelIndex
         if element_index.isValid():
-            dialog = RoutinePropertiesDialog(self.cards, self.routines_model, element_index)
+            dialog = RoutinePropertiesDialog(self.hardware, self.routines_model, element_index)
             rslt = dialog.exec()
 
             if rslt == QDialog.Accepted:

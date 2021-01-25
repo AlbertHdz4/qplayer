@@ -7,7 +7,7 @@ from PyQt5.QtGui import *
 from PyQt5.uic import *
 import numpy as np
 import utils
-import cards
+import hardware
 from routines import RoutinesModel
 from playlist import PlaylistModel, PlaylistMoveRoutineProxyModel
 
@@ -151,7 +151,7 @@ class SequenceEditor(QWidget):
 
         self.routine_row = None
 
-    def add_channel_widget(self, row, track_name, channel: cards.Channel):
+    def add_channel_widget(self, row, track_name, channel: hardware.Channel):
         track = SequenceChannel(row, track_name, channel, self)
         self.layout().addWidget(track)
 

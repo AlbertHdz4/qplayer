@@ -1,30 +1,42 @@
 
-import cards
 import json
 import utils
+import hardware
+import hardware_specific.buscards
 
 
 class Config:
-    def __init__(self):
-        with open('config.json') as json_data_file:
-            self._data = json.load(json_data_file)
-            self._verify()
+    @staticmethod
+    def _verify_config(data):
 
-    def _verify(self):
+        # Check that all card names are unique
+        outsys_names = []
+        for output_system in data["output systems"]:
+            if output_system["name"] in outsys_names:
+                raise utils.SequenceException("Output system names must be unique")
+            else:
+                outsys_names.append(output_system["name"])
 
         # Check that all card names are unique
         card_names = []
-        for card in self._data["cards"]:
-            if card["name"] in card_names:
-                raise utils.SequenceException("Card names must be unique")
-            else:
-                card_names.append(card["name"])
+        for output_system in data["output systems"]:
+            for card in output_system["cards"]:
+                if card["name"] in card_names:
+                    raise utils.SequenceException("Card names must be unique")
+                else:
+                    card_names.append(card["name"])
 
-    def get_cards_dict(self):
-        card_dict = {}
-        for card in self._data["cards"]:
-            class_ = getattr(cards, card["class"])
-            card.pop("class")
-            card_dict[card["name"]] =  class_(**card)
+    @staticmethod
+    def get_hardware():
+        with open('config.json') as json_data_file:
+            data = json.load(json_data_file)
 
-        return card_dict
+        Config._verify_config(data)
+
+        output_systems_dict = {}
+
+        for output_system_spec in data["output systems"]:
+            output_system_class = eval(output_system_spec["class"])
+            output_systems_dict[output_system_spec["name"]] = output_system_class(output_system_spec)
+
+        return hardware.Hardware(output_systems_dict)

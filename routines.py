@@ -2,15 +2,17 @@ from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel, pyqtSlot
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont, QColor
 import utils
 from variables import VariablesModel
+from hardware import Hardware
 
 import numpy as np
 
 
 class RoutinesModel(QStandardItemModel):
-    def __init__(self, variables_model:VariablesModel, cards):
+    def __init__(self, variables_model: VariablesModel, hardware: Hardware):
         super().__init__()
         self.variables_model = variables_model
-        self.cards = cards
+        self.hardware = hardware # type: Hardware
+        self.cards = self.hardware.get_cards()
         self.dataChanged.connect(self.update_values)
 
     def add_routine(self, name, channels):
