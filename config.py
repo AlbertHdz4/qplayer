@@ -2,6 +2,8 @@
 import json
 import utils
 import hardware
+
+import hardware_specific.dummy
 import hardware_specific.buscards
 
 
@@ -9,7 +11,7 @@ class Config:
     @staticmethod
     def _verify_config(data):
 
-        # Check that all card names are unique
+        # Check that all output system names are unique
         outsys_names = []
         for output_system in data["output systems"]:
             if output_system["name"] in outsys_names:

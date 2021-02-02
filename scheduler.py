@@ -1,22 +1,35 @@
-
+import hardware
+import sequence
 
 class Scheduler:
 
-    def __init__(self, sequence, hardware):
-        self.sequence = sequence
-        self.hardware = hardware
+    def __init__(self, seq: sequence.Sequence, hw: hardware.Hardware):
+        self.sequence = seq
+        self.hardware = hw
 
-    def run_single(self):
+    def play_once(self):
         print("Run single")
+        csequence = self.sequence.playlist.compile_active_playlist()
+        self.hardware.process_sequence(csequence)
+        self.hardware.play_once()
+
+    def play(self):
+        print("Run continuous")
+        csequence = self.sequence.playlist.compile_active_playlist()
+        self.hardware.process_sequence(csequence)
+        self.hardware.play()
 
     def iterate(self):
         pass
 
     def stop(self):
-        pass
+        self.hardware.stop()
 
     def shuffle_on(self):
         pass
 
     def shuffle_off(self):
         pass
+
+    def sequence_finished(self):
+        print("Sequence finished")

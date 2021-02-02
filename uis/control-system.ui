@@ -18,6 +18,26 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
+       <widget class="QToolButton" name="play_once_button">
+        <property name="toolTip">
+         <string>Run once</string>
+        </property>
+        <property name="text">
+         <string>run once</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/actions/icons/media-playback-start1.svg</normaloff>:/actions/icons/media-playback-start1.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="play_button">
         <property name="toolTip">
          <string>Run</string>
@@ -78,13 +98,6 @@
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="shuffle_button">
         <property name="toolTip">
          <string>Shuffle iterations</string>
@@ -120,6 +133,13 @@ QPushButton:checked{
         </property>
         <property name="autoExclusive">
          <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>

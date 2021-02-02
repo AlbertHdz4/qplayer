@@ -282,7 +282,7 @@ class VariablesModel(QStandardItemModel):
                         fstop = float(var_stop)
                         finc = float(var_increment)
                         isidx = int(var_scan_index)
-                        curr_val = np.arange(fstart, fstop+finc, finc)[isidx]
+                        curr_val = round(np.arange(fstart, fstop+finc, finc)[isidx],10) # To remove rounding errors
 
                         if "%g"%curr_val != self.data(val_idx):
                             #print("Iter var Changed from %s to %g"%(self.data(val_idx), curr_val))

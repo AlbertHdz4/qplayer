@@ -1,13 +1,19 @@
 {
+  "database": {
+    "dbhost": "localhost",
+    "dbuser": "",
+    "dbpasswd": "",
+    "dbname": ""
+  },
   "output systems":
   [
     {
-      "name": "DIO-64 Bus Card System",
-      "class": "hardware_specific.buscards.BuscardsOutputSystem",
+      "name": "Dummy Output System",
+      "class": "hardware_specific.dummy.DummyOutputSystem",
       "cards":
       [
         {
-          "class":"DigitalBusCard",
+          "class":"DigitalDummyCard",
           "address":"0x0000",
           "name": "Digital 0",
           "channels": [
@@ -22,7 +28,7 @@
           ]
         },
         {
-          "class":"DigitalBusCard",
+          "class":"DigitalDummyCard",
           "address":"0x0001",
           "name": "Digital 1",
           "channels": [
@@ -37,7 +43,7 @@
           ]
         },
         {
-          "class":"AnalogBusCard",
+          "class":"AnalogDummyCard",
           "address":"0x0002",
           "name": "Analog 0",
           "samplerate": 100000,
@@ -47,7 +53,7 @@
           ]
         },
         {
-          "class":"AnalogBusCard",
+          "class":"AnalogDummyCard",
           "address":"0x0003",
           "name": "Analog 1",
           "samplerate": 10000,

@@ -71,6 +71,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.save_button.clicked.connect(self.save_sequence)
         self.ui.load_button.clicked.connect(self.load_sequence)
         self.ui.play_button.clicked.connect(self.play_sequence)
+        self.ui.play_once_button.clicked.connect(self.play_sequence_once)
         self.ui.stop_button.clicked.connect(self.stop_sequence)
         self.ui.iterate_button.clicked.connect(self.iterate_sequence)
         self.ui.tabWidget.currentChanged.connect(self.tab_changed)
@@ -110,7 +111,7 @@ class ControlSystemGUI(QMainWindow):
     @pyqtSlot()
     def save_sequence(self):
         sequence = self.sequence.sequence_to_dict()
-        with open('sequence.json','w') as outfile:
+        with open('sequence.json', 'w') as outfile:
             json.dump(sequence, outfile, indent=2)
 
     @pyqtSlot()
@@ -120,8 +121,13 @@ class ControlSystemGUI(QMainWindow):
             self.sequence.load_sequence_from_dict(sequence)
 
     @pyqtSlot()
+    def play_sequence_once(self):
+        self.scheduler.play_once()
+        self.enable_inputs()
+
+    @pyqtSlot()
     def play_sequence(self):
-        self.scheduler.run_single()
+        self.scheduler.play()
         self.enable_inputs()
 
     @pyqtSlot()
