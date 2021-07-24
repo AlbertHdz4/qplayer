@@ -1,0 +1,68 @@
+{
+  "database": {
+    "dbhost": "localhost",
+    "dbuser": "",
+    "dbpasswd": "",
+    "dbname": ""
+  },
+  "output systems":
+  [
+    {
+      "name": "Dummy Output System",
+      "class": "hardware_specific.dummy.DummyOutputSystem",
+      "cards":
+      [
+        {
+          "class":"DigitalDummyCard",
+          "address":"0x0000",
+          "name": "Digital 0",
+          "channels": [
+            "D00",
+            "D01",
+            "D02",
+            "D03",
+            "D04",
+            "D05",
+            "D06",
+            "D07"
+          ]
+        },
+        {
+          "class":"DigitalDummyCard",
+          "address":"0x0001",
+          "name": "Digital 1",
+          "channels": [
+            "D00",
+            "D01",
+            "D02",
+            "D03",
+            "D04",
+            "D05",
+            "D06",
+            "D07"
+          ]
+        },
+        {
+          "class":"AnalogDummyCard",
+          "address":"0x0002",
+          "name": "Analog 0",
+          "samplerate": 100000,
+          "channels": [
+            "A00",
+            "A01"
+          ]
+        },
+        {
+          "class":"AnalogDummyCard",
+          "address":"0x0003",
+          "name": "Analog 1",
+          "samplerate": 10000,
+          "channels": [
+            "A00",
+            "A01"
+          ]
+        }
+      ]
+    }
+  ]
+}

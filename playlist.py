@@ -249,7 +249,7 @@ class PlaylistModel(QStandardItemModel):
     # An output instruction is a dict with the necessary parameters:
     # * For a digital channel an output instruction contains 'time' and 'state' (1 or 0).
     # * For an analog channel an output instruction structure can vary depending on the type of instruction
-    #   but all have 'type' (constant, sin, exp, etc.), 'time', 'duration' and the necesary additiona parameters.
+    #   but all have 'type' (constant, sin, exp, etc.), 'time', 'duration' and the necessary additional parameters.
     # TODO: delete get_active_playlist_points() and replace usages with get_compiled_active_playlist()
     def compile_active_playlist(self):
 
@@ -280,7 +280,9 @@ class PlaylistModel(QStandardItemModel):
 
             elif routine_item.data(utils.PlaylistItemTypeRole) == utils.Gap:
                 # if gap has children add children points with gap delay added
-                # else if gap is last in sequence add points at end with previous value (can this be even done with a recursive function?)
+                #
+                # else if gap is last in sequence add points at end with previous value (can this be even done with a
+                # recursive function?)
                 # TODO
                 pass
 

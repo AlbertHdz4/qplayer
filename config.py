@@ -5,6 +5,7 @@ import hardware
 
 import hardware_specific.dummy
 import hardware_specific.buscards
+import hardware_specific.artiq
 
 
 class Config:

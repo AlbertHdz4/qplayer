@@ -1,46 +1,10 @@
 {
   "variables": {
-    "MOT": [
-      {
-        "name": "v",
-        "set": "1",
-        "value": "0",
-        "iterator": true,
-        "start": "0",
-        "stop": "8",
-        "increment": "1",
-        "comment": "00",
-        "scan index": "0",
-        "nesting level": "0"
-      },
-      {
-        "name": "t",
-        "set": null,
-        "value": "1",
-        "iterator": true,
-        "start": "1",
-        "stop": "5",
-        "increment": "1",
-        "comment": null,
-        "scan index": "0",
-        "nesting level": "1"
-      },
-      {
-        "name": "f",
-        "set": null,
-        "value": "1",
-        "iterator": true,
-        "start": "1",
-        "stop": "10",
-        "increment": "1",
-        "comment": null,
-        "scan index": "0",
-        "nesting level": "2"
-      },
+    "default00": [
       {
         "name": "var00",
-        "set": "x = [8,4,2,3,20]\nreturn x[int(t)-1]",
-        "value": "8",
+        "set": null,
+        "value": "0",
         "iterator": false,
         "start": null,
         "stop": null,
@@ -48,37 +12,11 @@
         "comment": null,
         "scan index": null,
         "nesting level": null
-      }
-    ],
-    "Dipole trap": [
+      },
       {
         "name": "var01",
         "set": null,
-        "value": "1",
-        "iterator": true,
-        "start": "-1",
-        "stop": "1",
-        "increment": "0.1",
-        "comment": null,
-        "scan index": "20",
-        "nesting level": "3"
-      },
-      {
-        "name": "var02",
-        "set": "5",
-        "value": "5",
-        "iterator": false,
-        "start": null,
-        "stop": null,
-        "increment": null,
-        "comment": null,
-        "scan index": null,
-        "nesting level": null
-      },
-      {
-        "name": "var03",
-        "set": "return 2*(v/8-0.5)",
-        "value": "-1",
+        "value": "0",
         "iterator": false,
         "start": null,
         "stop": null,
@@ -90,233 +28,63 @@
     ]
   },
   "routines": {
-    "a": [
+    "test_routine": [
       {
         "chan": {
           "index": 0,
-          "card": "Digital 0"
+          "card": "ttl"
         },
         "offset": "0",
         "events": [
           {
-            "duration": "2",
-            "state": false
-          },
-          {
-            "duration": "2",
+            "duration": "5",
             "state": true
-          },
-          {
-            "duration": "2",
-            "state": false
-          }
-        ]
-      },
-      {
-        "chan": {
-          "index": 1,
-          "card": "Digital 0"
-        },
-        "offset": "0",
-        "events": [
-          {
-            "duration": "t",
-            "state": false
-          },
-          {
-            "duration": "2",
-            "state": true
-          },
-          {
-            "duration": "3",
-            "state": false
-          }
-        ]
-      },
-      {
-        "chan": {
-          "index": 2,
-          "card": "Digital 0"
-        },
-        "offset": "0",
-        "events": [
-          {
-            "duration": "1",
-            "state": false
-          },
-          {
-            "duration": "1",
-            "state": true
-          },
-          {
-            "duration": "1",
-            "state": false
-          },
-          {
-            "duration": "1",
-            "state": true
-          },
-          {
-            "duration": "1",
-            "state": false
-          },
-          {
-            "duration": "1",
-            "state": true
-          },
-          {
-            "duration": "1",
-            "state": false
-          },
-          {
-            "duration": "1",
-            "state": true
-          },
-          {
-            "duration": "1",
-            "state": false
-          },
-          {
-            "duration": "1",
-            "state": true
-          },
-          {
-            "duration": "1",
-            "state": false
-          },
-          {
-            "duration": "1",
-            "state": true
-          }
-        ]
-      },
-      {
-        "chan": {
-          "index": 1,
-          "card": "Analog 0"
-        },
-        "offset": "0",
-        "events": [
-          {
-            "duration": "10",
-            "function": "sin",
-            "frequency": "0.5",
-            "amplitude": "0.5",
-            "offset": "2",
-            "phase": "0"
           },
           {
             "duration": "5",
-            "function": "exp",
-            "start_val": "2",
-            "end_val": "0",
-            "gamma": "var01"
-          }
-        ]
-      }
-    ],
-    "b": [
-      {
-        "chan": {
-          "index": 0,
-          "card": "Digital 0"
-        },
-        "offset": "0",
-        "events": [
+            "state": false
+          },
           {
-            "duration": "3",
+            "duration": "5",
             "state": true
           },
           {
-            "duration": "3",
+            "duration": "5",
+            "state": false
+          },
+          {
+            "duration": "5",
+            "state": true
+          },
+          {
+            "duration": "5",
             "state": false
           }
         ]
       },
       {
         "chan": {
-          "index": 1,
-          "card": "Digital 0"
-        },
-        "offset": "0",
-        "events": [
-          {
-            "duration": "8+v",
-            "state": true
-          },
-          {
-            "duration": "1",
-            "state": false
-          },
-          {
-            "duration": "8-v",
-            "state": true
-          }
-        ]
-      }
-    ],
-    "c": [
-      {
-        "chan": {
-          "index": 4,
-          "card": "Digital 0"
-        },
-        "offset": "0",
-        "events": [
-          {
-            "duration": "f",
-            "state": false
-          },
-          {
-            "duration": "f",
-            "state": true
-          },
-          {
-            "duration": "f",
-            "state": false
-          },
-          {
-            "duration": "f",
-            "state": true
-          },
-          {
-            "duration": "f",
-            "state": false
-          }
-        ]
-      }
-    ],
-    "d": [
-      {
-        "chan": {
           "index": 0,
-          "card": "Analog 0"
+          "card": "zotino0"
         },
         "offset": "0",
         "events": [
           {
-            "duration": "1",
-            "function": "constant",
-            "val": "3"
-          },
-          {
-            "duration": "2",
+            "duration": "10",
             "function": "linear",
-            "start_val": "3",
-            "end_val": "3+var01"
-          },
-          {
-            "duration": "3",
-            "function": "constant",
-            "val": "3+var01"
+            "start_val": "0",
+            "end_val": "5"
           },
           {
             "duration": "10",
-            "function": "sin",
-            "frequency": "1",
-            "amplitude": "0.2",
-            "offset": "3+var01",
-            "phase": "0"
+            "function": "constant",
+            "val": "5"
+          },
+          {
+            "duration": "10",
+            "function": "linear",
+            "start_val": "5",
+            "end_val": "0"
           }
         ]
       }
@@ -324,32 +92,12 @@
   },
   "playlist": [
     {
-      "name": "basic",
+      "name": "test_playlist",
       "children": [
         {
           "type": 0,
-          "children": [
-            {
-              "type": 0,
-              "children": [
-                {
-                  "type": 0,
-                  "children": [],
-                  "name": "d",
-                  "repeat": "1"
-                }
-              ],
-              "name": "b",
-              "repeat": "1"
-            },
-            {
-              "type": 0,
-              "children": [],
-              "name": "c",
-              "repeat": "1"
-            }
-          ],
-          "name": "a",
+          "children": [],
+          "name": "test_routine",
           "repeat": "1"
         }
       ]

@@ -12,12 +12,11 @@
       "class": "hardware_specific.artiq.ARTIQOutputSystem",
       "master_host": "localhost",
       "master_port": 3251,
-      "experiment_file_path": "/data/pixki/OCR/ARTIQ/getting_started/repository/pyplayer_%d.py",
       "cards":
       [
         {
           "class":"TTLOutARTIQCard",
-          "name": "ttl",
+          "name": "TTLOut",
           "channels": [
             "D00",
             "D01",
