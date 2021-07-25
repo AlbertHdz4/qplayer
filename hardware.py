@@ -44,9 +44,9 @@ class Hardware:
     def add_sequence_end_listener(self, callback):
         self.sequence_end_listeners.append(callback)
 
-    # This sequence_finished signal is called when ALL of the output systems have finished
+    # This sequence_finished signal is called when ALL of the output systems  are ready to receive a new sequence
     def sequence_finished(self):
-        print("Sequence finished")
+        print("hardware: Sequence finished")
         for callback in self.sequence_end_listeners:
             callback()
 

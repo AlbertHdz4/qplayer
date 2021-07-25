@@ -33,7 +33,6 @@ class ControlSystemGUI(QMainWindow):
 
         # SEQUENCE MANAGER
         self.sequence = Sequence(self.variables_model, self.routines_model, self.playlist_model)
-
         self.scheduler = Scheduler(self.sequence, self.hardware)
 
         # UI SETUP
@@ -127,7 +126,7 @@ class ControlSystemGUI(QMainWindow):
 
     @pyqtSlot()
     def play_sequence(self):
-        self.scheduler.play()
+        self.scheduler.play_continuous()
         self.enable_inputs()
 
     @pyqtSlot()
@@ -420,8 +419,14 @@ class ControlSystemGUI(QMainWindow):
     #############
 
 if __name__ == "__main__":
+    import asyncio
+    from qasync import QEventLoop
     app = QApplication(sys.argv)
+    loop = QEventLoop(app)
+    asyncio.set_event_loop(loop)
     myapp = ControlSystemGUI()
     myapp.show()
-    sys.exit(app.exec_())
+    with loop:
+        loop.run_forever()
+    #sys.exit(app.exec_())
 

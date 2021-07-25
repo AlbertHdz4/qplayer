@@ -11,8 +11,9 @@
       "name": "ARTIQ",
       "class": "hardware_specific.artiq.ARTIQOutputSystem",
       "master_host": "localhost",
-      "master_port": 3251,
-      "experiment_file_path": "/data/pixki/OCR/ARTIQ/getting_started/repository/pyplayer_%d.py",
+      "master_control_port": 3251,
+      "master_notify_port": 3250,
+      "repository_path": "/data/pixki/OCR/ARTIQ/getting_started/repository/",
       "cards":
       [
         {
