@@ -3,27 +3,39 @@
     "default00": [
       {
         "name": "var00",
-        "set": null,
-        "value": "0",
+        "set": "5",
+        "value": "5",
         "iterator": false,
         "start": null,
         "stop": null,
         "increment": null,
-        "comment": null,
+        "comment": "",
         "scan index": null,
         "nesting level": null
       },
       {
         "name": "var01",
         "set": null,
-        "value": "0",
-        "iterator": false,
-        "start": null,
-        "stop": null,
-        "increment": null,
+        "value": "-2",
+        "iterator": true,
+        "start": "-5",
+        "stop": "5",
+        "increment": "1",
         "comment": null,
-        "scan index": null,
-        "nesting level": null
+        "scan index": "3",
+        "nesting level": 0
+      },
+      {
+        "name": "var02",
+        "set": null,
+        "value": "10",
+        "iterator": true,
+        "start": "5",
+        "stop": "10",
+        "increment": "0.5",
+        "comment": null,
+        "scan index": "10",
+        "nesting level": 1
       }
     ]
   },
@@ -41,7 +53,7 @@
             "state": true
           },
           {
-            "duration": "5",
+            "duration": "var02",
             "state": false
           },
           {
@@ -73,17 +85,17 @@
             "duration": "10",
             "function": "linear",
             "start_val": "0",
-            "end_val": "5"
+            "end_val": "var01"
           },
           {
             "duration": "10",
             "function": "constant",
-            "val": "5"
+            "val": "var01"
           },
           {
             "duration": "10",
             "function": "linear",
-            "start_val": "5",
+            "start_val": "var01",
             "end_val": "0"
           }
         ]

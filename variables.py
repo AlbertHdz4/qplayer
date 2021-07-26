@@ -31,7 +31,7 @@ class VariablesModel(QStandardItemModel):
 
         new_row = [new_item]
 
-        #Add the rest of the columns as inert cells
+        # Add the rest of the columns as inert cells
         for i in range(len(self.variable_fields)-1):
             it = QStandardItem()
             it.setFlags(Qt.NoItemFlags)
@@ -213,16 +213,39 @@ class VariablesModel(QStandardItemModel):
             for v in range(num_variables):
                 # If it is an iterating variable
                 if self.index(v,self.variable_fields.index("iterator"),group_index).data(Qt.CheckStateRole) == Qt.Checked:
-                    var_name = self.index(v, self.variable_fields.index("name"), group_index).data()
-                    var_start = self.index(v, self.variable_fields.index("start"), group_index).data()
-                    var_stop = self.index(v, self.variable_fields.index("stop"), group_index).data()
-                    var_increment = self.index(v, self.variable_fields.index("increment"), group_index).data()
-                    var_nesting_lvl = self.index(v, self.variable_fields.index("nesting level"), group_index).data()
-                    iter_vars[var_name] = {"start":var_start, "stop":var_stop, "increment":var_increment, "nesting level":var_nesting_lvl}
+                    try:
+                        var_name = self.index(v, self.variable_fields.index("name"), group_index).data()
+                        start = float(self.index(v, self.variable_fields.index("start"), group_index).data())
+                        stop = float(self.index(v, self.variable_fields.index("stop"), group_index).data())
+                        increment = float(self.index(v, self.variable_fields.index("increment"), group_index).data())
+                        nesting_lvl = int(self.index(v, self.variable_fields.index("nesting level"), group_index).data())
+                        # TODO: replace this with something that doesn't require allocating memory. Lazy Asaf from the past didn't do it.
+                        num_values = len(np.arange(start, stop + increment, increment))
+                        iter_vars[var_name] = {"start":start, "stop":stop, "increment":increment, "nesting level":nesting_lvl, "num_values": num_values}
+                    except (TypeError, ValueError): # When values are not well defined
+                        # ToDo: give an indication of the problem (i.e. paint fields red maybe).
+                        pass
 
         return iter_vars
 
+    def reset_indices(self):
+        self.blockSignals(False)
+        num_groups = self.rowCount()
+        for g in range(num_groups):
+            group_index = self.index(g,0)
+            num_variables = self.rowCount(group_index)
+            for v in range(num_variables):
+                # If it is an iterating variable
+                if self.index(v,self.variable_fields.index("iterator"),group_index).data(Qt.CheckStateRole) == Qt.Checked:
+                    idx = self.index(v, self.variable_fields.index("scan index"), group_index)
+                    self.setData(idx, "0", Qt.DisplayRole)
+        self.blockSignals(False)
+        print("Indices have been reset")
+        self.update_values()
+
+
     def set_iterating_variables_indices(self, scanvars_indices):
+        print("Setting indices to: "+str(scanvars_indices))
         self.blockSignals(True)
         for (var_name,idx) in scanvars_indices.items():
             # only one item should be returned since variable names should be unique
@@ -282,6 +305,8 @@ class VariablesModel(QStandardItemModel):
                         fstop = float(var_stop)
                         finc = float(var_increment)
                         isidx = int(var_scan_index)
+
+                        # TODO: isn't this rounding too scrict?
                         curr_val = round(np.arange(fstart, fstop+finc, finc)[isidx],10) # To remove rounding errors
 
                         if "%g"%curr_val != self.data(val_idx):

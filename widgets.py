@@ -761,13 +761,10 @@ class IteratorSlidersWidget(QWidget):
         for var in iter_vars_dict:
 
             try:
-                smin = float(iter_vars_dict[var]['start'])
-                smax = float(iter_vars_dict[var]['stop'])
-                sinc = float(iter_vars_dict[var]['increment'])
-                var_vals = np.arange(smin, smax+sinc, sinc)
-                num_vals = len(var_vals)
+                num_vals = iter_vars_dict[var]['num_values']
 
-                if var in self.slider_widgets: # if the slider already exists no not re-create
+                # if the slider already exists do not re-create
+                if var in self.slider_widgets:
                     curr_slider = self.slider_widgets[var] # type: QSlider
                     if curr_slider.maximum() == num_vals-1: # check if the slider limits have changed
                         pass
@@ -833,4 +830,4 @@ class IteratorSlidersWidget(QWidget):
         for var in self.slider_widgets:
             scanvars_indices[var] = self.slider_widgets[var].value()
 
-        self.sequence.variables.set_iterating_variables_indices(scanvars_indices)
+        #self.sequence.variables.set_iterating_variables_indices(scanvars_indices)
