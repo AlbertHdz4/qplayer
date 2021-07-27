@@ -219,9 +219,10 @@ class VariablesModel(QStandardItemModel):
                         stop = float(self.index(v, self.variable_fields.index("stop"), group_index).data())
                         increment = float(self.index(v, self.variable_fields.index("increment"), group_index).data())
                         nesting_lvl = int(self.index(v, self.variable_fields.index("nesting level"), group_index).data())
+                        scan_index = int(self.index(v, self.variable_fields.index("scan index"), group_index).data())
                         # TODO: replace this with something that doesn't require allocating memory. Lazy Asaf from the past didn't do it.
                         num_values = len(np.arange(start, stop + increment, increment))
-                        iter_vars[var_name] = {"start":start, "stop":stop, "increment":increment, "nesting level":nesting_lvl, "num_values": num_values}
+                        iter_vars[var_name] = {"start": start, "stop": stop, "increment": increment, "nesting level": nesting_lvl, "num_values": num_values, "scan_index":scan_index}
                     except (TypeError, ValueError): # When values are not well defined
                         # ToDo: give an indication of the problem (i.e. paint fields red maybe).
                         pass

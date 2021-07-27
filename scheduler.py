@@ -63,8 +63,6 @@ class Scheduler:
                         new_index_list.append(index_dict.copy())
                 self.iter_indices = new_index_list
 
-        print(self.iter_indices)
-
         if self.shuffle:
             random.shuffle(self.iter_indices)
 

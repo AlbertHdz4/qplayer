@@ -753,6 +753,7 @@ class IteratorSlidersWidget(QWidget):
 
         self.slider_widgets = {}
 
+    # This function is called whenever the variables model changes
     # Add or remove sliders when new iterating variables are added
     def update_sliders(self):
         iter_vars_dict = self.sequence.variables.get_iterating_variables()
@@ -762,12 +763,15 @@ class IteratorSlidersWidget(QWidget):
 
             try:
                 num_vals = iter_vars_dict[var]['num_values']
+                scan_index = iter_vars_dict[var]['scan_index']
 
                 # if the slider already exists do not re-create
                 if var in self.slider_widgets:
                     curr_slider = self.slider_widgets[var] # type: QSlider
                     if curr_slider.maximum() == num_vals-1: # check if the slider limits have changed
-                        pass
+                        curr_slider.blockSignals(True)
+                        curr_slider.setValue(scan_index)
+                        curr_slider.blockSignals(False)
                     else:
                         curr_slider.setRange(0, num_vals-1)
 
@@ -830,4 +834,4 @@ class IteratorSlidersWidget(QWidget):
         for var in self.slider_widgets:
             scanvars_indices[var] = self.slider_widgets[var].value()
 
-        #self.sequence.variables.set_iterating_variables_indices(scanvars_indices)
+        self.sequence.variables.set_iterating_variables_indices(scanvars_indices)
