@@ -82,12 +82,24 @@ class VariablesModel(QStandardItemModel):
         # set the nesting level to be the maximum of the current iterating variables
         new_nesting_level = len(self.get_iterating_variables())
         self.setData(var_iterator_index.parent().child(var_iterator_index.row(), self.variable_fields.index("nesting level")), new_nesting_level)
+        self.setData(var_iterator_index.parent().child(var_iterator_index.row(), self.variable_fields.index("scan index")), "0")
+        self.blockSignals(True)
         self.setData(var_iterator_index, Qt.Checked, Qt.CheckStateRole)
+        self.blockSignals(False)
+        #print(var_iterator_index.isValid())
+        #self.dataChanged.emit(var_iterator_index, var_iterator_index) # This causes segmentation fault, if whe emit a change for the whole model the problem is gone.
+        self.dataChanged.emit(QModelIndex(), QModelIndex())
 
     def make_static(self, var_index:QModelIndex):
         var_iterator_index = var_index.parent().child(var_index.row(),self.variable_fields.index("iterator"))
+        if not self.is_code_var(var_index):
+            var_set = self.data(var_index.parent().child(var_index.row(),self.variable_fields.index("set")))
+            self.setData(var_iterator_index.parent().child(var_iterator_index.row(), self.variable_fields.index("value")), var_set)
+        self.blockSignals(True) # Signal is separated from dataChange to avoid segfault. See make_iterating for details.
         self.setData(var_iterator_index, Qt.Unchecked, Qt.CheckStateRole)
+        self.blockSignals(False)
         self.sort_nesting_levels()
+        self.dataChanged.emit(QModelIndex(), QModelIndex())
 
     def increase_nesting_level(self, var_index: QModelIndex):
         nesting_level_index = var_index.parent().child(var_index.row(), self.variable_fields.index("nesting level"))
@@ -223,7 +235,7 @@ class VariablesModel(QStandardItemModel):
                         # TODO: replace this with something that doesn't require allocating memory. Lazy Asaf from the past didn't do it.
                         num_values = len(np.arange(start, stop + increment, increment))
                         iter_vars[var_name] = {"start": start, "stop": stop, "increment": increment, "nesting level": nesting_lvl, "num_values": num_values, "scan_index":scan_index}
-                    except (TypeError, ValueError): # When values are not well defined
+                    except (TypeError, ValueError, ZeroDivisionError): # When values are not well defined
                         # ToDo: give an indication of the problem (i.e. paint fields red maybe).
                         pass
 
@@ -241,12 +253,11 @@ class VariablesModel(QStandardItemModel):
                     idx = self.index(v, self.variable_fields.index("scan index"), group_index)
                     self.setData(idx, "0", Qt.DisplayRole)
         self.blockSignals(False)
-        print("Indices have been reset")
         self.update_values()
 
 
     def set_iterating_variables_indices(self, scanvars_indices):
-        print("Setting indices to: "+str(scanvars_indices))
+        # print("Setting indices to: "+str(scanvars_indices))
         self.blockSignals(True)
         for (var_name,idx) in scanvars_indices.items():
             # only one item should be returned since variable names should be unique
@@ -305,9 +316,13 @@ class VariablesModel(QStandardItemModel):
                         fstart = float(var_start)
                         fstop = float(var_stop)
                         finc = float(var_increment)
+
+                        if finc == 0:
+                            raise ValueError
+
                         isidx = int(var_scan_index)
 
-                        # TODO: isn't this rounding too scrict?
+                        # TODO: isn't this rounding too strict?
                         curr_val = round(np.arange(fstart, fstop+finc, finc)[isidx],10) # To remove rounding errors
 
                         if "%g"%curr_val != self.data(val_idx):
@@ -377,7 +392,7 @@ class VariablesModel(QStandardItemModel):
         self.blockSignals(False)
         if value_changed:
             self.dataChanged.emit(QModelIndex(),QModelIndex())
-            # ToDo: maybe it's more efficient to call dataChanged for each QModelIndex that was changed
+            # ToDo: maybe it's more efficient to call dataChanged for each QModelIndex that was changed]
 
     def update_style(self, name_index:QModelIndex, error=False):
         color = QColor()
@@ -409,7 +424,7 @@ class VariablesProxyModel(QSortFilterProxyModel):
     def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex):
         if source_parent.isValid():  # This is a variable
             row_idx = source_parent.child(source_row,
-                                          VariablesModel.variable_fields.index("iterator"))  # Index of interator cell
+                                          VariablesModel.variable_fields.index("iterator"))  # Index of iterator cell
             if self.sourceModel().data(row_idx, Qt.CheckStateRole) == Qt.Checked:
                 return self.show_iterator
             else:
@@ -430,7 +445,3 @@ class VariablesProxyModel(QSortFilterProxyModel):
                 return self.show_empty_groups
             else:
                 return True
-
-
-    class VariablesException(Exception):
-        pass

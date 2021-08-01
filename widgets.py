@@ -724,7 +724,7 @@ class InspectorWidget(QWidget):
                 chan_name, chan_index = chan
                 trace = np.array(pl_points[chan])
                 if len(trace) > 0:
-                    t,y = trace[:,0], trace[:,1]
+                    t, y = trace[:, 0], trace[:, 1]
                     self.axes.plot(t,0.8*y+chan_index, label=chan_name)
                     #self.axes.plot(t, y, label=chan_name)
 
@@ -800,18 +800,26 @@ class IteratorSlidersWidget(QWidget):
         levels = list(nesting_levels.keys())
         levels.sort()
 
-        i = 0
-        while i < self.form_group.layout().rowCount():
-            var_name = self.form_group.layout().itemAt(i, QFormLayout.LabelRole).widget().text()
-            if nesting_levels[i] == var_name:
-                # slider is in the correct place
-                i += 1
-            else:
-                # move slide one place further
-                row = self.form_group.layout().takeRow(i) # type: QFormLayout.TakeRowResult
-                self.form_group.layout().insertRow(i+1, row.labelItem.widget(), row.fieldItem.widget())
+        print(nesting_levels)
 
-        self.slider_value_changed()
+        i = 0
+        j = 0 # There can be some empty rows because Qt is lazy to delete them so we keep track of them with j
+        while i+j < self.form_group.layout().rowCount():
+            try:
+                var_name = self.form_group.layout().itemAt(i+j, QFormLayout.LabelRole).widget().text()
+                if nesting_levels[i] == var_name:
+                    # slider is in the correct place
+                    i += 1
+                else:
+                    # move slide one place further
+                    row = self.form_group.layout().takeRow(i+j) # type: QFormLayout.TakeRowResult
+                    self.form_group.layout().insertRow(i+j+1, row.labelItem.widget(), row.fieldItem.widget())
+            except AttributeError as e:
+                # The widget has been removed so it cannot be found
+                j += 1
+
+
+        #self.slider_value_changed()
 
     # Only remove sliders of variables which are no longer scanning variables
     def remove_unused_sliders(self, iter_vars_dict):
@@ -820,6 +828,8 @@ class IteratorSlidersWidget(QWidget):
             if var not in iter_vars_dict: # var is no longer an iterating variable -> remove slider
                 widget = self.slider_widgets[var] # type: QWidget
                 label = self.form_group.layout().labelForField(widget) # type: QLabel
+                self.form_group.layout().removeWidget(widget)
+                self.form_group.layout().removeWidget(label)
                 widget.deleteLater()
                 label.deleteLater()
 

@@ -1,3 +1,6 @@
+# To debug segmentation faults
+#import faulthandler
+#faulthandler.enable()
 
 from PyQt5.uic import loadUiType
 from PyQt5.QtGui import *
@@ -103,6 +106,9 @@ class ControlSystemGUI(QMainWindow):
         self.var_idx = 0
         self.group_idx = 0
         self.routine_idx = 0
+
+        #self.load_sequence()
+
 
     ###########
     # GENERAL #
@@ -428,5 +434,10 @@ if __name__ == "__main__":
     myapp.show()
     with loop:
         loop.run_forever()
-    #sys.exit(app.exec_())
 
+    """
+    app = QApplication(sys.argv)
+    myapp = ControlSystemGUI()
+    myapp.show()
+    sys.exit(app.exec_())
+    """

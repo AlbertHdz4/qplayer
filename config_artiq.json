@@ -11,12 +11,14 @@
       "name": "ARTIQ",
       "class": "hardware_specific.artiq.ARTIQOutputSystem",
       "master_host": "localhost",
-      "master_port": 3251,
+      "master_control_port": 3251,
+      "master_notify_port": 3250,
+      "repository_path": "/data/pixki/OCR/ARTIQ/getting_started/repository/",
       "cards":
       [
         {
           "class":"TTLOutARTIQCard",
-          "name": "TTLOut",
+          "name": "ttl",
           "channels": [
             "D00",
             "D01",
@@ -39,7 +41,7 @@
         {
           "class":"ZotinoARTIQCard",
           "name": "zotino0",
-          "samplerate": 10000,
+          "samplerate": 100,
           "channels": [
             "Z00",
             "Z01",

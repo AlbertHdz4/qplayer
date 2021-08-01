@@ -5,6 +5,7 @@ class PyPlayerGeneratedExperiment{{id}}(EnvExperiment):
         for i in range(16):
             self.setattr_device('ttl%d'%i)
         self.setattr_device('zotino0')
+
     @kernel
     def run(self):
         self.core.reset()

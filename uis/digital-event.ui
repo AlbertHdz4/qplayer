@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>180</width>
-    <height>87</height>
+    <width>200</width>
+    <height>98</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,7 +18,7 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>180</width>
+    <width>200</width>
     <height>16777215</height>
    </size>
   </property>
@@ -66,60 +66,67 @@
        <number>3</number>
       </property>
       <item>
-       <layout class="QFormLayout" name="formLayout">
-        <property name="labelAlignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-        <item row="0" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
          <widget class="QLabel" name="label">
           <property name="text">
            <string>duration:</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
+        <item>
          <widget class="QLineEdit" name="event_duration">
           <property name="clearButtonEnabled">
            <bool>false</bool>
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>duration:</string>
+        <item>
+         <layout class="QFormLayout" name="formLayout">
+          <property name="horizontalSpacing">
+           <number>0</number>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLabel" name="duration_label">
-          <property name="text">
-           <string>x</string>
+          <property name="verticalSpacing">
+           <number>0</number>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLabel" name="start_label">
-          <property name="text">
-           <string>x</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>start:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>act. duration:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="duration_label">
+            <property name="text">
+             <string>x</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>start:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="start_label">
+            <property name="text">
+             <string>x</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
@@ -145,7 +152,7 @@ QPushButton { background-color: '#e1e1e1'; }</string>
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="resources.qrc">
+         <iconset resource="../resources.qrc">
           <normaloff>:/actions/icons/state-off.svg</normaloff>
           <normalon>:/actions/icons/state-on.svg</normalon>:/actions/icons/state-off.svg</iconset>
         </property>
@@ -163,7 +170,7 @@ QPushButton { background-color: '#e1e1e1'; }</string>
   </layout>
  </widget>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections/>
 </ui>

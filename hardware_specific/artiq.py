@@ -148,6 +148,7 @@ class ARTIQOutputSystem(OutputSystem):
         self.master_scheduler.submit(pipeline_name="main", expid=expid, priority=0, due_date=None, flush=False)
         print("Play artiq sequence once")
 
+
     def artiq_schedule_setup(self, schedule):
         self.experiment_schedule.clear()
         self.experiment_schedule.update(schedule)
