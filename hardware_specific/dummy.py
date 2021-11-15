@@ -27,8 +27,6 @@ class DummyOutputSystem(OutputSystem):
 
     def stop(self):
         print("Stopped")
-        self.timer.stop()
-        self.sequence_finished()
 
 class DummyCard(Card):
     def __init__(self, name, address, channels):

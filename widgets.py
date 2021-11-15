@@ -506,7 +506,6 @@ class RoutinePropertiesDialog(QDialog):
             for r in range(num_channles):
                 chan_index = model.index(r,0,index)
                 chan = chan_index.data(utils.ChannelRole)
-                print(chan.name)
                 active_channels.append(chan)
 
         for card in cards.values():
@@ -536,6 +535,7 @@ class RoutinePropertiesDialog(QDialog):
     @pyqtSlot()
     def submitted(self):
         existing_routine_names = self.model.get_routine_names()
+        print(existing_routine_names)
         try:
             existing_routine_names.remove(self.old_name)
         except ValueError:
@@ -799,8 +799,6 @@ class IteratorSlidersWidget(QWidget):
 
         levels = list(nesting_levels.keys())
         levels.sort()
-
-        print(nesting_levels)
 
         i = 0
         j = 0 # There can be some empty rows because Qt is lazy to delete them so we keep track of them with j
