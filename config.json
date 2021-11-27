@@ -1,4 +1,5 @@
 {
+  "sequences path" : "/data/pixki/OCR/ARTIQ/player_sequences",
   "database": {
     "dbhost": "localhost",
     "dbuser": "",

@@ -43,3 +43,9 @@ class Config:
             output_systems_dict[output_system_spec["name"]] = output_system_class(output_system_spec)
 
         return hardware.Hardware(output_systems_dict)
+
+    @staticmethod
+    def get_sequences_path():
+        with open('config.json') as json_data_file:
+            data = json.load(json_data_file)
+        return data["sequences path"]

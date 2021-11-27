@@ -71,6 +71,7 @@ class ControlSystemGUI(QMainWindow):
         # SIGNALS
         ## General
         self.ui.save_button.clicked.connect(self.save_sequence)
+        self.ui.saveas_button.clicked.connect(self.save_sequence_as)
         self.ui.load_button.clicked.connect(self.load_sequence)
         self.ui.play_button.clicked.connect(self.play_sequence)
         self.ui.play_once_button.clicked.connect(self.play_sequence_once)
@@ -107,23 +108,60 @@ class ControlSystemGUI(QMainWindow):
         self.group_idx = 0
         self.routine_idx = 0
 
+        self.current_filename = None # This variable is populated when loading/saving a sequence
+
         #self.load_sequence()
 
 
     ###########
-    # GENERAL #
+    # GENER
     ###########
     @pyqtSlot()
     def save_sequence(self):
-        sequence = self.sequence.sequence_to_dict()
-        with open('sequence.json', 'w') as outfile:
-            json.dump(sequence, outfile, indent=2)
+        if self.current_filename is None:
+            sequences_path = config.Config.get_sequences_path()
+            file_name, _ = QFileDialog.getSaveFileName(self, "Select file to save", sequences_path,
+                                                       filter="Sequence File (*.json)")
+            if file_name:
+
+                # Append extension if not there yet
+                if not file_name.endswith(".json"):
+                    file_name += ".json"
+
+                self.current_filename = file_name
+
+        if self.current_filename is not None:
+            sequence = self.sequence.sequence_to_dict()
+            with open(self.current_filename, 'w') as outfile:
+                json.dump(sequence, outfile, indent=2)
+
+    @pyqtSlot()
+    def save_sequence_as(self):
+        sequences_path = config.Config.get_sequences_path()
+        file_name, _ = QFileDialog.getSaveFileName(self, "Select file to save as", sequences_path,
+                                                   filter="Sequence File (*.json)")
+        if file_name:
+
+            # Append extension if not there yet
+            if not file_name.endswith(".json"):
+                file_name += ".json"
+
+            self.current_filename = file_name
+
+            sequence = self.sequence.sequence_to_dict()
+            with open(self.current_filename, 'w') as outfile:
+                json.dump(sequence, outfile, indent=2)
 
     @pyqtSlot()
     def load_sequence(self):
-        with open('sequence.json','r') as infile:
-            sequence = json.load(infile)
-            self.sequence.load_sequence_from_dict(sequence)
+        sequences_path = config.Config.get_sequences_path()
+        file_name, _ = QFileDialog.getOpenFileName(self,"Select file to load", sequences_path,
+                                                   "Sequence File (*.json)")
+        if file_name:
+            with open(file_name, 'r') as infile:
+                sequence = json.load(infile)
+                self.sequence.load_sequence_from_dict(sequence)
+                self.current_filename = file_name
 
     @pyqtSlot()
     def play_sequence_once(self):
