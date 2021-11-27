@@ -100,7 +100,7 @@ class ARTIQOutputSystem(OutputSystem):
 
         # write experiment file
         exp_str = self.create_experiment_str(all_events, run_id)
-        with open(self.repository_path + 'experiment_%d.py' % run_id, 'w') as f:
+        with open(self.repository_path + '__experiment-%d.py' % run_id, 'w') as f:
             f.write(exp_str)
 
         # ask artiq_master to update experiment db
@@ -139,7 +139,7 @@ class ARTIQOutputSystem(OutputSystem):
     def play_once(self, run_id):
         expid = {
             "class_name": "PyPlayerGeneratedExperiment%d" % run_id,
-            "file": "experiment_%d.py" % run_id,
+            "file": "__experiment-%d.py" % run_id,
             "arguments": {"arg_name": 5},
             "log_level": 10,
             "repo_rev": "N/A",
@@ -170,7 +170,8 @@ class ARTIQOutputSystem(OutputSystem):
         if mod['action'] == 'setitem' and mod['value'] == 'deleting':
             exp_num = mod['path'][0]
             fname = self.experiment_schedule[exp_num]['expid']['file']
-            os.remove(self.repository_path + fname)
+            if fname.startswith("__experiment"):
+                os.remove(self.repository_path + fname)
 
     def stop(self):
         pass
