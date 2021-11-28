@@ -73,6 +73,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.save_button.clicked.connect(self.save_sequence)
         self.ui.saveas_button.clicked.connect(self.save_sequence_as)
         self.ui.load_button.clicked.connect(self.load_sequence)
+        self.ui.new_button.clicked.connect(self.new_sequence)
         self.ui.play_button.clicked.connect(self.play_sequence)
         self.ui.play_once_button.clicked.connect(self.play_sequence_once)
         self.ui.stop_button.clicked.connect(self.stop_sequence)
@@ -162,6 +163,16 @@ class ControlSystemGUI(QMainWindow):
                 sequence = json.load(infile)
                 self.sequence.load_sequence_from_dict(sequence)
                 self.current_filename = file_name
+                self.inspector_widget.update_plot()
+
+    def new_sequence(self):
+        reply = QMessageBox.question(self, 'Message',
+                                           "Are you sure to remove the current sequence?", QMessageBox.Yes |
+                                           QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.sequence.clear()
+            self.current_filename = None
+            self.inspector_widget.update_plot()
 
     @pyqtSlot()
     def play_sequence_once(self):

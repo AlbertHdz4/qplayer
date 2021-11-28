@@ -21,6 +21,9 @@ class VariablesModel(QStandardItemModel):
         self.setHorizontalHeaderLabels(self.variable_fields)
         self.dataChanged.connect(self.update_values)
 
+    def clear(self):
+        self.removeRows(0, self.rowCount())
+
     def add_group(self, name):
         new_item = QStandardItem(name)
 

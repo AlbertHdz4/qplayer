@@ -1,4 +1,5 @@
 {
+  "sequences path" : "",
   "database": {
     "dbhost": "localhost",
     "dbuser": "",

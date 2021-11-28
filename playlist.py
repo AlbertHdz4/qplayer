@@ -18,6 +18,10 @@ class PlaylistModel(QStandardItemModel):
         self.dataChanged.connect(self.update_values)
         self.active_playlist = None
 
+    def clear(self):
+        self.removeRows(0, self.rowCount())
+        self.active_playlist = None
+
     def flags(self, index: QModelIndex):
         return Qt.NoItemFlags | Qt.ItemIsEnabled | Qt.ItemIsSelectable
 

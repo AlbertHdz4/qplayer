@@ -13,7 +13,7 @@ class Sequence:
         self.playlist = playlist
 
     def load_sequence_from_dict(self, sequence):
-        #TODO: Clear current sequence
+        self.clear()
 
         self.variables.load_variables_from_pystruct(sequence["variables"])
         self.routines.load_routines_from_pystruct(sequence["routines"])
@@ -26,3 +26,8 @@ class Sequence:
 
         sequence = {"variables": variables, "routines": routines, "playlist": playlist}
         return sequence
+
+    def clear(self):
+        self.variables.clear()
+        self.routines.clear()
+        self.playlist.clear()

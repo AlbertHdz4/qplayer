@@ -140,14 +140,16 @@ class Highlighter(QSyntaxHighlighter):
 
 class SequenceEditor(QWidget):
 
-    def __init__(self, model):
+    def __init__(self, model: RoutinesModel):
         super().__init__()
         self.setLayout(QVBoxLayout())
         self.layout().setSpacing(2)
         self.layout().setAlignment(Qt.AlignTop)
-        self.model = model # type: QStandardItemModel
+        self.model = model
 
         self.model.dataChanged.connect(self.data_changed)
+
+        self.model.cleared.connect(self.model_cleared)
 
         self.routine_row = None
 
@@ -155,10 +157,15 @@ class SequenceEditor(QWidget):
         track = SequenceChannel(row, track_name, channel, self)
         self.layout().addWidget(track)
 
+    @pyqtSlot()
+    def model_cleared(self):
+        self.clear()
+
     # Remove all widgets: this is used when the sequence editor is loaded with a new routine so the old one must go
     def clear(self):
         for i in reversed(range(self.layout().count())):
-            widget = self.layout().itemAt(i).widget() # type: QWidget
+            widget = self.layout().itemAt(i).widget() # type: SequenceChannel
+            widget.clear()
             widget.setParent(None)
             widget.destroy()
 
@@ -213,7 +220,7 @@ class SequenceChannel(QWidget):
         return current_routine_index.child(self.row)
 
     # if event_item is None, a new item will be added to the model
-    # event_item will be None if the event was added through a dobule click of the empty track
+    # event_item will be None if the event was added through a double click of the empty track
     def add_event(self, event_item=None):
         if self.channel.card.type == utils.DigitalTrack:
             self.ui.track_container.addWidget(DigitalSequenceEvent(self,event_item))
@@ -235,6 +242,12 @@ class SequenceChannel(QWidget):
         # Update offset
         if self.get_model_item() is not None:
             self.ui.track_offset.setText(self.get_model_item().data(utils.TrackOffsetRole))
+
+    def clear(self):
+        for event_i in reversed(range(self.ui.track_container.count())):
+            event = self.ui.track_container.itemAt(event_i).widget() # type: SequenceEvent
+            event.delete()
+
 
 
 class SequenceEvent(QWidget):
@@ -313,7 +326,8 @@ class DigitalSequenceEvent(SequenceEvent):
     @pyqtSlot()
     def data_changed(self):
         # Update button state
-        self.ui.state_button.setChecked(self.event_item.checkState())
+        checked_state = self.event_item.checkState()
+        self.ui.state_button.setChecked(checked_state)
 
         # Update duration
         self.ui.event_duration.setText(self.event_item.data(utils.EventDurationRole))
@@ -382,7 +396,10 @@ class AnalogSequenceEvent(SequenceEvent):
         self.uis['sin'].phase.editingFinished.connect(self.sin_phase_edited)
         self.uis['sin'].offset.editingFinished.connect(self.sin_offset_edited)
 
-        self.data_changed()
+        try:
+            self.data_changed()
+        except RuntimeError as e:
+            print("RuntimeError %s"%e)
 
 
 
@@ -712,6 +729,8 @@ class InspectorWidget(QWidget):
         if self.active:
             csequence = self.sequence.playlist.compile_active_playlist()
             if csequence is None:
+                self.axes.cla()
+                self.fig.canvas.draw_idle()
                 return
             pl_points = self.format_sequence_for_plotting(csequence)
             if self.fix_scale:

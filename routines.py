@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel, pyqtSlot
+from PyQt5.QtCore import Qt, QModelIndex, QSortFilterProxyModel, pyqtSlot, pyqtSignal
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont, QColor
 import utils
 from variables import VariablesModel
@@ -8,12 +8,19 @@ import numpy as np
 
 
 class RoutinesModel(QStandardItemModel):
+
+    cleared = pyqtSignal()
+
     def __init__(self, variables_model: VariablesModel, hardware: Hardware):
         super().__init__()
         self.variables_model = variables_model
         self.hardware = hardware # type: Hardware
         self.cards = self.hardware.get_cards()
         self.dataChanged.connect(self.update_values)
+
+    def clear(self):
+        self.cleared.emit()
+        self.removeRows(0, self.rowCount())
 
     def add_routine(self, name, channels):
         new_item = QStandardItem(name)
