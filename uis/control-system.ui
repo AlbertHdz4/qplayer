@@ -282,7 +282,7 @@ QPushButton:checked{
              <string>Collapse groups</string>
             </property>
             <property name="text">
-             <string>collapse</string>
+             <string>collapse all</string>
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
@@ -294,6 +294,9 @@ QPushButton:checked{
               <height>32</height>
              </size>
             </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonTextBesideIcon</enum>
+            </property>
            </widget>
           </item>
           <item>
@@ -302,7 +305,7 @@ QPushButton:checked{
              <string>Expand groups</string>
             </property>
             <property name="text">
-             <string>expand</string>
+             <string>expand all</string>
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
@@ -313,6 +316,9 @@ QPushButton:checked{
               <width>32</width>
               <height>32</height>
              </size>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonTextBesideIcon</enum>
             </property>
            </widget>
           </item>
@@ -408,15 +414,18 @@ QPushButton:checked{
               <height>32</height>
              </size>
             </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonTextBesideIcon</enum>
+            </property>
            </widget>
           </item>
           <item>
            <widget class="QToolButton" name="add_variable_group_button">
             <property name="toolTip">
-             <string>Add new group</string>
+             <string>Add new variable group. Variable groups are useful for organizing variables but have no other meaning. Every variable must belong to a group.</string>
             </property>
             <property name="text">
-             <string>add group</string>
+             <string>add variable group</string>
             </property>
             <property name="icon">
              <iconset resource="../resources.qrc">
@@ -427,6 +436,9 @@ QPushButton:checked{
               <width>32</width>
               <height>32</height>
              </size>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonTextBesideIcon</enum>
             </property>
            </widget>
           </item>
@@ -556,8 +568,8 @@ QPushButton:checked{
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>80</width>
-             <height>18</height>
+             <width>1092</width>
+             <height>699</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5"/>
