@@ -30,6 +30,11 @@ class Hardware:
 
             self.output_systems[outsys].process_sequence(outsys_sequence, run_id)
 
+    def cycle_init(self):
+        for outsys_name in self.output_systems:
+            outsys = self.output_systems[outsys_name]
+            outsys.cycle_init()
+
     def play_once(self, run_id):
         for outsys_name in self.output_systems:
             outsys = self.output_systems[outsys_name]
@@ -69,6 +74,10 @@ class OutputSystem:
 
     # Process the sequence and send it to the hardware
     def process_sequence(self, sequence, run_id):
+        pass
+
+    # Cycle initialization, this is called before a sequence or set of sequences is executed to prepare the hardware
+    def cycle_init(self):
         pass
 
     # Triggers the reproduction of the sequence. set_sequence must be called before.

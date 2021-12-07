@@ -9,12 +9,17 @@ import hardware_specific.artiq
 
 
 class Config:
-    @staticmethod
-    def _verify_config(data):
 
+    def __init__(self, config_path):
+        with open(config_path) as json_data_file:
+            self.data = json.load(json_data_file)
+
+        self._verify_config()
+
+    def _verify_config(self):
         # Check that all output system names are unique
         outsys_names = []
-        for output_system in data["output systems"]:
+        for output_system in self.data["output systems"]:
             if output_system["name"] in outsys_names:
                 raise utils.SequenceException("Output system names must be unique")
             else:
@@ -22,30 +27,21 @@ class Config:
 
         # Check that all card names are unique
         card_names = []
-        for output_system in data["output systems"]:
+        for output_system in self.data["output systems"]:
             for card in output_system["cards"]:
                 if card["name"] in card_names:
                     raise utils.SequenceException("Card names must be unique")
                 else:
                     card_names.append(card["name"])
 
-    @staticmethod
-    def get_hardware():
-        with open('config.json') as json_data_file:
-            data = json.load(json_data_file)
-
-        Config._verify_config(data)
-
+    def get_hardware(self):
         output_systems_dict = {}
 
-        for output_system_spec in data["output systems"]:
+        for output_system_spec in self.data["output systems"]:
             output_system_class = eval(output_system_spec["class"])
             output_systems_dict[output_system_spec["name"]] = output_system_class(output_system_spec)
 
         return hardware.Hardware(output_systems_dict)
 
-    @staticmethod
-    def get_sequences_path():
-        with open('config.json') as json_data_file:
-            data = json.load(json_data_file)
-        return data["sequences path"]
+    def get_sequences_path(self):
+        return self.data["sequences path"]

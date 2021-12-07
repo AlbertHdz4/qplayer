@@ -8,7 +8,6 @@ class PyPlayerGeneratedExperiment{{id}}(EnvExperiment):
 
     @kernel
     def run(self):
-        self.core.reset()
         self.zotino0.init()
         delay(10*ms)
 {{experiment}}

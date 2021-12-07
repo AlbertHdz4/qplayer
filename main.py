@@ -20,8 +20,11 @@ from scheduler import Scheduler
 from hardware import Hardware
 
 class ControlSystemGUI(QMainWindow):
-    def __init__(self, parent=None):
-        self.hardware = config.Config.get_hardware()
+    def __init__(self, config_path, parent=None):
+
+        self.config = config.Config(config_path)
+
+        self.hardware = self.config.get_hardware()
 
         QMainWindow.__init__(self, parent)
         ui_main_window, main_window = loadUiType('uis/control-system.ui')
@@ -120,7 +123,7 @@ class ControlSystemGUI(QMainWindow):
     @pyqtSlot()
     def save_sequence(self):
         if self.current_filename is None:
-            sequences_path = config.Config.get_sequences_path()
+            sequences_path = self.config.get_sequences_path()
             file_name, _ = QFileDialog.getSaveFileName(self, "Select file to save", sequences_path,
                                                        filter="Sequence File (*.json)")
             if file_name:
@@ -138,7 +141,7 @@ class ControlSystemGUI(QMainWindow):
 
     @pyqtSlot()
     def save_sequence_as(self):
-        sequences_path = config.Config.get_sequences_path()
+        sequences_path = self.config.get_sequences_path()
         file_name, _ = QFileDialog.getSaveFileName(self, "Select file to save as", sequences_path,
                                                    filter="Sequence File (*.json)")
         if file_name:
@@ -155,7 +158,7 @@ class ControlSystemGUI(QMainWindow):
 
     @pyqtSlot()
     def load_sequence(self):
-        sequences_path = config.Config.get_sequences_path()
+        sequences_path = self.config.get_sequences_path()
         file_name, _ = QFileDialog.getOpenFileName(self,"Select file to load", sequences_path,
                                                    "Sequence File (*.json)")
         if file_name:
@@ -474,12 +477,19 @@ class ControlSystemGUI(QMainWindow):
     #############
 
 if __name__ == "__main__":
+    import argparse
     import asyncio
     from qasync import QEventLoop
-    app = QApplication(sys.argv)
+
+    parser = argparse.ArgumentParser(description='Quantum Player.')
+    parser.add_argument('config_file', help='Path to JSON config file.')
+    args = parser.parse_args()
+
+    app = QApplication([]) # We pass an empty list to QApplication instead of sys.argv because we use sys.argv in our program
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
-    myapp = ControlSystemGUI()
+    config_path = args.config_file
+    myapp = ControlSystemGUI(config_path)
     myapp.show()
     with loop:
         loop.run_forever()

@@ -26,8 +26,14 @@ class ARTIQOutputSystem(OutputSystem):
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.schedule_subscriber.connect(self.master_host, self.master_notify_port))
 
-        with open('hardware_specific/artiq/experiment_template.py', 'r') as f:
+        self.experiment_template_path = system_spec["experiment_template"]
+        self.cycle_init_kernel_path = system_spec["cycle_init_kernel"]
+
+        with open(self.experiment_template_path, 'r') as f:
             self.experiment_template = f.read()
+
+        with open(self.cycle_init_kernel_path, 'r') as f:
+            self.cycle_init_kernel = f.read()
 
         for card in system_spec["cards"]:
             card_class = eval(card["class"])
@@ -135,6 +141,22 @@ class ARTIQOutputSystem(OutputSystem):
             tprev = t
 
         return self.experiment_template.replace("{{id}}", "%d" % run_id).replace("{{experiment}}", experiment)
+
+    def cycle_init(self):
+        with open(self.repository_path + '__cycle_init.py', 'w') as f:
+            f.write(self.cycle_init_kernel)
+
+        expid = {
+            "class_name": "CycleInit",
+            "file": "__cycle_init.py",
+            "arguments": {},
+            "log_level": 10,
+            "repo_rev": "N/A",
+        }
+
+        self.master_scheduler.submit(pipeline_name="main", expid=expid, priority=0, due_date=None, flush=False)
+        print("Play artiq cycle init first")
+
 
     def play_once(self, run_id):
         expid = {

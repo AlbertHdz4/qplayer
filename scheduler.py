@@ -24,15 +24,21 @@ class Scheduler:
 
     def play_once(self):
         print("Run single")
+        self.hardware.cycle_init()
+        self.play()
+
+    def play(self):
         csequence = self.sequence.playlist.compile_active_playlist()
         self.hardware.process_sequence(csequence, self.run_id)
         self.hardware.play_once(self.run_id)
         self.run_id += 1
 
+
     def play_continuous(self):
         print("Run continuous")
         self.continuous = True
-        self.play_once()
+        self.hardware.cycle_init()
+        self.play()
 
     def iterate(self):
         print("Iterate")
@@ -70,7 +76,8 @@ class Scheduler:
         self.advance_indices = True
         self.run_idx = 0
         self.sequence.variables.reset_indices()
-        self.play_once()
+        self.hardware.cycle_init()
+        self.play()
 
     def stop(self):
         self.continuous = False
@@ -98,4 +105,4 @@ class Scheduler:
             self.sequence.variables.set_iterating_variables_indices(next_indices)
 
         if self.continuous:
-            self.play_once()
+            self.play()
