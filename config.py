@@ -7,6 +7,7 @@ import hardware_specific.dummy
 import hardware_specific.buscards
 import hardware_specific.artiq
 
+from databases.influxdb2 import InfluxDB2
 
 class Config:
 
@@ -45,3 +46,16 @@ class Config:
 
     def get_sequences_path(self):
         return self.data["sequences path"]
+
+    def get_database(self):
+        if "database" in self.data:
+            if "type" in self.data["database"]:
+                if self.data["database"]["type"] == "influxdb2":
+                    url = self.data["database"]["url"]
+                    token = self.data["database"]["token"]
+                    org = self.data["database"]["org"]
+                    bucket = self.data["database"]["bucket"]
+                    return InfluxDB2(url, token, org, bucket)
+            else:
+                raise utils.SequenceException("Database section present but no type is defined.")
+        return None

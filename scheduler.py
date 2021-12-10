@@ -1,3 +1,4 @@
+import database
 import hardware
 import sequence
 
@@ -6,9 +7,10 @@ import random
 
 class Scheduler:
 
-    def __init__(self, seq: sequence.Sequence, hw: hardware.Hardware):
+    def __init__(self, seq: sequence.Sequence, hw: hardware.Hardware, db: database.Database):
         self.sequence = seq
         self.hardware = hw
+        self.database = db
         self.hardware.add_sequence_end_listener(self.sequence_finished)
 
         # TODO: run_id and iter_id should be loaded and saved into a database
@@ -27,10 +29,13 @@ class Scheduler:
         self.hardware.cycle_init()
         self.play()
 
+    # Utility method called every time a sequence is executed.
     def play(self):
         csequence = self.sequence.playlist.compile_active_playlist()
+        vars_dict = self.sequence.variables.get_variables_dict()
         self.hardware.process_sequence(csequence, self.run_id)
         self.hardware.play_once(self.run_id)
+        self.database.store_run_parameters(self.run_id, vars_dict)
         self.run_id += 1
 
 

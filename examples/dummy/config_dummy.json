@@ -1,10 +1,11 @@
 {
   "sequences path" : "",
   "database": {
-    "dbhost": "localhost",
-    "dbuser": "",
-    "dbpasswd": "",
-    "dbname": ""
+    "type": "influxdb2",
+    "url": "http://localhost:8086",
+    "bucket": "",
+    "org": "",
+    "token": ""
   },
   "output systems":
   [

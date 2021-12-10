@@ -9,6 +9,8 @@ class CycleInit(EnvExperiment):
     @kernel
     def run(self):
         self.core.reset()
+
+        # Pulse a few times to give visual feedback and start with some slack
         self.led0.pulse(250*ms)
         delay(125*ms)
         self.led0.pulse(125*ms)

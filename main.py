@@ -37,9 +37,12 @@ class ControlSystemGUI(QMainWindow):
         self.routines_model = RoutinesModel(self.variables_model, self.hardware)
         self.playlist_model = PlaylistModel(self.variables_model, self.routines_model)
 
+        # DATABASE
+        self.database = self.config.get_database()
+
         # SEQUENCE MANAGER
         self.sequence = Sequence(self.variables_model, self.routines_model, self.playlist_model)
-        self.scheduler = Scheduler(self.sequence, self.hardware)
+        self.scheduler = Scheduler(self.sequence, self.hardware, self.database)
 
         # UI SETUP
         self.sequence_editor = SequenceEditor(self.routines_model)
@@ -118,7 +121,7 @@ class ControlSystemGUI(QMainWindow):
 
 
     ###########
-    # GENER
+    # GENERAL #
     ###########
     @pyqtSlot()
     def save_sequence(self):
