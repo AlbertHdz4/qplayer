@@ -8,6 +8,22 @@ import asyncio
 import os
 
 
+def voltage_to_mu(voltage):
+    # Copied from artiq source code
+    vref = 5
+    offset_dacs = 8192
+    code = int(round((1 << 16) * (voltage / (4. * vref)) + offset_dacs * 0x4))
+    if code < 0x0 or code > 0xffff:
+        raise ValueError("Invalid DAC voltage!")
+    return code
+
+
+def seconds_to_mu(seconds):
+    # Copied from artiq source code
+    ref_period = 1e-9
+    return np.int64(seconds // ref_period)
+
+
 class ARTIQOutputSystem(OutputSystem):
     def __init__(self, system_spec):
         self.name = system_spec["name"]
@@ -16,7 +32,6 @@ class ARTIQOutputSystem(OutputSystem):
         self.master_host = system_spec["master_host"]
         self.master_control_port = system_spec["master_control_port"]
         self.master_notify_port = system_spec["master_notify_port"]
-        self.repository_path = system_spec["repository_path"]
         self.master_scheduler = Client(self.master_host, self.master_control_port, "master_schedule")
         self.master_experiment_db = Client(self.master_host, self.master_control_port, "master_experiment_db")
         self.schedule_subscriber = Subscriber("schedule",
@@ -26,14 +41,7 @@ class ARTIQOutputSystem(OutputSystem):
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.schedule_subscriber.connect(self.master_host, self.master_notify_port))
 
-        self.experiment_template_path = system_spec["experiment_template"]
-        self.cycle_init_kernel_path = system_spec["cycle_init_kernel"]
-
-        with open(self.experiment_template_path, 'r') as f:
-            self.experiment_template = f.read()
-
-        with open(self.cycle_init_kernel_path, 'r') as f:
-            self.cycle_init_kernel = f.read()
+        self.exp_str = None
 
         for card in system_spec["cards"]:
             card_class = eval(card["class"])
@@ -104,51 +112,40 @@ class ARTIQOutputSystem(OutputSystem):
                 else:
                     all_events[t] = [event]
 
-        # write experiment file
-        exp_str = self.create_experiment_str(all_events, run_id)
-        with open(self.repository_path + '__experiment-%d.py' % run_id, 'w') as f:
-            f.write(exp_str)
+        self.exp_str = self.create_experiment_str(all_events)
 
-        # ask artiq_master to update experiment db
-        self.master_experiment_db.scan_repository()
-
-    def create_experiment_str(self, all_events, run_id):
+    def create_experiment_str(self, all_events):
         times = list(all_events.keys())
         times.sort()
 
-        experiment = ""
+        experiment_str = ""
 
-        tprev = 0
         for t in times:
-            experiment += " " * 8 + "delay(%f*ms)\n" % (t - tprev)
             events = all_events[t]
+            time_events_str = ""
             for event in events:
                 # TODO: cleanup by moving each code generation part to the corresponding card
                 event_str = ""
                 if event['chan'].card.type == utils.DigitalTrack:
-                    if event['state'] == 1:
-                        event_str = "        self.%s%d.on()" % (event['chan_id'][0], event['chan_id'][1])
-                    elif event['state'] == 0:
-                        event_str = "        self.%s%d.off()" % (event['chan_id'][0], event['chan_id'][1])
+                    event_str = "(0,%d,%d)" % (event['chan_id'][1], event['state'])
 
                 elif event['chan'].card.type == utils.AnalogTrack:
-                    event_str += "        self.%s.write_dac(%d, %f)\n" % (
-                    event['chan_id'][0], event['chan_id'][1], event['value'])
-                    event_str += "        self.%s.load()" % (event['chan_id'][0])
                     # TODO: subtract from the following delay the time for write_dac and load
+                    event_str = "(1,%d,%d)" % (event['chan_id'][1], voltage_to_mu(event['value']))
 
-                experiment += event_str + "\n"
-            tprev = t
+                time_events_str += event_str+','
 
-        return self.experiment_template.replace("{{id}}", "%d" % run_id).replace("{{experiment}}", experiment)
+            time_events_str = time_events_str.strip(',')
+            experiment_str += ("(%d, ["%seconds_to_mu(t*1e-3)) + time_events_str + "]),"
+
+        experiment_str = experiment_str.strip(',')
+
+        return "["+experiment_str+"]"
 
     def cycle_init(self):
-        with open(self.repository_path + '__cycle_init.py', 'w') as f:
-            f.write(self.cycle_init_kernel)
-
         expid = {
-            "class_name": "CycleInit",
-            "file": "__cycle_init.py",
+            "class_name": "QuantumPlayerCycleInit",
+            "file": "qplayer_cycle_init.py",
             "arguments": {},
             "log_level": 10,
             "repo_rev": "N/A",
@@ -157,19 +154,17 @@ class ARTIQOutputSystem(OutputSystem):
         self.master_scheduler.submit(pipeline_name="main", expid=expid, priority=0, due_date=None, flush=False)
         print("Play artiq cycle init first")
 
-
     def play_once(self, run_id):
         expid = {
-            "class_name": "PyPlayerGeneratedExperiment%d" % run_id,
-            "file": "__experiment-%d.py" % run_id,
-            "arguments": {"arg_name": 5},
-            "log_level": 10,
+            "class_name": "QuantumPlayer",
+            "file": "qplayer.py",
+            "arguments": {"sequence": self.exp_str},
+            "log_level": 1,
             "repo_rev": "N/A",
         }
 
         self.master_scheduler.submit(pipeline_name="main", expid=expid, priority=0, due_date=None, flush=False)
         print("Play artiq sequence once")
-
 
     def artiq_schedule_setup(self, schedule):
         self.experiment_schedule.clear()
@@ -177,9 +172,6 @@ class ARTIQOutputSystem(OutputSystem):
         return self.experiment_schedule
 
     def artiq_schedule_update(self, mod: dict):
-        #print(mod)
-        #print(self.experiment_schedule)
-
         # Only check the number of tasks when the number of tasks changes
         if 'path' in mod and len(mod['path']) == 0:
             # We keep the length of the queue to two elements or fewer.
@@ -188,14 +180,8 @@ class ARTIQOutputSystem(OutputSystem):
             if queue_size < 2:
                 self.sequence_finished()
 
-        # Delete files when we are finished using them
-        if mod['action'] == 'setitem' and mod['value'] == 'deleting':
-            exp_num = mod['path'][0]
-            fname = self.experiment_schedule[exp_num]['expid']['file']
-            if fname.startswith("__experiment"):
-                os.remove(self.repository_path + fname)
-
     def stop(self):
+        # TODO
         pass
 
 

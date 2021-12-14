@@ -15,9 +15,6 @@
       "master_host": "localhost",
       "master_control_port": 3251,
       "master_notify_port": 3250,
-      "repository_path": "",
-      "experiment_template": "experiment_template.py",
-      "cycle_init_kernel": "cycle_init_kernel.py",
       "cards":
       [
         {

@@ -2,6 +2,7 @@
 import json
 import utils
 import hardware
+import database
 
 import hardware_specific.dummy
 import hardware_specific.buscards
@@ -58,4 +59,4 @@ class Config:
                     return InfluxDB2(url, token, org, bucket)
             else:
                 raise utils.SequenceException("Database section present but no type is defined.")
-        return None
+        return database.Database()
