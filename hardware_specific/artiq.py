@@ -43,6 +43,7 @@ class ARTIQOutputSystem(OutputSystem):
 
         self.exp_str = None
         self.last_delay = 0
+        self.initializing = False
 
         for card in system_spec["cards"]:
             card_class = eval(card["class"])
@@ -156,10 +157,10 @@ class ARTIQOutputSystem(OutputSystem):
             "class_name": "QuantumPlayerCycleInit",
             "file": "qplayer_cycle_init.py",
             "arguments": {},
-            "log_level": 10,
+            "log_level": 0,
             "repo_rev": "N/A",
         }
-
+        self.initializing = True
         self.master_scheduler.submit(pipeline_name="main", expid=expid, priority=0, due_date=None, flush=False)
         print("Play artiq cycle init first")
 
@@ -168,7 +169,7 @@ class ARTIQOutputSystem(OutputSystem):
             "class_name": "QuantumPlayer",
             "file": "qplayer.py",
             "arguments": {"sequence": self.exp_str, "last_delay": self.last_delay},
-            "log_level": 1,
+            "log_level": 0,
             "repo_rev": "N/A",
         }
 
@@ -181,13 +182,18 @@ class ARTIQOutputSystem(OutputSystem):
         return self.experiment_schedule
 
     def artiq_schedule_update(self, mod: dict):
-        # Only check the number of tasks when the number of tasks changes
-        if 'path' in mod and len(mod['path']) == 0:
-            # We keep the length of the queue to two elements or fewer.
-            queue_size = len(self.experiment_schedule)
+
+        queue_size = len(self.experiment_schedule)
+
+        if 'path' in mod and len(mod['path']) == 0: # If the number of tasks changes
             print("ARTIQ queue size: %d" % queue_size)
-            if queue_size < 2:
-                self.sequence_finished()
+        if mod['action'] == 'delitem': # Item has been deleted
+            if queue_size < 2: # We keep the length of the queue to two elements or fewer.
+                if self.initializing:
+                    self.initializing = False
+                    print("Cycle Init Finished")
+                else:
+                    self.sequence_finished()
 
     def stop(self):
         # TODO

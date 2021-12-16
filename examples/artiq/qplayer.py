@@ -48,4 +48,7 @@ class QuantumPlayer(EnvExperiment):
             
         # Add last delay
         delay_mu(self.last_delay64)
+        self.core.wait_until_mu(now_mu()) # This is added so that we can know when the sequence finishes
+        delay(700*ms) # Increase this if getting RTIO Underflow errors
+
         print("After Execution", self.core.mu_to_seconds(now_mu() - self.core.get_rtio_counter_mu()))
