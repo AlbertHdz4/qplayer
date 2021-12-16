@@ -43,6 +43,7 @@ class ControlSystemGUI(QMainWindow):
         # SEQUENCE MANAGER
         self.sequence = Sequence(self.variables_model, self.routines_model, self.playlist_model)
         self.scheduler = Scheduler(self.sequence, self.hardware, self.database)
+        self.scheduler.add_sequence_end_listener(self.sequence_finished)
 
         # UI SETUP
         self.sequence_editor = SequenceEditor(self.routines_model)
@@ -180,23 +181,42 @@ class ControlSystemGUI(QMainWindow):
             self.current_filename = None
             self.inspector_widget.update_plot()
 
+    # This function is called by the scheduler
+    def sequence_finished(self):
+        self.uncheck_buttons()
+        self.ui.stop_button.setChecked(True)
+
+    def uncheck_buttons(self):
+        self.ui.play_once_button.setChecked(False)
+        self.ui.play_button.setChecked(False)
+        self.ui.iterate_button.setChecked(False)
+        self.ui.stop_button.setChecked(False)
+
     @pyqtSlot()
     def play_sequence_once(self):
+        self.uncheck_buttons()
+        self.ui.play_once_button.setChecked(True)
         self.scheduler.play_once()
         self.enable_inputs()
 
     @pyqtSlot()
     def play_sequence(self):
+        self.uncheck_buttons()
+        self.ui.play_button.setChecked(True)
         self.scheduler.play_continuous()
         self.enable_inputs()
 
     @pyqtSlot()
     def stop_sequence(self):
+        self.uncheck_buttons()
+        self.ui.stop_button.setChecked(True)
         self.scheduler.stop()
         self.enable_inputs()
 
     @pyqtSlot()
     def iterate_sequence(self):
+        self.uncheck_buttons()
+        self.ui.iterate_button.setChecked(True)
         self.scheduler.iterate()
         self.disable_inputs()
         # TODO: check if shuffle is enabled

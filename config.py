@@ -8,8 +8,6 @@ import hardware_specific.dummy
 import hardware_specific.buscards
 import hardware_specific.artiq
 
-from databases.influxdb2 import InfluxDB2
-
 class Config:
 
     def __init__(self, config_path):
@@ -52,6 +50,7 @@ class Config:
         if "database" in self.data:
             if "type" in self.data["database"]:
                 if self.data["database"]["type"] == "influxdb2":
+                    from databases.influxdb2 import InfluxDB2
                     url = self.data["database"]["url"]
                     token = self.data["database"]["token"]
                     org = self.data["database"]["org"]

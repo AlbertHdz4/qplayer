@@ -12,6 +12,7 @@ class Scheduler:
         self.hardware = hw
         self.database = db
         self.hardware.add_sequence_end_listener(self.sequence_finished)
+        self.sequence_end_listeners = []
 
         # TODO: run_id and iter_id should be loaded and saved into a database
         self.run_id = 0
@@ -33,10 +34,11 @@ class Scheduler:
     def play(self):
         csequence = self.sequence.playlist.compile_active_playlist()
         vars_dict = self.sequence.variables.get_variables_dict()
-        self.hardware.process_sequence(csequence, self.run_id)
-        self.hardware.play_once(self.run_id)
-        self.database.store_run_parameters(self.run_id, vars_dict)
-        self.run_id += 1
+        if csequence is not None:
+            self.hardware.process_sequence(csequence, self.run_id)
+            self.hardware.play_once(self.run_id)
+            self.database.store_run_parameters(self.run_id, vars_dict)
+            self.run_id += 1
 
 
     def play_continuous(self):
@@ -111,3 +113,16 @@ class Scheduler:
 
         if self.continuous:
             self.play()
+            print("NOT continuous")
+        else:
+            print("NOT continuous")
+            self.notify_sequence_finished()
+
+    def add_sequence_end_listener(self, callback):
+        self.sequence_end_listeners.append(callback)
+
+    # Notify listeners
+    def notify_sequence_finished(self):
+        print("scheduler: Sequence finished")
+        for callback in self.sequence_end_listeners:
+            callback()
