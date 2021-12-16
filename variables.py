@@ -378,7 +378,7 @@ class VariablesModel(QStandardItemModel):
                         value_changed = True
                     variables_dict[var_name] = var_val
                     retry_attempts = 0
-                except (NameError, TypeError) as e:
+                except (NameError, TypeError, KeyError, SyntaxError) as e:
                     # Return to To-Do list if this doesn't work (if there is no error, it should eventually work once
                     # all the required variables are evaluated)
                     to_do.insert(0,(g,v))
