@@ -42,6 +42,7 @@ class ARTIQOutputSystem(OutputSystem):
         loop.run_until_complete(self.schedule_subscriber.connect(self.master_host, self.master_notify_port))
 
         self.exp_str = None
+        self.last_delay = 0
 
         for card in system_spec["cards"]:
             card_class = eval(card["class"])
@@ -56,10 +57,16 @@ class ARTIQOutputSystem(OutputSystem):
     # Process the sequence and send it to the hardware
     def process_sequence(self, sequence, run_id):
 
-        # Convert analog sequences to actual values for the DAC
+        sequence_duration = 0
+        # Convert analog sequences to actual values for the DAC and calculate sequence duration
         for chan in sequence:
+            track_duration = 0
+            for event in sequence[chan]["events"]:
+                track_duration += event['duration']
+            sequence_duration = max(sequence_duration, track_duration)
+
             if sequence[chan]['chan'].card.type == utils.DigitalTrack:
-                pass  # nothing to do
+                pass
             elif sequence[chan]['chan'].card.type == utils.AnalogTrack:
                 samplerate = sequence[chan]['chan'].card.samplerate
                 exploded_events = []
@@ -113,6 +120,8 @@ class ARTIQOutputSystem(OutputSystem):
                     all_events[t] = [event]
 
         self.exp_str = self.create_experiment_str(all_events)
+        last_t = max(all_events.keys())
+        self.last_delay = str(seconds_to_mu((sequence_duration-last_t)*1e-3))
 
     def create_experiment_str(self, all_events):
         times = list(all_events.keys())
@@ -158,7 +167,7 @@ class ARTIQOutputSystem(OutputSystem):
         expid = {
             "class_name": "QuantumPlayer",
             "file": "qplayer.py",
-            "arguments": {"sequence": self.exp_str},
+            "arguments": {"sequence": self.exp_str, "last_delay": self.last_delay},
             "log_level": 1,
             "repo_rev": "N/A",
         }

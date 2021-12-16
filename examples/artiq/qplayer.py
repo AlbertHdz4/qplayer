@@ -1,4 +1,5 @@
-from artiq.experiment import EnvExperiment,kernel,ms,PYONValue
+from artiq.experiment import EnvExperiment,kernel,ms,PYONValue, NumberValue
+import numpy
 
 DIGITAL=0
 ANALOG =1
@@ -12,9 +13,13 @@ class QuantumPlayer(EnvExperiment):
         self.setattr_device('zotino0')
         self.ttls = [self.get_device("ttl%d"%i) for i in range(Nttl)]
         self.setattr_argument("sequence", PYONValue(default=[]))
+        self.setattr_argument("last_delay", NumberValue(default=0,type='int',ndecimals=0,step=1,scale=1))
         
     def prepare(self):
-        self.last_delay = 0
+        self.last_delay64 = numpy.int64(self.last_delay)
+        self.sequence64 = []
+        for t,events in self.sequence:
+            self.sequence64.append((numpy.int64(t), events))
 
     @kernel
     def run(self):
@@ -26,7 +31,7 @@ class QuantumPlayer(EnvExperiment):
         delay(10*ms)
 
         tprev = 0
-        for time, events in self.sequence:
+        for time, events in self.sequence64:
             delay_mu(time-tprev)
             for channel_type, channel_num, value in events:
                 if channel_type == DIGITAL:
@@ -42,5 +47,5 @@ class QuantumPlayer(EnvExperiment):
             tprev = time
             
         # Add last delay
-        #delay_mu(self.last_delay)
+        delay_mu(self.last_delay64)
         print("After Execution", self.core.mu_to_seconds(now_mu() - self.core.get_rtio_counter_mu()))
