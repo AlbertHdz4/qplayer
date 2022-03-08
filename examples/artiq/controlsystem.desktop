@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Quantum Player
+Exec=/home/ocr/scripts/launch_control.sh
+Icon=/home/ocr/repos/electronics-control-system-gui/icons/pyPlayer_icon.svg
+Terminal=false
+Type=Application
