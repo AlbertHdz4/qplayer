@@ -18,7 +18,6 @@ from widgets import *
 from sequence import Sequence
 from scheduler import Scheduler
 from hardware import Hardware
-from notification_server import NotificationServerWorker
 
 class ControlSystemGUI(QMainWindow):
     def __init__(self, config_path, parent=None):
@@ -121,17 +120,9 @@ class ControlSystemGUI(QMainWindow):
 
         #self.load_sequence()
 
-        self.start_notification_server()
-
     ###########
     # GENERAL #
     ###########
-
-    def start_notification_server(self):
-        loop = asyncio.get_event_loop()
-        self.server = NotificationServerWorker(loop)
-        self.set_text_signal.connect(self.server.broadcast)
-        self.server.serve()
 
     @pyqtSlot()
     def save_sequence(self):
