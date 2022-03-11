@@ -40,10 +40,15 @@ class ControlSystemGUI(QMainWindow):
         # DATABASE
         self.database = self.config.get_database()
 
+        # PUBLISHER
+        self.publisher = self.config.get_publisher()
+
         # SEQUENCE MANAGER
         self.sequence = Sequence(self.variables_model, self.routines_model, self.playlist_model)
         self.scheduler = Scheduler(self.sequence, self.hardware, self.database)
+        self.scheduler.add_sequence_stopped_listener(self.sequence_stopped)
         self.scheduler.add_sequence_end_listener(self.sequence_finished)
+        self.scheduler.add_sequence_start_listener(self.sequence_started)
 
         # UI SETUP
         self.sequence_editor = SequenceEditor(self.routines_model)
@@ -182,9 +187,18 @@ class ControlSystemGUI(QMainWindow):
             self.inspector_widget.update_plot()
 
     # This function is called by the scheduler
-    def sequence_finished(self):
+    def sequence_started(self, run_id, vars_dict):
+        self.publisher.publish(f"starting[run_id={run_id}]-{json.dumps(vars_dict)}")
+        self.ui.run_number_lcd.display(run_id)
+
+    # This function is called by the scheduler
+    def sequence_stopped(self):
         self.uncheck_buttons()
         self.ui.stop_button.setChecked(True)
+
+    # This function is called by the scheduler
+    def sequence_finished(self):
+        self.publisher.publish("Sequence Finished!")
 
     def uncheck_buttons(self):
         self.ui.play_once_button.setChecked(False)

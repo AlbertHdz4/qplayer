@@ -20,3 +20,7 @@ class InfluxDB2(Database):
         parameters_str += "_run_id=%d"%run_id
 
         self.write_api.write(self.bucket, self.org, parameters_str)
+
+    def get_latest_run_id(self):
+        # ToDo
+        return 0

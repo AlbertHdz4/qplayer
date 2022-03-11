@@ -12,7 +12,9 @@ class Scheduler:
         self.hardware = hw
         self.database = db
         self.hardware.add_sequence_end_listener(self.sequence_finished)
+        self.sequence_start_listeners = []
         self.sequence_end_listeners = []
+        self.sequence_stopped_listeners = []
 
         # TODO: run_id and iter_id should be loaded and saved into a database
         self.run_id = 0
@@ -37,6 +39,7 @@ class Scheduler:
         if csequence is not None:
             self.hardware.process_sequence(csequence, self.run_id)
             self.hardware.play_once(self.run_id)
+            self.notify_sequence_started(self.run_id, vars_dict)
             self.database.store_run_parameters(self.run_id, vars_dict)
             self.run_id += 1
 
@@ -99,6 +102,7 @@ class Scheduler:
 
     # This function is called when the hardware is ready to receive the next new sequence
     def sequence_finished(self):
+        self.notify_sequence_finished()
         print("scheduler: Ready for next one")
         if self.advance_indices:
             self.run_idx += 1
@@ -116,13 +120,36 @@ class Scheduler:
             print("NOT continuous")
         else:
             print("NOT continuous")
-            self.notify_sequence_finished()
+            self.notify_sequence_stopped()
 
+    # The callbacks registered with this function will be called whenever a sequences starts
+    # callback(run_id, variables_dict)
+    def add_sequence_start_listener(self, callback):
+        self.sequence_start_listeners.append(callback)
+
+    # The callbacks registered with this function will be called whenever a sequences is finished playing
+    # callback()
     def add_sequence_end_listener(self, callback):
         self.sequence_end_listeners.append(callback)
 
+    # The callbacks registered with this function will be called whenever a sequences is finished playing and no new
+    # sequence will be played afterwards
+    # callback()
+    def add_sequence_stopped_listener(self, callback):
+        self.sequence_stopped_listeners.append(callback)
+
     # Notify listeners
+    def notify_sequence_started(self, run_id, vars_dict):
+        print("scheduler: Sequence finished")
+        for callback in self.sequence_start_listeners:
+            callback(run_id, vars_dict)
+
     def notify_sequence_finished(self):
         print("scheduler: Sequence finished")
         for callback in self.sequence_end_listeners:
+            callback()
+
+    def notify_sequence_stopped(self):
+        print("scheduler: Sequence stopped")
+        for callback in self.sequence_stopped_listeners:
             callback()

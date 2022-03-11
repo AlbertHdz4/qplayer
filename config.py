@@ -8,6 +8,8 @@ import hardware_specific.dummy
 import hardware_specific.buscards
 import hardware_specific.artiq
 
+from notify import publisher
+
 class Config:
 
     def __init__(self, config_path):
@@ -59,3 +61,11 @@ class Config:
             else:
                 raise utils.SequenceException("Database section present but no type is defined.")
         return database.Database()
+
+    def get_publisher(self):
+        if "notify_server" in self.data:
+            if "host" in self.data["notify_server"] and "port" in self.data["notify_server"]:
+                host = self.data["notify_server"]["host"]
+                port = self.data["notify_server"]["port"]
+                print(host, port)
+                return publisher.PublisherClient(host, port)
