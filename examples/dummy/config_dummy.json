@@ -1,11 +1,12 @@
 {
   "sequences path" : "",
   "database": {
-    "type": "",
-    "url": "http://localhost:8086",
-    "bucket": "",
-    "org": "",
-    "token": ""
+    "type": "couchdb",
+    "username": "",
+    "password": "",
+    "host": "",
+    "port": "",
+    "database": ""
   },
   "notify_server" : {
     "host": "192.168.52.2",

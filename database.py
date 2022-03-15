@@ -6,4 +6,4 @@ class Database:
         pass
 
     def get_latest_run_id(self):
-        pass
+        return 0

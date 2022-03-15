@@ -54,6 +54,8 @@ class ControlSystemGUI(QMainWindow):
         self.sequence_editor = SequenceEditor(self.routines_model)
         self.ui.sequence_editor_scroll_area.setWidget(self.sequence_editor)
 
+        self.ui.run_number_lcd.display(self.database.get_latest_run_id()+1)
+
         # PROXY MODELS
         self.static_variables_model = VariablesProxyModel(["name","set","value","comment"], True, False, True)
         self.static_variables_model.setSourceModel(self.variables_model)
@@ -115,6 +117,7 @@ class ControlSystemGUI(QMainWindow):
         ## Inspector
         self.variables_model.dataChanged.connect(self.inspector_widget.update_plot)
         self.ui.fix_scale.toggled.connect(self.inspector_widget.fix_scale_toggled)
+
 
         # UTILITY VARIABLES
         self.var_idx = 0
@@ -197,8 +200,8 @@ class ControlSystemGUI(QMainWindow):
         self.ui.stop_button.setChecked(True)
 
     # This function is called by the scheduler
-    def sequence_finished(self):
-        self.publisher.publish("Sequence Finished!")
+    def sequence_finished(self, run_id):
+        self.publisher.publish(f"Sequence Finished! {run_id}")
 
     def uncheck_buttons(self):
         self.ui.play_once_button.setChecked(False)

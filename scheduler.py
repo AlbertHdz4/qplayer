@@ -17,7 +17,7 @@ class Scheduler:
         self.sequence_stopped_listeners = []
 
         # TODO: run_id and iter_id should be loaded and saved into a database
-        self.run_id = 0
+        self.run_id = self.database.get_latest_run_id()+1
         self.iter_id = 0
 
         self.run_idx = 0 # used for iterations
@@ -26,6 +26,7 @@ class Scheduler:
         self.continuous = False
         self.advance_indices = False
         self.shuffle = False
+        self.playing = False
 
     def play_once(self):
         print("Run single")
@@ -34,19 +35,24 @@ class Scheduler:
 
     # Utility method called every time a sequence is executed.
     def play(self):
-        csequence = self.sequence.playlist.compile_active_playlist()
-        vars_dict = self.sequence.variables.get_variables_dict()
-        if csequence is not None:
-            self.hardware.process_sequence(csequence, self.run_id)
-            self.hardware.play_once(self.run_id)
-            self.notify_sequence_started(self.run_id, vars_dict)
-            self.database.store_run_parameters(self.run_id, vars_dict)
-            self.run_id += 1
+        if self.playing:
+            pass
+        else:
+            self.playing = True
+            csequence = self.sequence.playlist.compile_active_playlist()
+            vars_dict = self.sequence.variables.get_variables_dict()
+            if csequence is not None:
+                self.hardware.process_sequence(csequence, self.run_id)
+                self.hardware.play_once(self.run_id)
+                self.notify_sequence_started(self.run_id, vars_dict)
+                if self.advance_indices: # Only save stuff if iterating
+                    self.database.store_run_parameters(self.run_id, vars_dict)
 
 
     def play_continuous(self):
         print("Run continuous")
         self.continuous = True
+        self.advance_indices = False
         self.hardware.cycle_init()
         self.play()
 
@@ -102,9 +108,10 @@ class Scheduler:
 
     # This function is called when the hardware is ready to receive the next new sequence
     def sequence_finished(self):
-        self.notify_sequence_finished()
+        self.notify_sequence_finished(self.run_id)
         print("scheduler: Ready for next one")
         if self.advance_indices:
+            self.run_id += 1
             self.run_idx += 1
             if self.run_idx == len(self.iter_indices):
                 self.iter_id += 1
@@ -115,6 +122,7 @@ class Scheduler:
             print(next_indices)
             self.sequence.variables.set_iterating_variables_indices(next_indices)
 
+        self.playing = False
         if self.continuous:
             self.play()
             print("NOT continuous")
@@ -144,10 +152,10 @@ class Scheduler:
         for callback in self.sequence_start_listeners:
             callback(run_id, vars_dict)
 
-    def notify_sequence_finished(self):
+    def notify_sequence_finished(self, run_id):
         print("scheduler: Sequence finished")
         for callback in self.sequence_end_listeners:
-            callback()
+            callback(run_id)
 
     def notify_sequence_stopped(self):
         print("scheduler: Sequence stopped")

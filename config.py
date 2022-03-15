@@ -51,13 +51,14 @@ class Config:
     def get_database(self):
         if "database" in self.data:
             if "type" in self.data["database"]:
-                if self.data["database"]["type"] == "influxdb2":
-                    from databases.influxdb2 import InfluxDB2
-                    url = self.data["database"]["url"]
-                    token = self.data["database"]["token"]
-                    org = self.data["database"]["org"]
-                    bucket = self.data["database"]["bucket"]
-                    return InfluxDB2(url, token, org, bucket)
+                if self.data["database"]["type"] == "couchdb":
+                    from databases.couchdb import CouchDBDatabase
+                    username = self.data["database"]["username"]
+                    password = self.data["database"]["password"]
+                    host = self.data["database"]["host"]
+                    port = self.data["database"]["port"]
+                    database = self.data["database"]["database"]
+                    return CouchDBDatabase(username, password, host, port, database)
             else:
                 raise utils.SequenceException("Database section present but no type is defined.")
         return database.Database()
