@@ -393,9 +393,9 @@ class ControlSystemGUI(QMainWindow):
             rslt = dialog.exec()
 
             if rslt == QDialog.Accepted:
-                self.routines_model.setData(element_index,dialog.name)
+                self.routines_model.setData(element_index, dialog.name) # Update routine name
                 active_channels = dialog.active_channels
-                self.routines_model.set_active_channels(element_index, active_channels)
+                self.routines_model.set_active_channels(element_index, active_channels) # Update active channels
                 self.sequence_editor.set_routine(row)
         else:
             QMessageBox.information(self,"No routine","Please create a routine first")

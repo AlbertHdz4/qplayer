@@ -175,11 +175,13 @@ class SequenceEditor(QWidget):
         return None
 
     def set_routine(self, routine_row: int):
+
+        self.clear()
+
         self.routine_row = routine_row
         root_index = self.model.index(self.routine_row,0) # type: QModelIndex
         routine_item = self.model.itemFromIndex(root_index)
 
-        self.clear()
 
         for i in range(routine_item.rowCount()):
             channel_item = routine_item.child(i)
@@ -246,7 +248,7 @@ class SequenceChannel(QWidget):
     def clear(self):
         for event_i in reversed(range(self.ui.track_container.count())):
             event = self.ui.track_container.itemAt(event_i).widget() # type: SequenceEvent
-            event.delete()
+            event.delete_widget()
 
 
 
@@ -293,7 +295,7 @@ class SequenceEvent(QWidget):
         action = menu.exec(self.mapToGlobal(pos))  # type: QMenu
 
         if action == delete_event_action:
-            self.delete()
+            self.delete_event()
         elif action == move_right_action:
             # TODO: move events
             print("Not implemented!")
@@ -304,10 +306,12 @@ class SequenceEvent(QWidget):
     def mouseDoubleClickEvent(self, event: QEvent):
         print(self.sequence_track.position_of_event(self))
 
-    def delete(self):
+    def delete_event(self):
         self.event_item.model().removeRow(self.event_item.row(),self.event_item.parent().index())
-        self.setParent(None)
+        self.delete_widget()
 
+    def delete_widget(self):
+        self.setParent(None)
 
 class DigitalSequenceEvent(SequenceEvent):
     ui_file = "uis/digital-event.ui"
