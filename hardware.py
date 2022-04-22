@@ -80,7 +80,7 @@ class OutputSystem:
     def cycle_init(self):
         pass
 
-    # Triggers the reproduction of the sequence. set_sequence must be called before.
+    # Triggers the reproduction of the sequence. process_sequence must be called before.
     def play_once(self, run_id):
         pass
 

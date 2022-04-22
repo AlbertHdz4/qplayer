@@ -21,6 +21,9 @@ class DummyOutputSystem(OutputSystem):
                 card_samplerate = card["samplerate"]
                 self.cards[card_name] = card_class(card_name, card_address, card_channels, card_samplerate)
 
+    def process_sequence(self, sequence, run_id):
+        print(run_id)
+
     def play_once(self, run_id):
         print("Play dummy %d sequence once"%run_id)
         QTimer.singleShot(1500, self.sequence_finished)

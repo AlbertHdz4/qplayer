@@ -57,8 +57,8 @@ class Config:
                     password = self.data["database"]["password"]
                     host = self.data["database"]["host"]
                     port = self.data["database"]["port"]
-                    database = self.data["database"]["database"]
-                    return CouchDBDatabase(username, password, host, port, database)
+                    db_name = self.data["database"]["database"]
+                    return CouchDBDatabase(username, password, host, port, db_name)
             else:
                 raise utils.SequenceException("Database section present but no type is defined.")
         return database.Database()
