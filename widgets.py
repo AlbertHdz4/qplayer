@@ -333,6 +333,7 @@ class DigitalSequenceEvent(SequenceEvent):
         try:
             checked_state = self.event_item.checkState()
         except RuntimeError: # The item was deleted
+            self.delete_widget()
             return
         self.ui.state_button.setChecked(checked_state)
 
