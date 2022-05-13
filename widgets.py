@@ -330,7 +330,10 @@ class DigitalSequenceEvent(SequenceEvent):
     @pyqtSlot()
     def data_changed(self):
         # Update button state
-        checked_state = self.event_item.checkState()
+        try:
+            checked_state = self.event_item.checkState()
+        except RuntimeError: # The item was deleted
+            return
         self.ui.state_button.setChecked(checked_state)
 
         # Update duration
