@@ -40,13 +40,15 @@ class Scheduler:
         else:
             self.playing = True
             csequence = self.sequence.playlist.compile_active_playlist()
-            vars_dict = self.sequence.variables.get_variables_dict()
             if csequence is not None:
+                vars_dict = self.sequence.variables.get_variables_dict()
+                iter_dict = self.sequence.variables.get_iterating_variables()
+
                 self.hardware.process_sequence(csequence, self.run_id)
                 self.hardware.play_once(self.run_id)
-                self.notify_sequence_started(self.run_id, vars_dict)
+                self.notify_sequence_started(self.run_id, vars_dict, iter_dict)
                 if self.advance_indices: # Only save stuff if iterating
-                    self.database.store_run_parameters(self.run_id, vars_dict)
+                    self.database.store_run_parameters(self.run_id, vars_dict, iter_dict)
 
 
     def play_continuous(self):
@@ -147,10 +149,10 @@ class Scheduler:
         self.sequence_stopped_listeners.append(callback)
 
     # Notify listeners
-    def notify_sequence_started(self, run_id, vars_dict):
+    def notify_sequence_started(self, run_id, vars_dict, iter_dict):
         print("scheduler: Sequence finished")
         for callback in self.sequence_start_listeners:
-            callback(run_id, vars_dict)
+            callback(run_id, vars_dict, iter_dict)
 
     def notify_sequence_finished(self, run_id):
         print("scheduler: Sequence finished")

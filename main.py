@@ -190,8 +190,9 @@ class ControlSystemGUI(QMainWindow):
             self.inspector_widget.update_plot()
 
     # This function is called by the scheduler
-    def sequence_started(self, run_id, vars_dict):
-        self.publisher.publish(f"starting[run_id={run_id}]-{json.dumps(vars_dict)}")
+    def sequence_started(self, run_id, vars_dict, iter_dict):
+        parameters = {'variables': vars_dict, 'iterators': iter_dict, 'run_id':run_id}
+        self.publisher.publish(f"starting[run_id={run_id}]-{json.dumps(parameters)}")
         self.ui.run_number_lcd.display(run_id)
 
     # This function is called by the scheduler
@@ -201,7 +202,7 @@ class ControlSystemGUI(QMainWindow):
 
     # This function is called by the scheduler
     def sequence_finished(self, run_id):
-        self.publisher.publish(f"Sequence Finished! {run_id}")
+        self.publisher.publish(f"finished[run_id={run_id}]")
 
     def uncheck_buttons(self):
         self.ui.play_once_button.setChecked(False)
