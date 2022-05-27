@@ -21,9 +21,15 @@ class NotificationServer:
         if message[0] == "S": # From subscriber
             self.subscriber_writers.append(writer)
             print(f"Subscribed {addr!r}")
+            print("===Current Clients===")
+            for subscriber in self.subscriber_writers:
+                caddr = subscriber.get_extra_info('peername')
+                print(f"{caddr!r}")
+            print("===Current Clients===")
 
         if message[0] == "P": # From publisher
             data = message[1:]
+            dead_subscribers = [] # list of dead clients
             for subscriber in self.subscriber_writers:
                 caddr = subscriber.get_extra_info('peername')
                 print(f"Send: {data!r} to {caddr!r}")
@@ -32,7 +38,11 @@ class NotificationServer:
                     await subscriber.drain()
                 except ConnectionResetError:
                     print(f"Client from {caddr!r} removed")
-                    self.subscriber_writers.remove(subscriber)
+                    dead_subscribers.append(subscriber)
+
+            # We remove the dead clients in a separate loop to not make a mess
+            for dead_subscriber in dead_subscribers:
+                self.subscriber_writers.remove(dead_subscriber)
             writer.close()
 
     async def main(self):
