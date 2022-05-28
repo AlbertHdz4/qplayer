@@ -99,7 +99,6 @@ class Scheduler:
 
     def stop(self):
         self.continuous = False
-        self.advance_indices = False
         self.hardware.stop()
 
     def shuffle_on(self):
@@ -130,6 +129,7 @@ class Scheduler:
             print("NOT continuous")
         else:
             print("NOT continuous")
+            self.advance_indices = False
             self.notify_sequence_stopped()
 
     # The callbacks registered with this function will be called whenever a sequences starts
@@ -162,4 +162,4 @@ class Scheduler:
     def notify_sequence_stopped(self):
         print("scheduler: Sequence stopped")
         for callback in self.sequence_stopped_listeners:
-            callback()
+            callback(self.run_id)

@@ -154,15 +154,17 @@ class ControlSystemGUI(QMainWindow):
     @pyqtSlot()
     def save_sequence_as(self):
         sequences_path = self.config.get_sequences_path()
-        file_name, _ = QFileDialog.getSaveFileName(self, "Select file to save as", sequences_path,
+        file_path, _ = QFileDialog.getSaveFileName(self, "Select file to save as", sequences_path,
                                                    filter="Sequence File (*.json)")
-        if file_name:
+        if file_path: # This is None if no file is selected
+            file_name = file_path.split(os.sep)[-1]
+            self.ui.filename_label.setText(file_name)
 
             # Append extension if not there yet
-            if not file_name.endswith(".json"):
-                file_name += ".json"
+            if not file_path.endswith(".json"):
+                file_path += ".json"
 
-            self.current_filename = file_name
+            self.current_filename = file_path
 
             sequence = self.sequence.sequence_to_dict()
             with open(self.current_filename, 'w') as outfile:
@@ -171,13 +173,15 @@ class ControlSystemGUI(QMainWindow):
     @pyqtSlot()
     def load_sequence(self):
         sequences_path = self.config.get_sequences_path()
-        file_name, _ = QFileDialog.getOpenFileName(self,"Select file to load", sequences_path,
+        file_path, _ = QFileDialog.getOpenFileName(self,"Select file to load", sequences_path,
                                                    "Sequence File (*.json)")
-        if file_name:
-            with open(file_name, 'r') as infile:
+        if file_path: # This is None if no file is selected
+            file_name = file_path.split(os.sep)[-1]
+            self.ui.filename_label.setText(file_name)
+            with open(file_path, 'r') as infile:
                 sequence = json.load(infile)
                 self.sequence.load_sequence_from_dict(sequence)
-                self.current_filename = file_name
+                self.current_filename = file_path
                 self.inspector_widget.update_plot()
 
     def new_sequence(self):
@@ -197,9 +201,11 @@ class ControlSystemGUI(QMainWindow):
         self.ui.run_number_lcd.display(run_id)
 
     # This function is called by the scheduler
-    def sequence_stopped(self):
+    def sequence_stopped(self, run_id):
+        self.ui.run_number_lcd.display(run_id)
         self.uncheck_buttons()
         self.ui.stop_button.setChecked(True)
+
 
     # This function is called by the scheduler
     def sequence_finished(self, run_id):
