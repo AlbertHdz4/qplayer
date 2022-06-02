@@ -49,12 +49,13 @@ class ControlSystemGUI(QMainWindow):
         self.scheduler.add_sequence_stopped_listener(self.sequence_stopped)
         self.scheduler.add_sequence_end_listener(self.sequence_finished)
         self.scheduler.add_sequence_start_listener(self.sequence_started)
+        self.scheduler.add_sequence_iteration_finished_listener(self.sequence_iteration_finished)
 
         # UI SETUP
         self.sequence_editor = SequenceEditor(self.routines_model)
         self.ui.sequence_editor_scroll_area.setWidget(self.sequence_editor)
 
-        self.ui.run_number_lcd.display(self.database.get_latest_run_id()+1)
+        self.ui.run_number_label.setText(str(self.database.get_latest_run_id()+1))
 
         # PROXY MODELS
         self.static_variables_model = VariablesProxyModel(["name","set","value","comment"], True, False, True)
@@ -123,6 +124,8 @@ class ControlSystemGUI(QMainWindow):
         self.var_idx = 0
         self.group_idx = 0
         self.routine_idx = 0
+        self.completed_iterations = 0
+        self.delete_completed_iterations()
 
         self.current_filename = None # This variable is populated when loading/saving a sequence
 
@@ -198,11 +201,11 @@ class ControlSystemGUI(QMainWindow):
         parameters = {'variables': vars_dict, 'iterators': iter_dict, 'run_id':run_id}
         id_dict = {'run_id':run_id}
         self.publisher.publish(f'starting@{json.dumps(id_dict)}@{json.dumps(parameters)}')
-        self.ui.run_number_lcd.display(run_id)
+        self.ui.run_number_label.setText(str(run_id))
 
     # This function is called by the scheduler
     def sequence_stopped(self, run_id):
-        self.ui.run_number_lcd.display(run_id)
+        self.ui.run_number_label.setText(str(run_id))
         self.uncheck_buttons()
         self.ui.stop_button.setChecked(True)
 
@@ -211,6 +214,15 @@ class ControlSystemGUI(QMainWindow):
     def sequence_finished(self, run_id):
         id_dict = {'run_id':run_id}
         self.publisher.publish(f'finished@{json.dumps(id_dict)}')
+
+    # This function is called by the scheduler
+    def sequence_iteration_finished(self):
+        self.completed_iterations += 1
+        self.ui.completed_iterations_label.setText("Completed Iterations: "+str(self.completed_iterations))
+
+    def delete_completed_iterations(self):
+        self.ui.completed_iterations_label.setText("")
+        self.completed_iterations = 0
 
     def uncheck_buttons(self):
         self.ui.play_once_button.setChecked(False)
@@ -224,6 +236,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.play_once_button.setChecked(True)
         self.scheduler.play_once()
         self.enable_inputs()
+        self.delete_completed_iterations()
 
     @pyqtSlot()
     def play_sequence(self):
@@ -231,6 +244,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.play_button.setChecked(True)
         self.scheduler.play_continuous()
         self.enable_inputs()
+        self.delete_completed_iterations()
 
     @pyqtSlot()
     def stop_sequence(self):
@@ -245,6 +259,7 @@ class ControlSystemGUI(QMainWindow):
         self.ui.iterate_button.setChecked(True)
         self.scheduler.iterate()
         self.disable_inputs()
+        self.delete_completed_iterations()
         # TODO: check if shuffle is enabled
 
 

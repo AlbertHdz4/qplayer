@@ -15,6 +15,7 @@ class Scheduler:
         self.sequence_start_listeners = []
         self.sequence_end_listeners = []
         self.sequence_stopped_listeners = []
+        self.sequence_iteration_finished_listeners = []
 
         # TODO: run_id and iter_id should be loaded and saved into a database
         self.run_id = self.database.get_latest_run_id()+1
@@ -115,6 +116,7 @@ class Scheduler:
             self.run_id += 1
             self.run_idx += 1
             if self.run_idx == len(self.iter_indices):
+                self.notify_sequence_iteration_finished()
                 self.iter_id += 1
                 self.run_idx = 0
                 if self.shuffle:
@@ -138,15 +140,20 @@ class Scheduler:
         self.sequence_start_listeners.append(callback)
 
     # The callbacks registered with this function will be called whenever a sequences is finished playing
-    # callback()
+    # callback(run_id)
     def add_sequence_end_listener(self, callback):
         self.sequence_end_listeners.append(callback)
 
     # The callbacks registered with this function will be called whenever a sequences is finished playing and no new
     # sequence will be played afterwards
-    # callback()
+    # callback(run_id)
     def add_sequence_stopped_listener(self, callback):
         self.sequence_stopped_listeners.append(callback)
+
+    # The callbacks registered with this function will be called whenever full iteration is completed
+    # callback()
+    def add_sequence_iteration_finished_listener(self, callback):
+        self.sequence_iteration_finished_listeners.append(callback)
 
     # Notify listeners
     def notify_sequence_started(self, run_id, vars_dict, iter_dict):
@@ -163,3 +170,8 @@ class Scheduler:
         print("scheduler: Sequence stopped")
         for callback in self.sequence_stopped_listeners:
             callback(self.run_id)
+
+    def notify_sequence_iteration_finished(self):
+        print("scheduler: Iteration finished")
+        for callback in self.sequence_iteration_finished_listeners:
+            callback()
