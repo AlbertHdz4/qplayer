@@ -30,17 +30,34 @@
        <number>5</number>
       </property>
       <item>
-       <widget class="QLabel" name="completed_iterations_label">
-        <property name="text">
-         <string>Completed Iterations: 0</string>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::NoTextInteraction</set>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_10">
+        <item>
+         <widget class="QLabel" name="iteration_start_label">
+          <property name="text">
+           <string>Iteration start: 0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="completed_iterations_label">
+          <property name="text">
+           <string>Completed Iterations: 0</string>
+          </property>
+          <property name="textInteractionFlags">
+           <set>Qt::NoTextInteraction</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="QLabel" name="filename_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
           <pointsize>12</pointsize>
@@ -650,7 +667,7 @@ QPushButton:checked{
              <x>0</x>
              <y>0</y>
              <width>1092</width>
-             <height>670</height>
+             <height>669</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5"/>

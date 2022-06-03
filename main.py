@@ -222,6 +222,7 @@ class ControlSystemGUI(QMainWindow):
 
     def delete_completed_iterations(self):
         self.ui.completed_iterations_label.setText("")
+        self.ui.iteration_start_label.setText("")
         self.completed_iterations = 0
 
     def uncheck_buttons(self):
@@ -257,9 +258,11 @@ class ControlSystemGUI(QMainWindow):
     def iterate_sequence(self):
         self.uncheck_buttons()
         self.ui.iterate_button.setChecked(True)
+        run_id = self.scheduler.run_id
         self.scheduler.iterate()
         self.disable_inputs()
         self.delete_completed_iterations()
+        self.ui.iteration_start_label.setText("Iteration start: %d"%run_id)
         # TODO: check if shuffle is enabled
 
 
