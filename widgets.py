@@ -382,6 +382,9 @@ class AnalogSequenceEvent(SequenceEvent):
             self.widgets[ftype] = w
 
         super().__init__(sequence_track, event_item)
+
+        self.ui.function_selection_combobox.installEventFilter(self) # To discard mouse wheel events
+
         self.ui.function_selection_combobox.addItems(self.function_types)
         self.ui.function_selection_combobox.currentTextChanged.connect(self.update_function_type)
 
@@ -409,7 +412,12 @@ class AnalogSequenceEvent(SequenceEvent):
         except RuntimeError as e:
             print("RuntimeError %s"%e)
 
-
+    # Event filter to discard wheel events that change the type of ramp accidentaly
+    def eventFilter(self, obj: QObject, event: QEvent):
+        if obj == self.ui.function_selection_combobox and event.type() == QEvent.Wheel:
+            return True
+        else:
+            return False
 
     @pyqtSlot()
     def data_changed(self):
