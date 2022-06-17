@@ -1,4 +1,4 @@
-from artiq.experiment import EnvExperiment,kernel,ms,PYONValue, NumberValue
+from artiq.experiment import EnvExperiment,kernel,ms,PYONValue, NumberValue, RTIOUnderflow
 import numpy
 
 DIGITAL=0
@@ -26,7 +26,13 @@ class QuantumPlayer(EnvExperiment):
         #self.core.reset()
         delay(10*ms)
         print("Pre Init", self.core.mu_to_seconds(now_mu() - self.core.get_rtio_counter_mu()))
-        self.zotino0.init(blind=True)
+        try:
+            self.zotino0.init(blind=True)
+        except RTIOUnderflow:
+            self.core.reset()
+            delay(1000*ms)
+            self.zotino0.init(blind=True)
+            print("========== RTIOUnderflow ==========")
         print("After Init", self.core.mu_to_seconds(now_mu() - self.core.get_rtio_counter_mu()))
         delay(10*ms)
 
