@@ -22,9 +22,6 @@ class PlaylistModel(QStandardItemModel):
         self.removeRows(0, self.rowCount())
         self.active_playlist = None
 
-    def flags(self, index: QModelIndex):
-        return Qt.NoItemFlags | Qt.ItemIsEnabled | Qt.ItemIsSelectable
-
     def add_playlist(self, playlist_name, start_time, repeat, duration, end_time):
         playlist_name_item = QStandardItem(playlist_name)
         font = QFont()
@@ -37,6 +34,9 @@ class PlaylistModel(QStandardItemModel):
                          QStandardItem(repeat),
                          QStandardItem(duration),
                          QStandardItem(end_time)]
+        for item in playlist_item:
+            item.setFlags(Qt.NoItemFlags | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+
         self.invisibleRootItem().appendRow(playlist_item)
         self.dataChanged.emit(QModelIndex(), QModelIndex())
         num_rows = self.rowCount()
@@ -52,6 +52,10 @@ class PlaylistModel(QStandardItemModel):
         item_end = QStandardItem("end time")
 
         new_row = [item_name, item_start, item_repeat, item_duration, item_end]
+        for item in new_row:
+            item.setFlags(Qt.NoItemFlags | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+        item_repeat.setFlags(Qt.NoItemFlags | Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable)
+
         self.itemFromIndex(parent).appendRow(new_row)
         self.dataChanged.emit(parent,parent)
         num_rows = self.rowCount(parent)
@@ -170,7 +174,8 @@ class PlaylistModel(QStandardItemModel):
                 if item.parent().parent() is None: # This will only be true for top-level routines which begin the sequence
                     if item.data(utils.PlaylistItemTypeRole) == utils.Routine:
                         routine_name = item.data(Qt.DisplayRole)
-                        routine_duration = self.routines_model.get_routine_duration(routine_name)
+                        routine_repeat = int(item.parent().child(item.row(), self.column_names.index("repeat")).data(Qt.DisplayRole))
+                        routine_duration = float(self.routines_model.get_routine_duration(routine_name))*routine_repeat
 
                         if item.parent().child(item.row(), self.column_names.index("start")).data(Qt.DisplayRole) != "0":
                             item.parent().child(item.row(), self.column_names.index("start")).setData("0", Qt.DisplayRole)
@@ -201,7 +206,8 @@ class PlaylistModel(QStandardItemModel):
 
                     if item.data(utils.PlaylistItemTypeRole) == utils.Routine: # if item is a routine
                         routine_name = item.data(Qt.DisplayRole)
-                        routine_duration = self.routines_model.get_routine_duration(routine_name)
+                        routine_repeat = int(item.parent().child(item.row(), self.column_names.index("repeat")).data(Qt.DisplayRole))
+                        routine_duration = float(self.routines_model.get_routine_duration(routine_name))*routine_repeat
 
                         if item.parent().child(item.row(), self.column_names.index("start")).data(Qt.DisplayRole) != parent_end_time:
                             item.parent().child(item.row(), self.column_names.index("start")).setData(parent_end_time, Qt.DisplayRole)
@@ -266,6 +272,7 @@ class PlaylistModel(QStandardItemModel):
 
                 routine_name = routine_item.data(Qt.DisplayRole)
                 routine_points = self.routines_model.compile_routine(routine_name)
+                routine_repeat = int(routine_item.parent().child(routine_item.row(), self.column_names.index("repeat")).data(Qt.DisplayRole))
 
                 for chan_key in routine_points:
                     offset = routine_points[chan_key]["offset"]
@@ -276,11 +283,12 @@ class PlaylistModel(QStandardItemModel):
                         sequence[chan_key] = {'chan': channel, 'events': []}
                     t = offset
                     if len(events) > 0:
-                        for event in events:
-                            event['time'] = t
-                            sequence[chan_key]['events'].append(event)
-                            t += event['duration']
-                            tend = max(tend, t)
+                        for _ in range(routine_repeat):
+                            for event in events:
+                                event['time'] = t
+                                sequence[chan_key]['events'].append(event.copy())
+                                t += event['duration']
+                                tend = max(tend, t)
 
             elif routine_item.data(utils.PlaylistItemTypeRole) == utils.Gap:
                 # if gap has children add children points with gap delay added

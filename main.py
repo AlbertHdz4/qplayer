@@ -273,6 +273,9 @@ class ControlSystemGUI(QMainWindow):
         else:
             self.inspector_widget.set_inactive()
 
+        if self.ui.tabWidget.tabText(tab_index) == "Playlists":
+            self.playlist_model.update_values()
+
     # Blocks inputs during interations
     def disable_inputs(self):
         pass # TODO
