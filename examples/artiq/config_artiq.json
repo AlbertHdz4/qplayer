@@ -48,6 +48,7 @@
           "class":"ZotinoARTIQCard",
           "name": "zotino0",
           "samplerate": 100,
+          "ramp_points": 100,
           "channels": [
             "Z00",
             "Z01",

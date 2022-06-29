@@ -53,7 +53,8 @@ class ARTIQOutputSystem(OutputSystem):
                 self.cards[card_name] = card_class(card_name, card_channels)
             elif card_class == ZotinoARTIQCard:
                 card_samplerate = card["samplerate"]
-                self.cards[card_name] = card_class(card_name, card_channels, card_samplerate)
+                card_ramp_points = card["ramp_points"]
+                self.cards[card_name] = card_class(card_name, card_channels, card_samplerate, card_ramp_points)
 
     # Process the sequence and send it to the hardware
     def process_sequence(self, sequence, run_id):
@@ -70,6 +71,7 @@ class ARTIQOutputSystem(OutputSystem):
                 pass
             elif sequence[chan]['chan'].card.type == utils.AnalogTrack:
                 samplerate = sequence[chan]['chan'].card.samplerate
+                ramp_points = sequence[chan]['chan'].card.ramp_points
                 exploded_events = []
                 events = sequence[chan]["events"]
                 for event in events:
@@ -84,11 +86,10 @@ class ARTIQOutputSystem(OutputSystem):
                         end_val = event['end_val']
                         duration = event['duration']
                         t0 = event['time']
-                        num_points = int(duration * samplerate * 1e-3) + 1  # convert samplerate to 1/ms
-                        t = np.linspace(t0, duration + t0, num_points)
+                        t = np.linspace(t0, duration + t0, ramp_points)
                         dt = t[1] - t[0]
-                        v = np.linspace(start_val, end_val, num_points)
-                        for i in range(num_points - 1):
+                        v = np.linspace(start_val, end_val, ramp_points)
+                        for i in range(ramp_points - 1):
                             new_event = {'duration': dt,
                                          'value': v[i],
                                          'time': t[i]}
@@ -98,7 +99,6 @@ class ARTIQOutputSystem(OutputSystem):
                                      'value': v[-1],
                                      'time': t[-1]}
                         exploded_events.append(new_event)
-
 
                     elif event['type'] == 'sin':
                         pass
@@ -224,6 +224,7 @@ class ZotinoARTIQCard(ARTIQCard):
     num_channels = 32
     type = utils.AnalogTrack
 
-    def __init__(self, name, channels, samplerate):
+    def __init__(self, name, channels, samplerate, ramp_points):
         super().__init__(name, channels)
         self.samplerate = samplerate
+        self.ramp_points = ramp_points
