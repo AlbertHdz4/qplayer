@@ -48,12 +48,12 @@ class DummyCard(Card):
 
 
 class DigitalDummyCard(DummyCard):
-    num_channels = 8
+    num_channels = 16
     type = utils.DigitalTrack
 
 
 class AnalogDummyCard(DummyCard):
-    num_channels = 2
+    num_channels = 32
     type = utils.AnalogTrack
 
     def __init__(self, name, address, channels, samplerate):
