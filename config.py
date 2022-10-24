@@ -3,10 +3,7 @@ import json
 import utils
 import hardware
 import database
-
-import hardware_specific.dummy
-import hardware_specific.buscards
-import hardware_specific.artiq
+import importlib
 
 from notify import publisher
 
@@ -23,7 +20,7 @@ class Config:
         outsys_names = []
         for output_system in self.data["output systems"]:
             if output_system["name"] in outsys_names:
-                raise utils.SequenceException("Output system names must be unique")
+                raise utils.ConfigException("Output system names must be unique")
             else:
                 outsys_names.append(output_system["name"])
 
@@ -32,7 +29,7 @@ class Config:
         for output_system in self.data["output systems"]:
             for card in output_system["cards"]:
                 if card["name"] in card_names:
-                    raise utils.SequenceException("Card names must be unique")
+                    raise utils.ConfigException("Card names must be unique")
                 else:
                     card_names.append(card["name"])
 
@@ -40,7 +37,13 @@ class Config:
         output_systems_dict = {}
 
         for output_system_spec in self.data["output systems"]:
-            output_system_class = eval(output_system_spec["class"])
+            s = output_system_spec["class"]
+            module_name = s[:s.rindex(".")]
+            class_name = s[s.rindex(".")+1:]
+
+            mod = importlib.import_module(module_name)
+            output_system_class = getattr(mod, class_name)
+
             output_systems_dict[output_system_spec["name"]] = output_system_class(output_system_spec)
 
         return hardware.Hardware(output_systems_dict)
@@ -61,7 +64,8 @@ class Config:
                     return CouchDBDatabase(username, password, host, port, db_name)
             else:
                 raise utils.SequenceException("Database section present but no type is defined.")
-        return database.Database()
+        else:
+            return database.Database()
 
     def get_publisher(self):
         if "notify_server" in self.data:
@@ -70,3 +74,7 @@ class Config:
                 port = self.data["notify_server"]["port"]
                 print(host, port)
                 return publisher.PublisherClient(host, port)
+            else:
+                raise utils.ConfigException("host and port not specified for notify_server. Remove the notify_server section from config if not using it.")
+        else:
+            publisher.DummyPublisherClient()

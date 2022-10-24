@@ -73,3 +73,6 @@ def is_descendant_of(ancestor : QModelIndex, index: QModelIndex):
 
 class SequenceException(Exception):
     pass
+
+class ConfigException(Exception):
+    pass

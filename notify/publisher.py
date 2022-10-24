@@ -13,6 +13,14 @@ class PublisherClient:
             s.connect((self.server_host, self.server_port))
             s.sendall(b"P"+bytes(str(msg+"\r\n"),'utf8'))
 
+class DummyPublisherClient:
+
+    def __init__(self):
+        pass
+
+    def publish(self, msg):
+        print(msg)
+
 if __name__ == "__main__":
 
     p = PublisherClient("192.168.52.2")
