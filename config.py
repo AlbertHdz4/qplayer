@@ -77,4 +77,4 @@ class Config:
             else:
                 raise utils.ConfigException("host and port not specified for notify_server. Remove the notify_server section from config if not using it.")
         else:
-            publisher.DummyPublisherClient()
+            return publisher.DummyPublisherClient()
