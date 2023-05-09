@@ -198,7 +198,7 @@ class ControlSystemGUI(QMainWindow):
 
     # This function is called by the scheduler
     def sequence_started(self, run_id, vars_dict, iter_dict):
-        parameters = {'variables': vars_dict, 'iterators': iter_dict, 'run_id':run_id}
+        parameters = {'variables': vars_dict, 'iterators': iter_dict, 'run_id': run_id}
         id_dict = {'run_id':run_id}
         self.publisher.publish(f'starting@{json.dumps(id_dict)}@{json.dumps(parameters)}')
         self.ui.run_number_label.setText(str(run_id))
@@ -209,11 +209,11 @@ class ControlSystemGUI(QMainWindow):
         self.uncheck_buttons()
         self.ui.stop_button.setChecked(True)
 
-
     # This function is called by the scheduler
-    def sequence_finished(self, run_id):
+    def sequence_finished(self, run_id, vars_dict, iter_dict): ######################################################################################
+        parameters = {'variables': vars_dict, 'iterators': iter_dict, 'run_id': run_id}  # Added#####################################################
         id_dict = {'run_id':run_id}
-        self.publisher.publish(f'finished@{json.dumps(id_dict)}')
+        self.publisher.publish(f'finished@{json.dumps(id_dict)}@{json.dumps(parameters)}') ##########################################################
 
     # This function is called by the scheduler
     def sequence_iteration_finished(self):

@@ -7,6 +7,12 @@ from sipyco.sync_struct import Subscriber
 import asyncio
 import os
 
+# Returns maximum output voltage
+def vmax():
+    vref = 5
+    offset_dacs = 8192
+    vmax = (0xffff-offset_dacs * 0x4)*4*vref/(1<<16)
+    return vmax
 
 def voltage_to_mu(voltage):
     # Copied from artiq source code
@@ -216,7 +222,7 @@ class ARTIQCard(Card):
 
 
 class TTLOutARTIQCard(ARTIQCard):
-    num_channels = 16
+    num_channels = 32
     type = utils.DigitalTrack
 
 

@@ -326,7 +326,10 @@ class VariablesModel(QStandardItemModel):
                         isidx = int(var_scan_index)
 
                         # TODO: isn't this rounding too strict?
-                        curr_val = round(np.arange(fstart, fstop+finc, finc)[isidx],10) # To remove rounding errors
+                        try:
+                            curr_val = round(np.arange(fstart, fstop+finc, finc)[isidx],10) # To remove rounding errors
+                        except IndexError:
+                            curr_val = round(np.arange(fstart, fstop+finc, finc)[0],10)
 
                         if "%g"%curr_val != self.data(val_idx):
                             #print("Iter var Changed from %s to %g"%(self.data(val_idx), curr_val))

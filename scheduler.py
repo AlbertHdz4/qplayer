@@ -110,7 +110,7 @@ class Scheduler:
 
     # This function is called when the hardware is ready to receive the next new sequence
     def sequence_finished(self):
-        self.notify_sequence_finished(self.run_id)
+        self.notify_sequence_finished(self.run_id, self.sequence.variables.get_variables_dict(), self.sequence.variables.get_iterating_variables())  #################################################################
         print("scheduler: Ready for next one")
         if self.advance_indices:
             self.run_id += 1
@@ -161,10 +161,10 @@ class Scheduler:
         for callback in self.sequence_start_listeners:
             callback(run_id, vars_dict, iter_dict)
 
-    def notify_sequence_finished(self, run_id):
+    def notify_sequence_finished(self, run_id, vars_dict, iter_dict):##########################################################################
         print("scheduler: Sequence finished")
         for callback in self.sequence_end_listeners:
-            callback(run_id)
+            callback(run_id, vars_dict, iter_dict)##############################################################################################
 
     def notify_sequence_stopped(self):
         print("scheduler: Sequence stopped")
