@@ -22,6 +22,22 @@ AEventPhaseRole = Qt.UserRole + 16
 AEventFrequencyRole = Qt.UserRole + 17
 AEventOffsetRole = AEventValueRole
 
+AEventValueBackgroundRole = Qt.UserRole + 18
+AEventEndValBackgroundRole = Qt.UserRole + 19
+AEventGammaBackgroundRole = Qt.UserRole + 20
+AEventAmplitudeBackgroundRole = Qt.UserRole + 21
+AEventPhaseBackgroundRole = Qt.UserRole + 22
+AEventFrequencyBackgroundRole = Qt.UserRole + 23
+AEventOffsetBackgroundRole = AEventValueBackgroundRole
+
+AEventValueNumericRole = Qt.UserRole + 24
+AEventEndValNumericRole = Qt.UserRole + 25
+AEventGammaNumericRole = Qt.UserRole + 26
+AEventAmplitudeNumericRole = Qt.UserRole + 27
+AEventPhaseNumericRole = Qt.UserRole + 28
+AEventFrequencyNumericRole = Qt.UserRole + 29
+AEventOffsetNumericRole = AEventValueNumericRole
+
 # TrackTypes
 DigitalTrack = 0
 AnalogTrack = 1

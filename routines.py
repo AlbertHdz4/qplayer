@@ -361,14 +361,32 @@ class RoutinesModel(QStandardItemModel):
                             start_time += dur_num  #Start time of next event
                             self.itemFromIndex(event_index).setBackground(Qt.white)
                         except (SyntaxError, NameError):
-                            color = QColor()
-                            color.setNamedColor("#ffc5c7")
+                            color = QColor("#ffc5c7")
                             self.itemFromIndex(event_index).setBackground(color)
                         except TypeError:
                             print(duration)
                             print(variables)
                     except TypeError: # in case duration in None
                         print("Error duration is: %s"%duration)
+
+                    # Validate event parameters
+                    if channel_index.data(utils.TrackTypeRole) == utils.AnalogTrack:
+                        # ToDo: Validate other types of events
+                        if event_index.data(utils.AEventFunctionRole) == "constant":
+                            value = event_index.data(utils.AEventValueRole)
+                            try:
+                                val = eval(value, variables)
+                                if event_index.data(utils.AEventValueNumericRole) != val:
+                                    self.setData(event_index, val, utils.AEventValueNumericRole)
+                                    value_changed = True
+                                card = channel_index.data(utils.ChannelRole).card
+                                if val > card.vmax() or val < card.vmin():
+                                    self.itemFromIndex(event_index).setData(QColor("#f7df97"), utils.AEventValueBackgroundRole)
+                                else:
+                                    self.itemFromIndex(event_index).setData(QColor("#ffffff"), utils.AEventValueBackgroundRole)
+                            except (SyntaxError, NameError):
+                                self.itemFromIndex(event_index).setData(QColor("#ffc5c7"), utils.AEventValueBackgroundRole)
+
 
                 # There is no next event so start_time contains the duration of this channel
                 if start_time != self.data(channel_index, utils.ChannelDurationRole):

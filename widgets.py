@@ -438,6 +438,11 @@ class AnalogSequenceEvent(SequenceEvent):
 
         if ftype == "constant":
             self.uis[ftype].val.setText(self.event_item.data(utils.AEventValueRole))
+
+            # Set style
+            color = self.event_item.data(utils.AEventValueBackgroundRole)  # type: QBrush
+            if color is not None and type(color) is QColor:
+                self.uis[ftype].val.setStyleSheet("QLineEdit { background: " + color.name() + " }")
         elif ftype == "linear":
             self.uis[ftype].start_val.setText(self.event_item.data(utils.AEventStartValRole))
             self.uis[ftype].end_val.setText(self.event_item.data(utils.AEventEndValRole))

@@ -100,7 +100,7 @@ class OutputSystem:
 
 class Card:
     num_channels = None
-    type = None
+    type = None # can be utils.DigitalTrack or utils.AnalogTrack
 
     # TODO: add 'name' as abstract property
 
@@ -110,6 +110,14 @@ class Card:
 
     def get_card_dict(self):
         pass
+
+    # If type == utils.AnalogTrack vmax() and vmin() must be implemented by sublcasses
+    def vmax(self):
+        pass
+
+    def vmin(self):
+        pass
+
 
 
 class Channel:

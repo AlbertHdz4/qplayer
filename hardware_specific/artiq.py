@@ -14,6 +14,12 @@ def vmax():
     vmax = (0xffff-offset_dacs * 0x4)*4*vref/(1<<16)
     return vmax
 
+def vmin():
+    vref = 5
+    offset_dacs = 8192
+    vmin = (0x0000-offset_dacs * 0x4)*4*vref/(1<<16)
+    return vmin
+
 def voltage_to_mu(voltage):
     # Copied from artiq source code
     vref = 5
@@ -234,3 +240,9 @@ class ZotinoARTIQCard(ARTIQCard):
         super().__init__(name, channels)
         self.samplerate = samplerate
         self.ramp_points = ramp_points
+
+    def vmax(self):
+        return vmax()
+
+    def vmin(self):
+        return vmin()

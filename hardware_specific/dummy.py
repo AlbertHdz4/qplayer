@@ -59,3 +59,9 @@ class AnalogDummyCard(DummyCard):
     def __init__(self, name, address, channels, samplerate):
         super().__init__(name, address, channels)
         self.samplerate = samplerate
+
+    def vmax(self):
+        return 10
+
+    def vmin(self):
+        return -10
