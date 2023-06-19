@@ -345,6 +345,7 @@ class RoutinesModel(QStandardItemModel):
                 num_events = self.rowCount(channel_index)
                 for e in range(num_events):
                     event_index = self.index(e,0,channel_index)
+                    start_time = round(start_time, 8) # To avoid comparison errors that cause infinite loops
                     if start_time != self.data(event_index, utils.EventStartRole):
                         self.setData(event_index, start_time, utils.EventStartRole)
                         value_changed = True
@@ -389,6 +390,7 @@ class RoutinesModel(QStandardItemModel):
 
 
                 # There is no next event so start_time contains the duration of this channel
+                start_time = round(start_time, 8) # To avoid comparison errors that cause infinite loops
                 if start_time != self.data(channel_index, utils.ChannelDurationRole):
                     value_changed = True
                     self.setData(channel_index,start_time, utils.ChannelDurationRole)
