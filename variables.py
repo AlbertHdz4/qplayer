@@ -331,9 +331,9 @@ class VariablesModel(QStandardItemModel):
                         except IndexError:
                             curr_val = round(np.arange(fstart, fstop+finc, finc)[0],10)
 
-                        if "%g"%curr_val != self.data(val_idx):
+                        if "%.9g"%curr_val != self.data(val_idx):
                             #print("Iter var Changed from %s to %g"%(self.data(val_idx), curr_val))
-                            self.setData(val_idx, "%g"%curr_val)
+                            self.setData(val_idx, "%.9g"%curr_val)
                             value_changed = True
                         variables_dict[var_name] = curr_val
 
@@ -350,9 +350,9 @@ class VariablesModel(QStandardItemModel):
                         try:
                             var_val = float(var_set)  # Cast variables which are numerical
                             val_idx = self.index(v, self.variable_fields.index("value"), group_index)
-                            if "%g"%var_val != self.data(val_idx):
+                            if "%.9g"%var_val != self.data(val_idx):
                                 #print("Numeric var Changed from %s to %g"%(self.data(val_idx), var_val))
-                                self.setData(val_idx, "%g"%var_val)
+                                self.setData(val_idx, "%.9g"%var_val)
                                 value_changed = True
                                 self.update_style(name_idx)
                             variables_dict[var_name] = var_val
@@ -375,9 +375,9 @@ class VariablesModel(QStandardItemModel):
                     var_name_idx = self.index(v, self.variable_fields.index("name"), group_index)
                     self.update_style(var_name_idx)
                     var_name = var_name_idx.data()
-                    if "%g" % var_val != self.data(val_idx):
+                    if "%.9g" % var_val != self.data(val_idx):
                         #print("Code var Changed from %s to %g"%(self.data(val_idx), var_val))
-                        self.setData(val_idx, "%g" % var_val)
+                        self.setData(val_idx, "%.9g" % var_val)
                         value_changed = True
                     variables_dict[var_name] = var_val
                     retry_attempts = 0
