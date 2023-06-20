@@ -385,7 +385,7 @@ class RoutinesModel(QStandardItemModel):
                                     self.itemFromIndex(event_index).setData(QColor("#f7df97"), utils.AEventValueBackgroundRole)
                                 else:
                                     self.itemFromIndex(event_index).setData(QColor("#ffffff"), utils.AEventValueBackgroundRole)
-                            except (SyntaxError, NameError):
+                            except (SyntaxError, NameError, TypeError):
                                 self.itemFromIndex(event_index).setData(QColor("#ffc5c7"), utils.AEventValueBackgroundRole)
 
 
