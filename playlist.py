@@ -301,6 +301,9 @@ class PlaylistModel(QStandardItemModel):
                 #
                 # else if gap is last in sequence add points at end with previous value (can this be even done with a
                 # recursive function?)
+                #
+                # Is this really necessary? Children of gaps are already added but with the gap missing.
+                #
                 # TODO
                 pass
 
