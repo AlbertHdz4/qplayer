@@ -1,0 +1,224 @@
+{
+  "variables": {
+    "parameters": [
+      {
+        "name": "T",
+        "set": "10",
+        "value": "10",
+        "iterator": false,
+        "start": null,
+        "stop": null,
+        "increment": null,
+        "comment": null,
+        "scan index": null,
+        "nesting level": null
+      },
+      {
+        "name": "t",
+        "set": "1",
+        "value": "1",
+        "iterator": false,
+        "start": null,
+        "stop": null,
+        "increment": null,
+        "comment": null,
+        "scan index": null,
+        "nesting level": null
+      }
+    ]
+  },
+  "routines": {
+    "a": [
+      {
+        "chan": {
+          "index": 0,
+          "card": "ttl"
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "0*T",
+            "state": false
+          },
+          {
+            "duration": "T",
+            "state": true
+          },
+          {
+            "duration": "0",
+            "state": false
+          }
+        ]
+      },
+      {
+        "chan": {
+          "index": 1,
+          "card": "ttl"
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "1*T",
+            "state": false
+          },
+          {
+            "duration": "T",
+            "state": true
+          },
+          {
+            "duration": "0",
+            "state": false
+          }
+        ]
+      },
+      {
+        "chan": {
+          "index": 2,
+          "card": "ttl"
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "2*T",
+            "state": false
+          },
+          {
+            "duration": "T",
+            "state": true
+          },
+          {
+            "duration": "0",
+            "state": false
+          }
+        ]
+      },
+      {
+        "chan": {
+          "index": 3,
+          "card": "ttl"
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "3*T",
+            "state": false
+          },
+          {
+            "duration": "T",
+            "state": true
+          },
+          {
+            "duration": "0",
+            "state": false
+          }
+        ]
+      }
+    ],
+    "b": [
+      {
+        "chan": {
+          "index": 0,
+          "card": "ttl"
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "t",
+            "state": false
+          },
+          {
+            "duration": "t",
+            "state": true
+          },
+          {
+            "duration": "0",
+            "state": false
+          }
+        ]
+      },
+      {
+        "chan": {
+          "index": 1,
+          "card": "ttl"
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "t",
+            "state": false
+          },
+          {
+            "duration": "t",
+            "state": true
+          },
+          {
+            "duration": "0",
+            "state": false
+          }
+        ]
+      },
+      {
+        "chan": {
+          "index": 2,
+          "card": "ttl"
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "t",
+            "state": false
+          },
+          {
+            "duration": "t",
+            "state": true
+          },
+          {
+            "duration": "0",
+            "state": false
+          }
+        ]
+      },
+      {
+        "chan": {
+          "index": 3,
+          "card": "ttl"
+        },
+        "offset": "0",
+        "events": [
+          {
+            "duration": "t",
+            "state": false
+          },
+          {
+            "duration": "t",
+            "state": true
+          },
+          {
+            "duration": "0",
+            "state": false
+          }
+        ]
+      }
+    ]
+  },
+  "playlist": [
+    {
+      "name": "pulses",
+      "children": [
+        {
+          "type": 0,
+          "children": [
+            {
+              "type": 0,
+              "children": [],
+              "name": "b",
+              "repeat": "5"
+            }
+          ],
+          "name": "a",
+          "repeat": "5"
+        }
+      ]
+    }
+  ]
+}

@@ -265,7 +265,7 @@ class PlaylistModel(QStandardItemModel):
 
         def _compile_playlist_branch(routine_item : QStandardItem):
             sequence = {}
-            tend = 0 # end time of current routine
+            tend = 0 # end time of current routine (including repeats)
 
             if routine_item.data(utils.PlaylistItemTypeRole) == utils.Routine:
                 # find routine points relative to routine start
@@ -274,16 +274,19 @@ class PlaylistModel(QStandardItemModel):
                 routine_points = self.routines_model.compile_routine(routine_name)
                 routine_repeat = int(routine_item.parent().child(routine_item.row(), self.column_names.index("repeat")).data(Qt.DisplayRole))
 
-                for chan_key in routine_points:
-                    offset = routine_points[chan_key]["offset"]
-                    events = routine_points[chan_key]["events"]
-                    channel = routine_points[chan_key]["chan"]
+                tstart = 0 # When we repeat a routine we need to keep track of the duration to know the start time of the next one
 
-                    if chan_key not in sequence:
-                        sequence[chan_key] = {'chan': channel, 'events': []}
-                    t = offset
-                    if len(events) > 0:
-                        for _ in range(routine_repeat):
+                for _ in range(routine_repeat):
+                    tstart = tend
+                    for chan_key in routine_points:
+                        offset = routine_points[chan_key]["offset"]
+                        events = routine_points[chan_key]["events"]
+                        channel = routine_points[chan_key]["chan"]
+
+                        if chan_key not in sequence:
+                            sequence[chan_key] = {'chan': channel, 'events': []}
+                        t = offset + tstart
+                        if len(events) > 0:
                             for event in events:
                                 event['time'] = t
                                 sequence[chan_key]['events'].append(event.copy())
