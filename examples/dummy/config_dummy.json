@@ -1,17 +1,5 @@
 {
   "sequences path" : "/data/repos/electronics-control-system-gui/examples/sequences",
-  "database": {
-    "type": "",
-    "username": "",
-    "password": "",
-    "host": "",
-    "port": "",
-    "database": ""
-  },
-  "notify_server" : {
-    "host": "192.168.52.2",
-    "port": 9193
-  },
   "output systems":
   [
     {

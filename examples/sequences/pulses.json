@@ -24,6 +24,18 @@
         "comment": null,
         "scan index": null,
         "nesting level": null
+      },
+      {
+        "name": "num_pulses",
+        "set": "10",
+        "value": "1",
+        "iterator": true,
+        "start": "1",
+        "stop": "20",
+        "increment": "1",
+        "comment": null,
+        "scan index": "0",
+        "nesting level": 0
       }
     ]
   },
@@ -212,7 +224,7 @@
               "type": 0,
               "children": [],
               "name": "b",
-              "repeat": "5"
+              "repeat": "num_pulses"
             }
           ],
           "name": "a",

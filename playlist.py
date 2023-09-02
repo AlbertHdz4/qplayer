@@ -174,7 +174,8 @@ class PlaylistModel(QStandardItemModel):
                 if item.parent().parent() is None: # This will only be true for top-level routines which begin the sequence
                     if item.data(utils.PlaylistItemTypeRole) == utils.Routine:
                         routine_name = item.data(Qt.DisplayRole)
-                        routine_repeat = int(item.parent().child(item.row(), self.column_names.index("repeat")).data(Qt.DisplayRole))
+                        routine_repeat_str = item.parent().child(item.row(), self.column_names.index("repeat")).data(Qt.DisplayRole)
+                        routine_repeat = int(eval(routine_repeat_str, variables))
                         routine_duration = float(self.routines_model.get_routine_duration(routine_name))*routine_repeat
 
                         if item.parent().child(item.row(), self.column_names.index("start")).data(Qt.DisplayRole) != "0":
@@ -206,7 +207,8 @@ class PlaylistModel(QStandardItemModel):
 
                     if item.data(utils.PlaylistItemTypeRole) == utils.Routine: # if item is a routine
                         routine_name = item.data(Qt.DisplayRole)
-                        routine_repeat = int(item.parent().child(item.row(), self.column_names.index("repeat")).data(Qt.DisplayRole))
+                        routine_repeat_str = item.parent().child(item.row(), self.column_names.index("repeat")).data(Qt.DisplayRole)
+                        routine_repeat = int(eval(routine_repeat_str, variables))
                         routine_duration = float(self.routines_model.get_routine_duration(routine_name))*routine_repeat
 
                         if item.parent().child(item.row(), self.column_names.index("start")).data(Qt.DisplayRole) != parent_end_time:
@@ -263,7 +265,7 @@ class PlaylistModel(QStandardItemModel):
     # TODO: delete get_active_playlist_points() and replace usages with get_compiled_active_playlist()
     def compile_active_playlist(self):
 
-        def _compile_playlist_branch(routine_item : QStandardItem):
+        def _compile_playlist_branch(routine_item : QStandardItem, variables):
             sequence = {}
             tend = 0 # end time of current routine (including repeats)
 
@@ -272,7 +274,8 @@ class PlaylistModel(QStandardItemModel):
 
                 routine_name = routine_item.data(Qt.DisplayRole)
                 routine_points = self.routines_model.compile_routine(routine_name)
-                routine_repeat = int(routine_item.parent().child(routine_item.row(), self.column_names.index("repeat")).data(Qt.DisplayRole))
+                routine_repeat_str = routine_item.parent().child(routine_item.row(), self.column_names.index("repeat")).data(Qt.DisplayRole)
+                routine_repeat = int(eval(routine_repeat_str, variables))
 
                 tstart = 0 # When we repeat a routine we need to keep track of the duration to know the start time of the next one
 
@@ -303,7 +306,7 @@ class PlaylistModel(QStandardItemModel):
 
             for i in range(routine_item.rowCount()):
                 child_item = routine_item.child(i)
-                child_points = _compile_playlist_branch(child_item)
+                child_points = _compile_playlist_branch(child_item, variables)
 
                 for chan_key in child_points:
                     if chan_key not in sequence:
@@ -313,9 +316,18 @@ class PlaylistModel(QStandardItemModel):
                         sequence[chan_key]['events'].append(chan_point)
 
             return sequence
+
+        variables = self.variables_model.get_variables_dict()
+        # __builtins__ is added so eval treats 'variables' as we want
+        # (it doesn't add the builtin python variables)
+        variables["__builtins__"] = {}
+
+        # Make numpy available
+        variables['np'] = np
+
         if self.active_playlist is not None:
             active_pl_item = self.item(self.active_playlist) # type: QStandardItem
-            return _compile_playlist_branch(active_pl_item)
+            return _compile_playlist_branch(active_pl_item, variables)
         else:
             return None
 
