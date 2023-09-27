@@ -48,7 +48,7 @@ class DummyCard(Card):
 
 
 class DigitalDummyCard(DummyCard):
-    num_channels = 16
+    num_channels = 32
     type = utils.DigitalTrack
 
 

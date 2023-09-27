@@ -125,6 +125,7 @@ class ControlSystemGUI(QMainWindow):
         self.group_idx = 0
         self.routine_idx = 0
         self.completed_iterations = 0
+        self.iteration_start_run_id = 0
         self.delete_completed_iterations()
 
         self.current_filename = None # This variable is populated when loading/saving a sequence
@@ -210,15 +211,18 @@ class ControlSystemGUI(QMainWindow):
         self.ui.stop_button.setChecked(True)
 
     # This function is called by the scheduler
-    def sequence_finished(self, run_id, vars_dict, iter_dict): ######################################################################################
-        parameters = {'variables': vars_dict, 'iterators': iter_dict, 'run_id': run_id}  # Added#####################################################
+    def sequence_finished(self, run_id, vars_dict, iter_dict):
+        parameters = {'variables': vars_dict, 'iterators': iter_dict, 'run_id': run_id}
         id_dict = {'run_id':run_id}
-        self.publisher.publish(f'finished@{json.dumps(id_dict)}@{json.dumps(parameters)}') ##########################################################
+        self.publisher.publish(f'finished@{json.dumps(id_dict)}@{json.dumps(parameters)}')
 
     # This function is called by the scheduler
     def sequence_iteration_finished(self):
         self.completed_iterations += 1
         self.ui.completed_iterations_label.setText("Completed Iterations: "+str(self.completed_iterations))
+        iters_dict = {'iteration_start_run_id': self.iteration_start_run_id, 'completed_iterations': self.completed_iterations}
+        self.publisher.publish(f'iteration_finished@{json.dumps(iters_dict)}')
+
 
     def delete_completed_iterations(self):
         self.ui.completed_iterations_label.setText("")
@@ -258,11 +262,11 @@ class ControlSystemGUI(QMainWindow):
     def iterate_sequence(self):
         self.uncheck_buttons()
         self.ui.iterate_button.setChecked(True)
-        run_id = self.scheduler.run_id
+        self.iteration_start_run_id = self.scheduler.run_id
         self.scheduler.iterate()
         self.disable_inputs()
         self.delete_completed_iterations()
-        self.ui.iteration_start_label.setText("Iteration start: %d"%run_id)
+        self.ui.iteration_start_label.setText("Iteration start: %d"%self.iteration_start_run_id)
         # TODO: check if shuffle is enabled
 
 
