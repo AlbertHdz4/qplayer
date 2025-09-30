@@ -10,6 +10,8 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont, QColor
 import utils
 
 import numpy as np
+import scipy
+import scipy.interpolate
 
 
 class VariablesModel(QStandardItemModel):
@@ -284,10 +286,10 @@ class VariablesModel(QStandardItemModel):
 
     @pyqtSlot()
     def update_values(self):
-        value_changed = False # Flag to decide if dataChanged signal should be emited
+        value_changed = False # Flag to decide if dataChanged signal should be emitted
 
         to_do = [] # reference to non-numerical variables
-        variables_dict = {'np':np, 'int':int}
+        variables_dict = {'np':np, 'int':int, 'scipy':scipy, 'print':print}
 
         # __builtins__ is added so eval treats 'variables' as we want
         # (it doesn't add the builtin python variables)
