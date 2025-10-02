@@ -234,20 +234,15 @@ class VariablesModel(QStandardItemModel):
                         var_name = self.index(v, self.variable_fields.index("name"), group_index).data()
                         start = float(self.index(v, self.variable_fields.index("start"), group_index).data())
                         stop = float(self.index(v, self.variable_fields.index("stop"), group_index).data())
-                        if (stop > start) : raise ValueError # Error fixed: When stop value is greater than start value, an error ocurred and the program crashed.
+                        if (stop >= start) : raise ValueError # Error fixed: When stop value is greater than start value, an error ocurred and the program crashed.
                         increment = float(self.index(v, self.variable_fields.index("increment"), group_index).data())
                         nesting_lvl = int(self.index(v, self.variable_fields.index("nesting level"), group_index).data())
                         scan_index = int(self.index(v, self.variable_fields.index("scan index"), group_index).data())
                         # TODO: replace this with something that doesn't require allocating memory. Lazy Asaf from the past didn't do it.
                         num_values = len(np.arange(start, stop + increment, increment))
                         iter_vars[var_name] = {"start": start, "stop": stop, "increment": increment, "nesting level": nesting_lvl, "num_values": num_values, "scan_index":scan_index}
-
-                        self.update_style(var_name, error=False)
-
                     except (TypeError, ValueError, ZeroDivisionError): # When values are not well defined
                         # ToDo: give an indication of the problem (i.e. paint fields red maybe).
-                        self.update_style(start, error=True)
-                        self.update_style(stop, error=True)
                         return { }
                 
                 else :
@@ -327,9 +322,11 @@ class VariablesModel(QStandardItemModel):
                     val_idx = self.index(v, self.variable_fields.index("value"), group_index)
 
                     try:
+                        if var_start >= var_stop : raise ValueError # Error fixed: When start value was greater than stop value, an error ocurred and program crashed.
+                        
                         fstart = float(var_start)
                         fstop = float(var_stop)
-                        finc = float(var_increment)
+                        finc = float(var_increment) 
 
                         if finc == 0:
                             raise ValueError
@@ -350,8 +347,14 @@ class VariablesModel(QStandardItemModel):
 
                         # If no errors during conversion, set default style
                         self.update_style(name_idx)
+                        # Bug fixed: When stop was greater than star, the program crashed. Not anymore.
+                        self.update_style(self.index(v, self.variable_fields.index("start"), group_index), error = False)
+                        self.update_style(self.index(v, self.variable_fields.index("stop"), group_index), error = False)
                     except (TypeError, ValueError):
                         self.update_style(name_idx, error=True)
+                        # Bug fixed: When stop was greater than star, the program crashed. Not anymore.
+                        self.update_style(self.index(v, self.variable_fields.index("start"), group_index), error = True)
+                        self.update_style(self.index(v, self.variable_fields.index("stop"), group_index), error = True)
 
                 # Set numerical variables
                 else:

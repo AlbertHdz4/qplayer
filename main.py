@@ -263,9 +263,7 @@ class ControlSystemGUI(QMainWindow):
         self.uncheck_buttons()
         self.ui.iterate_button.setChecked(True)
         self.iteration_start_run_id = self.scheduler.run_id
-        is_iterating = self.scheduler.iterate() # Bug fixed: 
-
-        if is_iterating : 
+        if self.scheduler.iterate() : 
             self.disable_inputs()
             self.delete_completed_iterations()
             self.ui.iteration_start_label.setText("Iteration start: %d"%self.iteration_start_run_id)
