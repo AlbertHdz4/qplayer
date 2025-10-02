@@ -234,15 +234,24 @@ class VariablesModel(QStandardItemModel):
                         var_name = self.index(v, self.variable_fields.index("name"), group_index).data()
                         start = float(self.index(v, self.variable_fields.index("start"), group_index).data())
                         stop = float(self.index(v, self.variable_fields.index("stop"), group_index).data())
+                        if (stop > start) : raise ValueError # Error fixed: When stop value is greater than start value, an error ocurred and the program crashed.
                         increment = float(self.index(v, self.variable_fields.index("increment"), group_index).data())
                         nesting_lvl = int(self.index(v, self.variable_fields.index("nesting level"), group_index).data())
                         scan_index = int(self.index(v, self.variable_fields.index("scan index"), group_index).data())
                         # TODO: replace this with something that doesn't require allocating memory. Lazy Asaf from the past didn't do it.
                         num_values = len(np.arange(start, stop + increment, increment))
                         iter_vars[var_name] = {"start": start, "stop": stop, "increment": increment, "nesting level": nesting_lvl, "num_values": num_values, "scan_index":scan_index}
+
+                        self.update_style(var_name, error=False)
+
                     except (TypeError, ValueError, ZeroDivisionError): # When values are not well defined
                         # ToDo: give an indication of the problem (i.e. paint fields red maybe).
-                        pass
+                        self.update_style(start, error=True)
+                        self.update_style(stop, error=True)
+                        return { }
+                
+                else :
+                    pass 
 
         return iter_vars
 
