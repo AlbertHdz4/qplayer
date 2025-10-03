@@ -15,6 +15,7 @@ import scipy.interpolate
 
 
 class VariablesModel(QStandardItemModel):
+    EPS = 1e-12
     variable_fields = ["name", "set", "value", "iterator", "start", "stop", "increment", "comment", "scan index", "nesting level"]
     variable_types = [str, str, float, bool, float, float, float, str, int, int]
 
@@ -288,6 +289,20 @@ class VariablesModel(QStandardItemModel):
 
         return return_value
 
+    def _validate_iter(self, fstart, fstop, finc) :
+        if finc > 0 and not (fstart < fstop - self.EPS):
+            return False, "Con incremento positivo, start debe ser < stop."
+        
+        if finc < 0 and not (fstart > fstop + self.EPS):
+            return False, "Con incremento negativo, start debe ser > stop."
+        return True, ""
+
+    def _count_steps(self, fstart, fstop, finc):
+        """Cuenta puntos teóricos (incluyendo start) sin construir el array."""
+        steps_float = (fstop - fstart) / finc
+        n = int(np.floor(steps_float + self.EPS)) + 1
+        return max(n, 0)
+
     @pyqtSlot()
     def update_values(self):
         value_changed = False # Flag to decide if dataChanged signal should be emitted
@@ -314,48 +329,70 @@ class VariablesModel(QStandardItemModel):
 
                 # Set iterating variables
                 if self.is_iterator(name_idx):
-                    var_start = self.index(v, self.variable_fields.index("start"), group_index).data()
-                    var_stop = self.index(v, self.variable_fields.index("stop"), group_index).data()
-                    var_increment = self.index(v, self.variable_fields.index("increment"), group_index).data()
-                    var_scan_index = self.index(v, self.variable_fields.index("scan index"), group_index).data()
-
-                    val_idx = self.index(v, self.variable_fields.index("value"), group_index)
+                    idx_start     = self.index(v, self.variable_fields.index("start"), group_index)
+                    idx_stop      = self.index(v, self.variable_fields.index("stop"), group_index)
+                    idx_inc       = self.index(v, self.variable_fields.index("increment"), group_index)
+                    idx_scanidx   = self.index(v, self.variable_fields.index("scan index"), group_index)
+                    val_idx       = self.index(v, self.variable_fields.index("value"), group_index)
+                    var_start       = idx_start.data()
+                    var_stop        = idx_stop.data()
+                    var_increment   = idx_inc.data()
+                    var_scan_index  = idx_scanidx.data()
 
                     try:
-                        if var_start >= var_stop : raise ValueError # Error fixed: When start value was greater than stop value, an error ocurred and program crashed.
-                        
                         fstart = float(var_start)
-                        fstop = float(var_stop)
-                        finc = float(var_increment) 
+                        fstop  = float(var_stop)
+                        finc   = float(var_increment)
 
-                        if finc == 0:
-                            raise ValueError
+                        ok, _msg = self._validate_iter(fstart, fstop, finc)
+                        print(_msg)
+    
+                        if not ok:
+                            self.update_style(name_idx,  error=True)
+                            self.update_style(idx_start, error=True)
+                            self.update_style(idx_stop,  error=True)
+                            self.update_style(idx_inc,   error=True)
+                            self.update_style(val_idx,   error=True)
+                            continue
 
-                        isidx = int(var_scan_index)
-
-                        # TODO: isn't this rounding too strict?
-                        try:
-                            curr_val = round(np.arange(fstart, fstop+finc, finc)[isidx],10) # To remove rounding errors
-                        except IndexError:
-                            curr_val = round(np.arange(fstart, fstop+finc, finc)[0],10)
-
-                        if "%.9g"%curr_val != self.data(val_idx):
-                            #print("Iter var Changed from %s to %g"%(self.data(val_idx), curr_val))
-                            self.setData(val_idx, "%.9g"%curr_val)
-                            value_changed = True
-                        variables_dict[var_name] = curr_val
-
-                        # If no errors during conversion, set default style
-                        self.update_style(name_idx)
-                        # Bug fixed: When stop was greater than star, the program crashed. Not anymore.
-                        self.update_style(self.index(v, self.variable_fields.index("start"), group_index), error = False)
-                        self.update_style(self.index(v, self.variable_fields.index("stop"), group_index), error = False)
                     except (TypeError, ValueError):
-                        self.update_style(name_idx, error=True)
-                        # Bug fixed: When stop was greater than star, the program crashed. Not anymore.
-                        self.update_style(self.index(v, self.variable_fields.index("start"), group_index), error = True)
-                        self.update_style(self.index(v, self.variable_fields.index("stop"), group_index), error = True)
+                        self.update_style(name_idx,  error=True)
+                        self.update_style(idx_start, error=True)
+                        self.update_style(idx_stop,  error=True)
+                        self.update_style(idx_inc,   error=True)
+                        self.update_style(val_idx,   error=True)
+                        continue
+                    
+                    try:
+                        isidx = int(var_scan_index)
+                    except (TypeError, ValueError):
+                        isidx = None
 
+                    n_steps = self._count_steps(fstart, fstop, finc)
+                    if n_steps <= 0 or isidx is None or not (0 <= isidx < n_steps):
+                        self.update_style(name_idx, error=True)
+                        self.update_style(idx_scanidx, error=True)
+                        self.update_style(val_idx, error=True)
+                        if n_steps <= 0:
+                            self.update_style(idx_start, error=True)
+                            self.update_style(idx_stop, error=True)
+                            self.update_style(idx_inc, error=True)
+                        continue 
+                    
+                    self.update_style(name_idx, error=False)
+                    self.update_style(idx_start, error=False)
+                    self.update_style(idx_stop, error=False)
+                    self.update_style(idx_inc, error=False)
+                    self.update_style(idx_scanidx, error=False)
+                    self.update_style(val_idx, error=False)
+
+                    curr_val = round(fstart + isidx * finc, 10)
+                    
+                    if "%.9g" % curr_val != self.data(val_idx):
+                        self.setData(val_idx, "%.9g" % curr_val)
+                        value_changed = True
+                        variables_dict[var_name] = curr_val
+                    
                 # Set numerical variables
                 else:
                     var_set = self.index(v,self.variable_fields.index("set"),group_index).data()
@@ -429,6 +466,10 @@ class VariablesModel(QStandardItemModel):
             self.itemFromIndex(name_index).setBackground(color)
             self.itemFromIndex(name_index).setFont(font)
 
+    def _count_steps(fstart, fstop, finc):
+        steps_float = (fstop - fstart) / finc
+        n = int(math.floor(steps_float + EPS)) + 1
+        return max(n, 0)
 
 class VariablesProxyModel(QSortFilterProxyModel):
     def __init__(self, accepted_fields, show_static, show_iterator, show_empty_groups):
